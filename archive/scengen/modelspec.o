@@ -1,0 +1,873 @@
+,
+		     $i,
+		     $MOVE[$node]->[$i]->[$TIME],
+		     $MOVE[$node]->[$i]->[$PT],
+		     $MOVE[$node]->[$i]->[$TOX],
+		     $MOVE[$node]->[$i]->[$TOY],
+		     $MOVE[$node]->[$i]->[$SPEED]);
+	$out[$i] = $l;
+    }
+    return @out;
+};
+
+sub ToggleWaypointHighlight {
+   my ($w,$node) = @ARG;
+
+   if (-1 != $WP[$node]->{highlight_start}) {
+       $WP[$node]->{highlight_start} = -1;
+       $WP[$node]->{highlight_stop} = -1;
+       $WP[$node]->{wplist}->selection('clear',0,'end');
+       $CANVAS->itemconfigure(trace_name($node), -fill => $waypoint_color, );
+   } else {
+       my $e = $w->XEvent;
+       my($x, $y) = ($e->x, $e->y);
+       my $wp = $WP[$node]->{wplist}->nearest($y);
+
+       $WP[$node]->{highlight_start} = $wp;
+       $WP[$node]->{highlight_stop} = $wp;
+       $WP[$node]->{wplist}->selection('clear',0,'end');
+       $WP[$node]->{wplist}->selection('set', $WP[$node]->{highlight_start},
+				       $WP[$node]->{highlight_stop});
+       $CANVAS->itemconfigure("w$node-$wp", -fill => $waypoint_highlight_color, );
+   }
+}
+
+sub ExtendWaypointHighlight {
+   my ($w,$node) = @ARG;
+
+   if (-1 == $WP[$node]->{highlight_start}) {
+       return;
+   }
+   
+   my $e = $w->XEvent;
+   my($x, $y) = ($e->x, $e->y);
+
+   my $wp = $WP[$node]->{wplist}->nearest($y);
+
+   if ($wp < $WP[$node]->{highlight_start}) {
+       $WP[$node]->{highlight_start} = $wp;
+   } else {
+       $WP[$node]->{highlight_stop} = $wp;
+   }
+   
+   $WP[$node]->{wplist}->selection('clear',0,'end');
+   $WP[$node]->{wplist}->selection('set', $WP[$node]->{highlight_start},
+				   $WP[$node]->{highlight_stop});
+
+   $CANVAS->itemconfigure(trace_name($node), -fill => $waypoint_color, );
+   my $i;
+   for ($i = $WP[$node]->{highlight_start}; $i <= $WP[$node]->{highlight_stop}; $i++) {
+       $CANVAS->itemconfigure("w$node-$i", -fill => $waypoint_highlight_color, );
+   }
+}
+
+sub add_waypoint {
+    my ($node) = @ARG;
+    
+    my $new = $NUM_TIMES[$node];
+    $MOVE[$node]->[$new]->[$TOX] = $MOVE[$node]->[$new-1]->[$TOX] 
+	+ 2 * unscale_dist($DOT_SIZE);
+    $MOVE[$node]->[$new]->[$TOY] = $MOVE[$node]->[$new-1]->[$TOY]
+	+ 2 * unscale_dist($DOT_SIZE);
+    if ($new > 1) {
+	$MOVE[$node]->[$new]->[$SPEED] = $MOVE[$node]->[$new-1]->[$SPEED];
+    } else {
+	$MOVE[$node]->[$new]->[$SPEED] = 1.0;
+    }
+    $MOVE[$node]->[$new]->[$PT] = 0.0;
+
+    if ($new == 1) {
+	$MOVE[$node]->[$new]->[$TIME] = 0.0;
+    } else {
+	my ($dx, $dy, $dt, $x, $y, $d, $i);
+	$dx = $MOVE[$node]->[$new-1]->[$TOX] - $MOVE[$node]->[$new-2]->[$TOX];
+	$dy = $MOVE[$node]->[$new-1]->[$TOY] - $MOVE[$node]->[$new-2]->[$TOY];
+	$d = sqrt($dx * $dx + $dy * $dy);
+	$dt = $MOVE[$node]->[$new-1]->[$PT] +
+	    $d / $MOVE[$node]->[$new-1]->[$SPEED];
+	
+	$MOVE[$node]->[$new]->[$TIME] = $dt + $MOVE[$node]->[$new-1]->[$TIME];
+    }
+    $NUM_TIMES[$node]++;
+
+    $CANVAS->delete(trace_name($node));
+    display_movetrace($node);
+
+    $WP[$node]->{wplist}->delete(0,'end');
+    $WP[$node]->{wplist}->insert(0,build_entries($node));
+};
+
+sub delete_waypoint {
+    my ($node) = @ARG;
+    my ($j);
+
+    my $wp = $WP[$node]->{wplist}->index('active');
+#    print $WP[$node]->{wplist}->get('active');
+#    print " delete index $wp\n";
+
+    if (0 == $wp) {
+	Msg("Can't delete start waypoint!");
+	return;
+    } elsif ($wp == $NUM_TIMES[$node] - 1) {
+	$NUM_TIMES[$node]--;	
+    } else {	
+
+	$MOVE[$node]->[$wp+1]->[$PT] += $MOVE[$node]->[$wp+1]->[$TIME] -
+	    $MOVE[$node]->[$wp]->[$TIME];
+	$MOVE[$node]->[$wp+1]->[$TIME] = $MOVE[$node]->[$wp]->[$TIME];
+
+#	dumpValue(\$MOVE[$node]);
+	for ($j = $wp; $j < $NUM_TIMES[$node]; $j++) {
+	    $MOVE[$node]->[$j]->[$TIME] = $MOVE[$node]->[$j+1]->[$TIME];
+	    $MOVE[$node]->[$j]->[$SPEED] = $MOVE[$node]->[$j+1]->[$SPEED];
+	    $MOVE[$node]->[$j]->[$TOX] = $MOVE[$node]->[$j+1]->[$TOX];
+	    $MOVE[$node]->[$j]->[$TOY] = $MOVE[$node]->[$j+1]->[$TOY];
+	    $MOVE[$node]->[$j]->[$PT] = $MOVE[$node]->[$j+1]->[$PT];
+	}
+#	dumpValue(\$MOVE[$node]);
+
+	$NUM_TIMES[$node]--;	
+	update_waypoint_position($node,$wp,$MOVE[$node]->[$wp]->[$TOX],
+				 $MOVE[$node]->[$wp]->[$TOY]);
+    }
+
+
+    $CANVAS->delete(trace_name($node));
+    display_movetrace($node);
+
+    $WP[$node]->{wplist}->delete(0,'end');
+    $WP[$node]->{wplist}->insert(0,build_entries($node));
+    
+}
+
+
+#change the position of the waypoint, and change the speeds coming 
+# in and going out of the waypoint (so as to leave the times on adj 
+# waypoints constant)
+sub update_waypoint_position {
+    my ($node,$wp,$newx,$newy) = @ARG;
+    
+    $MOVE[$node]->[$wp]->[$TOX] = $newx;
+    $MOVE[$node]->[$wp]->[$TOY] = $newy;
+    
+    ## now adj the speeds
+    my ($dx, $dy, $dt, $d);
+
+    if ($wp != 0 && $wp != $NUM_TIMES[$node] - 1) {
+	$dx = $MOVE[$node]->[$wp]->[$TOX] - $MOVE[$node]->[$wp-1]->[$TOX];
+	$dy = $MOVE[$node]->[$wp]->[$TOY] - $MOVE[$node]->[$wp-1]->[$TOY];
+	$d = sqrt($dx * $dx + $dy * $dy);
+	$dt = $MOVE[$node]->[$wp+1]->[$TIME] - $MOVE[$node]->[$wp]->[$PT]
+	    - $MOVE[$node]->[$wp]->[$TIME];
+	$MOVE[$node]->[$wp]->[$SPEED] = $d / $dt;	
+    }
+
+    # the speed of the last leg is unconstrained, since there's no
+    # set time by which the node must reach the end of the leg
+    if ($wp < $NUM_TIMES[$node] - 2) {
+	$dx = $MOVE[$node]->[$wp+1]->[$TOX] - $MOVE[$node]->[$wp]->[$TOX];
+	$dy = $MOVE[$node]->[$wp+1]->[$TOY] - $MOVE[$node]->[$wp]->[$TOY];
+	$d = sqrt($dx * $dx + $dy * $dy);
+	$dt = $MOVE[$node]->[$wp+2]->[$TIME] - $MOVE[$node]->[$wp+1]->[$PT]
+	    - $MOVE[$node]->[$wp+1]->[$TIME];
+	$MOVE[$node]->[$wp+1]->[$SPEED] = $d / $dt;	
+    }
+
+    $WP[$node]->{wplist}->delete(0,'end');
+    $WP[$node]->{wplist}->insert(0,build_entries($node));
+};
+
+#change the time of the waypoint, and apply the same delta to all 
+# following waypoints
+sub update_waypoint_time {
+    my ($node,$wp,$newtime) = @ARG;
+
+
+    if ($wp <= 1) {
+	Msg("Can't change the start time of waypoints 0 or 1");
+	return;
+    }
+
+    my $oldtime = $MOVE[$node]->[$wp]->[$TIME];
+    $MOVE[$node]->[$wp]->[$TIME] = $newtime;
+
+    if ($newtime > $oldtime) {
+	# take up the slack by increasing the pause time
+	$MOVE[$node]->[$wp-1]->[$PT] = $newtime - $oldtime;
+    } else {
+	# fix up the speed of the previous leg so we arrive at $wp at the new
+	# time
+	my ($dx, $dy, $dt, $d);
+	$dx = $MOVE[$node]->[$wp-1]->[$TOX] - $MOVE[$node]->[$wp-2]->[$TOX];
+	$dy = $MOVE[$node]->[$wp-1]->[$TOY] - $MOVE[$node]->[$wp-2]->[$TOY];
+	$d = sqrt($dx * $dx + $dy * $dy);
+	$dt = $MOVE[$node]->[$wp]->[$TIME] - $MOVE[$node]->[$wp-1]->[$PT]
+	    - $MOVE[$node]->[$wp-1]->[$TIME];
+	$MOVE[$node]->[$wp-1]->[$SPEED] = $d / $dt;	
+    }
+
+    my $i;
+    for ($i = $wp + 1; $i < $NUM_TIMES[$node] ; $i++) {
+	$MOVE[$node]->[$i]->[$TIME] += ($newtime - $oldtime);
+    }
+
+    $WP[$node]->{wplist}->delete(0,'end');
+    $WP[$node]->{wplist}->insert(0,build_entries($node));
+};
+
+
+#change the pause time of the waypoint, and adjust the speed of the link
+# to arrive at the next waypoint on schedule.
+sub update_waypoint_pt {
+    my ($node,$wp,$newpt) = @ARG;
+
+    if ($wp == 0) { return; }  # the start pos has no pause time
+
+    my $oldpt = $MOVE[$node]->[$wp]->[$PT];
+    $MOVE[$node]->[$wp]->[$PT] = $newpt;
+
+    if ($wp == $NUM_TIMES[$node] - 1) { return; } # no deadlines for last wp
+    if ($newpt + $MOVE[$node]->[$wp]->[$TIME] 
+	>= $MOVE[$node]->[$wp+1]->[$TIME]) {
+	Msg("Illegal pause time change: couldn't meet start time for next waypoint");
+	$MOVE[$node]->[$wp]->[$PT] = $oldpt;
+	return;
+    }
+
+    my ($dx, $dy, $dt, $d);
+    $dx = $MOVE[$node]->[$wp]->[$TOX] - $MOVE[$node]->[$wp-1]->[$TOX];
+    $dy = $MOVE[$node]->[$wp]->[$TOY] - $MOVE[$node]->[$wp-1]->[$TOY];
+    $d = sqrt($dx * $dx + $dy * $dy);
+    $dt = $MOVE[$node]->[$wp+1]->[$TIME] - $MOVE[$node]->[$wp]->[$PT]
+	- $MOVE[$node]->[$wp]->[$TIME];
+    $MOVE[$node]->[$wp]->[$SPEED] = $d / $dt;	
+    
+    $WP[$node]->{wplist}->delete(0,'end');
+    $WP[$node]->{wplist}->insert(0,build_entries($node));
+};
+
+
+#change the speed of the waypoint, and update the next waypoint with the
+# new arrival time
+sub update_waypoint_speed {
+    my ($node,$wp,$newspeed) = @ARG;
+
+    my $oldspeed = $MOVE[$node]->[$wp]->[$SPEED];
+    $MOVE[$node]->[$wp]->[$SPEED] = $newspeed;
+
+    if ($wp == 0) { return; }  # the start pos has no speed
+    if ($wp == $NUM_TIMES[$node] - 1) { return; } # no deadlines for last wp
+
+    my ($dx, $dy, $dt, $d, $change, $i);
+    $dx = $MOVE[$node]->[$wp]->[$TOX] - $MOVE[$node]->[$wp-1]->[$TOX];
+    $dy = $MOVE[$node]->[$wp]->[$TOY] - $MOVE[$node]->[$wp-1]->[$TOY];
+    $d = sqrt($dx * $dx + $dy * $dy);
+    $dt = $d / $MOVE[$node]->[$wp]->[$SPEED] + $MOVE[$node]->[$wp]->[$PT];
+
+    update_waypoint_time($node, $wp + 1, $dt + $MOVE[$node]->[$wp]->[$TIME]);
+    
+    $WP[$node]->{wplist}->delete(0,'end');
+    $WP[$node]->{wplist}->insert(0,build_entries($node));
+};
+
+###########################################################################
+###########################################################################
+sub display_movetrace {
+    my ($node) = @ARG;
+    
+    my ($i);
+    for ($i = 0; $i < $NUM_TIMES[$node]; $i++) {
+	plot_waypoint($node,$i,$MOVE[$node]->[$i]->[$TOX],
+		      $MOVE[$node]->[$i]->[$TOY]);
+	if ($i < $NUM_TIMES[$node] - 1) {
+	    my $item = $CANVAS->create('line', 
+				       scale_dist($MOVE[$node]->[$i]->[$TOX]),
+				       scale_dist($MOVE[$node]->[$i]->[$TOY]),
+				       scale_dist($MOVE[$node]->[$i+1]->[$TOX]),
+				       scale_dist($MOVE[$node]->[$i+1]->[$TOY]),
+				       -arrowshape => [8,14,4],
+				       -arrow => 'last',
+				       -width => 2,
+				       -fill => $waypoint_color, 
+				       -tag => "t$node-$i" );
+	    $CANVAS->addtag(trace_name($node),'withtag',$item);
+	}
+    }
+    
+    if ($WP_DOT_SIZE > $DOT_SIZE) {
+	$CANVAS->raise(node_name($node));
+    }
+};
+
+sub plot_waypoint {
+    my ($n, $i, $x, $y) = @ARG;
+    $x = scale_dist($x); $y = scale_dist($y);
+    my $item = $CANVAS->create('oval', $x-$WP_DOT_SIZE, $y-$WP_DOT_SIZE, 
+			    $x+$WP_DOT_SIZE, $y+$WP_DOT_SIZE,
+		  -outline => $waypoint_color, 
+		  -fill => $waypoint_color, -tag => "w$n-$i" );
+    $CANVAS->addtag('waypoint','withtag',$item);
+    $CANVAS->addtag(trace_name($n),'withtag',$item);
+}
+
+###########################################################################
+###########################################################################
+
+sub move_waypoint {
+    my ($n, $i, $x, $y) = @ARG;
+    my ($j, @coords);
+
+    $x = scale_dist($x); $y = scale_dist($y);
+    @coords = $CANVAS->coords("w$n-$i");
+    if (@coords == '') {
+	die;   # I don't think this code path should ever be used -dam 6/98
+	plot_waypoint($n,$i,$x,$y);
+    } else {
+	my ($x1,$y1) = @coords;
+	$CANVAS->move("w$n-$i", 
+		      $x - $x1 - $WP_DOT_SIZE, 
+		      $y - $y1 - $WP_DOT_SIZE);
+	
+	### Now move the trace lines
+	if ($i != 0) {
+	    $j = $i - 1;
+	    @coords = $CANVAS->coords("t$n-$j");
+	    if (@coords != '') {
+		$CANVAS->coords("t$n-$j", $coords[0], $coords[1], $x, $y);
+	    } else {
+		print "not found t$n-$j\n";
+		die;
+	    }
+	}
+	if ($i != $NUM_TIMES[$n] - 1) {
+	    @coords = $CANVAS->coords("t$n-$i");
+	    if (@coords != '') {
+		$CANVAS->coords("t$n-$i", $x, $y, $coords[2], $coords[3]);
+	    } else {
+		print "not found t$n-$i\n";
+		die;
+	    }
+	}
+    }
+
+    if ($WP_DOT_SIZE > $DOT_SIZE) {
+	$CANVAS->raise(node_name($n));
+    }
+}
+
+sub reposition_waypoint {
+    my($w) = @ARG;
+
+    my $e = $w->XEvent;
+    my ($screen_x, $screen_y) = ($e->x, $e->y);
+    my ($x, $y) = (unscale_dist($screen_x), unscale_dist($screen_y));
+
+    if ($x > $MAXX) { $x = $MAXX;}
+    if ($x < 0) { $x = 0;}
+    if ($y > $MAXY) { $y = $MAXY;}
+    if ($y < 0) { $y = 0;}
+
+    my @tags = $CANVAS->gettags('current');
+    if (join(' ',@tags) =~ /\bw(\d+)-(\d+)\b/o) {
+	move_waypoint($1,$2,$x,$y);
+	update_waypoint_position($1,$2,$x,$y);
+    }
+};
+
+###########################################################################
+###########################################################################
+# Trace file manipulations
+###########################################################################
+my %next_fileevent = (time => -1.0, event => "");
+my $TRACEFILE = '';
+my $maxtrpos = 0;
+
+sub ReadAddrMap {
+    my ($fname) = @ARG;
+
+    open(F,$fname) or die "Can't open address map file '$fname'";
+    while (<F>) {
+        if (/[^\#]*(\d+)\s+([\w\.]+)\s+([0-9a-fA-F\.:]+)/) {
+            $ADDRMAP{$2} = $1;
+        } 
+    }
+
+#    print "read addrmap\n";
+#    dumpValue(\%ADDRMAP);
+
+    close F;
+}
+
+sub SetTRPos {
+# set the trace file pointer to the next line following the given location
+    my ($new_pos) = @ARG;
+    seek(TRACEFILE,$new_pos,0);
+    # sync to line break
+    my $c;
+
+    for ($c = getc(TRACEFILE); 
+	 !eof(TRACEFILE) && $c ne "\n"; 
+	 $c = getc(TRACEFILE)) {}
+    $next_fileevent{time} = -1;  # ignore the old next_event
+}
+
+sub PeekNextEventTime {
+# return the time of the next event, < 0 if at EOF
+    if ($next_fileevent{time} != -1.0) { return $next_fileevent{time};}
+
+    $next_fileevent{event} = <TRACEFILE>;
+
+    my @fields;
+    if ($pctd_file) {
+	@fields = split " ",$next_fileevent{event};
+#	print "event len $#fields\n fields are ";
+#	print join "|",@fields;
+#	print "\n";
+    }
+
+    if ($next_fileevent{event} =~ /^[sf] (\d+\.\d+)/) {
+	$next_fileevent{time} = $1;
+
+    } elsif ($next_fileevent{event} =~ /^r (\d+\.\d+).*?(\d+) \[/) {
+	# a recv event is posted to the trace when the event completes, but
+	# we'd like to know about it
+	$next_fileevent{time} = $1 - ($2 * 8)/$LINK_BW;
+
+    } elsif ($next_fileevent{event} =~ /^\w+ (\d+\.\d+)/) {
+	$next_fileevent{time} = $1;
+
+    } elsif ($pctd_file && $#fields == $#pctd_header ) {
+	SetPCTDData(@fields);
+	$next_fileevent{time} = $PCTD_DATA{time};
+	$next_fileevent{event} = 'pctd-data';
+
+    } elsif (eof TRACEFILE) {
+	# $next_fileevent{event} is already false
+	$next_fileevent{time} = -1;
+
+    } else {
+	print "DFU: unknown trace file line:\n$next_fileevent{event}\n";
+	die;
+    }
+    return $next_fileevent{time};
+};
+
+sub GetNextEvent {
+# return the next event and its time as (time, event)
+# rtns time as -1 and event as false in case of EOF
+    if ($next_fileevent{time} == -1.0) { 
+	PeekNextEventTime();
+    }
+    my ($time,$event) = ($next_fileevent{time},$next_fileevent{event});
+    $next_fileevent{time} = -1;
+    return ($time,$event);
+};
+
+sub OpenTraceFile {
+    ($TRACEFILE) = @ARG;
+    if ($trace_loaded) { CloseTraceFile(); }
+    if ($TRACEFILE eq "") {
+	return -1;
+    }
+    if (!open(TRACEFILE, "<$TRACEFILE")) {
+	Msg("Can't open trace file $TRACEFILE");
+	return -1;
+    }
+
+    if ($pctd_file) {
+	my $line = <TRACEFILE>;
+	@pctd_header = split(" ",$line);
+	print "Read PCTD header size $#pctd_header : $line\n";
+	ReadAddrMap($addrmap_file);
+    }
+
+    $next_fileevent{time} = -1.0;
+    seek(TRACEFILE, 0, 2) or die;  #find EOF
+    $maxtrpos = tell TRACEFILE;
+    seek(TRACEFILE, 0, 0) or die;  #back to start
+    $trace_loaded = 1;
+    return 0;
+};
+
+sub CloseTraceFile {
+    close TRACEFILE;
+    $trace_loaded = 0;
+}
+
+sub SetNextEventTime {
+    # do binary search in file
+    my ($new_time) = @ARG;
+
+    my $done = 0;
+    my $time; 
+    my $old_time = -1;
+
+    my ($min,$mid,$max) = (0, int ($maxtrpos / 2), $maxtrpos);
+    while (!$done) {
+	SetTRPos($mid);
+	$time = PeekNextEventTime();
+
+# print "$min $mid $max $time |$next_fileevent{event}|\n";
+
+	if (abs($time - $new_time) < $EP) {
+	    $done = 1;
+	} elsif (!$next_fileevent{event}) {
+	    # EOF condition
+	    $done = 1;
+	} elsif (abs($min - $max) <= 1) {
+	    $done = 1;
+	} elsif ($time == $old_time) {
+	    # encourage faster convergence.
+	    # pos is in characters, but we only care about lines.
+	    # If we get the same line twice, we're done.
+	    # Note that this is not exactly correct, but is close enuf
+	    # for the visualizer since off by one line won't matter and
+	    # otherwise the search bounces a bunch between the last two lines
+	    $done = 1;
+	} elsif ($time < $new_time) {
+	    $min = $mid;
+	} else {
+	    $max = $mid;
+	}
+	$mid = int (($max - $min) / 2) + $min;
+	$old_time = $time;
+    }
+
+    $next_fileevent{time} = -1;
+};
+
+sub SetPCTDData {
+    if ($#ARG != $#pctd_header) {
+	die "$#ARG != $#pctd_header when setting PCTD data\n";
+    }
+
+    %PCTD_DATA = ();
+
+    my $field_name;
+    foreach $field_name (@pctd_header) {
+	$PCTD_DATA{$field_name} = shift @ARG;
+    }
+
+    if ($BASE_TIME < 0.0) {
+	$BASE_TIME = $PCTD_DATA{'gps_time.tv_sec'} + 
+	    ($PCTD_DATA{'gps_time.tv_usec'} / 1000000);
+    }
+
+    $PCTD_DATA{time} = $PCTD_DATA{'gps_time.tv_sec'} + 
+	($PCTD_DATA{'gps_time.tv_usec'} / 1000000) - $BASE_TIME;
+    
+    $PCTD_DATA{node} = $ADDRMAP{$PCTD_DATA{gps_homeaddr}};
+
+#    print "===========================================================================\n";
+#    dumpValue(\%PCTD_DATA);
+#    print "===========================================================================\n";
+
+};
+
+###########################################################################
+###########################################################################
+# Configuration Dialog
+###########################################################################
+sub Configuration {
+
+    my $W = MainWindow->new;
+    $W->title("Scenario Configuration");
+
+    my $f = $W->Frame(-width => '15c');
+
+    my $l1 = $f->Frame();
+    $l1->pack(-side => 'top');
+    my $xdim = $l1->Entry(-relief => 'sunken', -width => 16,);
+    $l1->Label(-text => 'X dimension (meters):')->pack(-side => 'left');
+    $xdim->pack(-side => 'left');
+    $xdim->insert(0,$MAXX);
+
+    my $ydim = $l1->Entry(-relief => 'sunken', -width => 16,);
+    $l1->Label(-text => 'Y dimension (meters):')->pack(-side => 'left');
+    $ydim->pack(-side => 'left');
+    $ydim->insert(0,$MAXY);
+
+    my $l2 = $f->Frame();
+    $l2->pack(-side => 'top', -anchor => 'w');
+    $l2->Label(-text => 'Max Time (secs):')->pack(-side => 'left');
+    my $maxtime = $l2->Entry(-relief => 'sunken',);
+    $maxtime->pack(-side => 'left', -fill => 'x', -expand => 1);
+    $maxtime->insert(0,$MAX_TIME);
+    
+    my $l3 = $f->Frame();
+    $l3->pack(-side => 'top', -anchor => 'w');
+    $l3->Label(-text => 'Nominal Range (meters):')->pack(-side => 'left');
+    my $range = $l3->Entry(-relief => 'sunken',);
+    $range->pack(-side => 'left');
+    $range->insert(0,"$RANGE");
+
+    $l3->Label(-text => 'Link Bandwidth (bps):')->pack(-side => 'left');
+    my $bw = $l3->Label(-relief => 'sunken',-text =>$LINK_BW);
+    $bw->pack(-side => 'left');
+
+    my $l5 = $f->Frame();
+    $l5->pack(-side => 'top');
+    my $bmname = $l5->Entry(-relief => 'sunken', -width => 26,);
+    $l5->Label(-text => 'Bitmap filename:')->pack(-side => 'left');
+    $bmname->pack(-side => 'left');
+    $bmname->insert(0,$bitmap_file);
+
+    my $bmx = $l5->Entry(-relief => 'sunken', -width => 4,);
+    $l5->Label(-text => 'X dim (pixels):')->pack(-side => 'left');
+    $bmx->pack(-side => 'left');
+    $bmx->insert(0,$bitmap_xdim);
+
+    my $bmy = $l5->Entry(-relief => 'sunken', -width => 4,);
+    $l5->Label(-text => 'Y dim (pixels):')->pack(-side => 'left');
+    $bmy->pack(-side => 'left');
+    $bmy->insert(0,$bitmap_ydim);
+
+
+    my $done = sub {
+	$MAXX = 0 + $xdim->get();
+	$MAXY = 0 + $ydim->get();
+	$MAX_TIME = 0.0 + $maxtime->get();
+	$RANGE = 0.0 + $range->get();
+	$bitmap_file = $bmname->get();
+	$bitmap_xdim = $bmx->get();
+	$bitmap_ydim = $bmy->get();
+	ConfigureUI();
+
+	$W->destroy();
+    };
+
+    my $l4 = $f->Frame();
+    $l4->pack(-side => 'top', -pady => 5);
+
+    $l4->Button(-text => "Okay", -command => $done,
+	       )->pack(-side => 'left', -expand => 'yes', -padx => 3);
+    $l4->Button(-text => "Cancel", -command => sub { $W->destroy(); },
+	       )->pack(-side => 'left', -expand => 'yes', -padx => 3);
+
+    $f->pack(-side => 'top');
+    
+};
+
+###########################################################################
+###########################################################################
+# File Dialog
+###########################################################################
+sub FileMenu {
+
+    my $W = MainWindow->new;
+    $W->title("Save/Load Files");
+
+    my $f = $W->Frame(-width => '15c');
+
+    my $l1 = $f->Frame();
+    $l1->pack(-side => 'top');
+    $l1->Label(-text => 'Scenario File:')->pack(-side => 'left');
+    my $scenario = $l1->Entry(-relief => 'sunken', -width => 40,);
+    $scenario->pack(-side => 'left');
+    $scenario->insert(0, $default_scenario);
+
+    my $l2 = $f->Frame();
+    $l2->pack(-side => 'top', -anchor => 'w');
+    $l2->Label(-text => 'Trace File:')->pack(-side => 'left');
+    my $trace = $l2->Entry(-relief => 'sunken', -width => 40);
+    $trace->pack(-side => 'left', -fill => 'x', -expand => 1);
+    $trace->insert(0,$default_trace);
+
+    my $l3 = $f->Frame();
+    $l3->pack(-side => 'top', -anchor => 'w');
+    $l3->Label(-text => 'Communication File:')->pack(-side => 'left');
+    my $comm = $l3->Entry(-relief => 'sunken', -width => 40);
+    $comm->pack(-side => 'left', -fill => 'x', -expand => 1);
+    $comm->insert(0,$default_commpattern);
+    
+    my $load = sub {
+	$default_scenario = $scenario->get();
+	$default_trace = $trace->get();
+	$default_commpattern = $comm->get();
+	if (!ClearAll()) {
+	    return;
+	}
+	Msg('Load Completed');
+	ReadScenario($default_scenario);
+	ConfigureUI();
+	OpenTraceFile($default_trace);
+	ReadCommunicationPattern($default_commpattern);
+
+	$W->destroy();
+    };
+
+    my $save = sub {
+	$default_scenario = $scenario->get();
+	$default_trace = $trace->get();
+	$default_commpattern = $comm->get();
+	Msg('Save Completed');
+	SaveScenario($default_scenario);
+	ConfigureUI();
+	SaveCommunicationPattern($default_commpattern);
+	$W->destroy();
+    };
+
+    my $l4 = $f->Frame();
+    $l4->pack(-side => 'top', -pady => 5);
+
+    $l4->Button(-text => "Load", -command => $load,
+	       )->pack(-side => 'left', -expand => 'yes', -padx => 3);
+    $l4->Button(-text => "Cancel", -command => sub { $W->destroy(); },
+	       )->pack(-side => 'left', -expand => 'yes', -padx => 3);
+    $l4->Button(-text => "Save", -command => $save,
+	       )->pack(-side => 'left', -expand => 'yes', -padx => 3);
+
+    $f->pack(-side => 'top');
+    
+};
+
+###########################################################################
+###########################################################################
+# SchedulePackets
+###########################################################################
+my @ORIG;
+my $num_orig;
+my $next_orig;
+my $OrigWin;       # window for originations
+my $OrigList;      # list box of originations
+
+
+sub FindOrigIndex {
+    my ($time) = @ARG;
+    my ($i);
+    for ($i = 0; $i < $num_orig; $i++) {
+	last if ($ORIG[$i]->{time} >= $time);
+    }
+    return $i;
+};
+
+sub InsertOrig {
+    my ($time,$type,$from,$to,$count,$rate,$size) = @ARG;
+    
+    my $insert_point = FindOrigIndex($time);
+    my ($i);
+    for ($i = $num_orig; $i > $insert_point; $i--) {
+	$ORIG[$i] = $ORIG[$i - 1];
+    }
+
+    $ORIG[$insert_point] = {time => $time,
+			    type => $type,
+			    from => $from,
+			    to => $to,
+			    count => $count,
+			    rate => $rate,
+			    size => $size,};
+
+    $num_orig++;
+};
+
+sub DeleteOrig {
+    my ($index) = @ARG;
+
+    if ($num_orig <= 0) { $num_orig = 0; return; }
+
+    my $i;
+    for ($i = $index; $i < $num_orig - 1; $i++) {
+	$ORIG[$i] = $ORIG[$i+1];
+    }
+    $num_orig--;
+};
+
+sub FormatOrig {
+    my ($index) = @ARG;
+    return "" if ($index >= $num_orig);
+    
+    if ($ORIG[$index]->{type} eq 'cbr') {
+	return sprintf("%8.3f %s %d -> %d send %d pkts at %f/sec (MSS %d)",
+		       $ORIG[$index]->{time},
+		       $ORIG[$index]->{type},
+		       $ORIG[$index]->{from},
+		       $ORIG[$index]->{to},
+		       $ORIG[$index]->{count},
+		       $ORIG[$index]->{rate},
+		       $ORIG[$index]->{size});
+    } elsif ($ORIG[$index]->{type} eq 'tcp') {
+	return sprintf("%8.3f %s %d -> %d send %d bytes (MSS %d)",
+		       $ORIG[$index]->{time},
+		       $ORIG[$index]->{type},
+		       $ORIG[$index]->{from},
+		       $ORIG[$index]->{to},
+		       $ORIG[$index]->{count},
+		       $ORIG[$index]->{size});
+    } else {
+	return "DFU: $index unknown type $ORIG[$index]->{type}";
+    }
+};
+
+sub ReadCommunicationPattern {
+    my ($CP) = @ARG;
+
+    if ($CP eq "") {
+	return 0;
+    }
+
+    if (!open(CP,"<$CP")) {
+	Msg("Can't read communication pattern file $CP\n");
+	return -1;
+    }
+    
+    while (<CP>) {
+
+	if (/^\# (\d+.\d+) (\d+) -> (\d+) cbr (\d+) (\d+\.*\d+) (\d+)/) {
+
+## 10.123 1 -> 2 cbr 10 8.0 512
+
+	    InsertOrig($1, 'cbr', $2, $3, $4, $5, $6);
+	} elsif (/^\# (\d+.\d+) (\d+) -> (\d+) tcp (\d+) (\d+)/) {
+
+## 10.123 1 -> 2 tcp 1000 512 
+
+	    InsertOrig($1, 'tcp', $2, $3, $4, 0, $5);
+
+	} else {
+	}
+    }
+    close CP;
+    return 0;
+};
+
+sub SaveCommunicationPattern {
+    my ($CP) = @ARG;
+
+    if ($CP eq "" ){
+	return 0;
+    }
+    if (!open(CP,">$CP")) {
+	Msg("Can't write communication pattern file $CP\n");
+	return -1;
+    }
+    
+    my $i;
+    for ($i = 0; $i < $num_orig; $i++) {
+	if ($ORIG[$i]->{type} eq 'cbr') {
+
+	    my $buf = sprintf("%f %d -> %d cbr %d %f %d",
+			      $ORIG[$i]->{time},
+			      $ORIG[$i]->{from},
+			      $ORIG[$i]->{to},
+			      $ORIG[$i]->{count},
+			      $ORIG[$i]->{rate},
+			      $ORIG[$i]->{size});
+	    my $rate = 1/$ORIG[$i]->{rate};
+	    print CP <<"CBR"
+#
+# $buf
+#
+set cbr_($i) [\$ns_ create-connection  CBR \$node_($ORIG[$i]->{from}) \\
+	      CBR \$node_($ORIG[$i]->{to}) 0]
+\$cbr_($i) set packetSize_ $ORIG[$i]->{size}
+\$cbr_($i) set interval_ $rate
+\$cbr_($i) set random_ 0
+\$cbr_($i) set maxpkts_ $ORIG[$i]->{count}
+\$ns_ at $ORIG[$i]->{time} "\$cbr_($i) start"
+CBR
+	} elsif  ($ORIG[$i]->{type} eq 'tcp') {
+	    
+	    my $buf = sprintf("%f %d -> %d tcp %d %d",
+			      $ORIG[$i]->{time},
+			      $O

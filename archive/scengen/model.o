@@ -1,0 +1,1266 @@
+>insert(0,1024);
+    
+    my $l4 = $W->Frame();
+    $l4->pack(-side => 'top');
+    $l4->Label(-text => 'Pkt size (bytes):')->pack(-side => 'left');
+    my $size = $l4->Entry(-relief => 'sunken',);
+    $size->pack(-side => 'left', -fill => 'x', -expand => 1);
+    $size->insert(0,512);
+
+    my $done = sub {
+	my $t;
+
+	if (int($CUR_TIME) == $timepos_scale->get()) {
+	    $t = $CUR_TIME;
+	} else {
+	    $t = $timepos_scale->get();
+	}
+
+	InsertOrig($t, 'tcp',
+		   int($n1->get()),
+		   int($n2->get()),
+		   int($count->get()),
+		   0,
+		   int($size->get()));
+	ShowOrig($list);	
+	$W->destroy();
+    };
+
+    my $l5 = $W->Frame();
+    $l5->pack(-side => 'top', -pady => 5);
+
+    $l5->Button(-text => "Okay", -command => $done,
+	       )->pack(-side => 'left', -expand => 'yes', -padx => 3);
+    $l5->Button(-text => "Cancel", 
+		-command => $cancel,
+	       )->pack(-side => 'left', -expand => 'yes', -padx => 3);
+};
+###########################################################################
+###########################################################################
+# Manipulate Obstacles
+###########################################################################
+my @OBST;          # array of references to obstacles
+my $num_obst = 0;
+my $obst_uid = 0;
+
+sub AddBox {
+    my %pinfo;
+    my $done = 0;
+
+    my $save_point = sub {
+	my ($w, $pinfo) = @ARG;
+	my $e = $w->XEvent;
+	my ($x, $y) = ($e->x, $e->y);
+	$pinfo->{x1} = $x;
+	$pinfo->{y1} = $y;
+	$pinfo->{x2} = $x;
+	$pinfo->{y2} = $y;
+	$CANVAS->create('rect', $pinfo->{x1}, $pinfo->{y1},
+			$pinfo->{x2}, $pinfo->{y2},
+			-outline => $obst_color, -width => $obst_width,
+			-tag => 'cur_rect');
+	Msg('Hold and drag out box');
+    };
+
+    my $drag_box = sub {
+	my ($w, $pinfo) = @ARG;
+	my $e = $w->XEvent;
+	my ($x, $y) = ($e->x, $e->y);
+	$pinfo->{x2} = $x;
+	$pinfo->{y2} = $y;
+	$CANVAS->coords('cur_rect', $pinfo->{x1}, $pinfo->{y1},
+			$pinfo->{x2}, $pinfo->{y2});
+	Msg(sprintf("from %6.1f,%6.1f to %6.1f,%6.1f (%6.1fx%6.1f)",
+		    unscale_dist($pinfo->{x1}),
+		    unscale_dist($pinfo->{y1}),
+		    unscale_dist($pinfo->{x2}),
+		    unscale_dist($pinfo->{y2}),
+		    unscale_dist(abs($pinfo->{x1} - $pinfo->{x2})),
+		    unscale_dist(abs($pinfo->{y1} - $pinfo->{y2}))));
+    };
+
+    Msg('Left click start point');
+    $CANVAS->Tk::bind('<Button-1>' => [sub{&$save_point(@ARG)},\%pinfo] );
+    $CANVAS->Tk::bind('<B1-Motion>' => [sub{&$drag_box(@ARG)}, \%pinfo] );
+    $CANVAS->Tk::bind('<ButtonRelease-1>' => sub {$done = 1;} );
+    while (!$done) {
+	DoOneEvent(DONT_WAIT | ALL_EVENTS);
+    }
+    $CANVAS->Tk::bind('<Button-1>' => sub{;} );
+    $CANVAS->Tk::bind('<B1-Motion>' => sub {;} );
+    $CANVAS->Tk::bind('<ButtonRelease-1>' => sub {;} );
+
+    $OBST[$num_obst]->{type} = 'box';
+    $OBST[$num_obst]->{uid} = $obst_uid++;;
+    $OBST[$num_obst]->{permeability} = $default_permeability;
+    $OBST[$num_obst]->{points} = {
+	x1 => unscale_dist($pinfo{x1}), y1 => unscale_dist($pinfo{y1}),
+	x2 => unscale_dist($pinfo{x2}), y2 => unscale_dist($pinfo{y2}),};
+
+    $CANVAS->addtag('obst','withtag','cur_rect');
+    $CANVAS->addtag('obst'.$OBST[$num_obst]->{uid},'withtag','cur_rect');
+    $CANVAS->dtag('cur_rect');
+
+    Msg(sprintf("Added %6.1fx%6.1f box (%6.1f,%6.1f -> %6.1f,%6.1f) perm %.2f)",
+		unscale_dist(abs($pinfo{x1} - $pinfo{x2})),
+		unscale_dist(abs($pinfo{y1} - $pinfo{y2})),
+		unscale_dist($pinfo{x1}),
+		unscale_dist($pinfo{y1}),
+		unscale_dist($pinfo{x2}),
+		unscale_dist($pinfo{y2}),
+		$OBST[$num_obst]->{permeability}));
+
+    $num_obst++;
+};
+
+sub AddLine {
+    my %pinfo;
+    my $done = 0;
+
+    my $save_point = sub {
+	my ($w, $pinfo) = @ARG;
+	my $e = $w->XEvent;
+	my ($x, $y) = ($e->x, $e->y);
+	$pinfo->{x1} = $x;
+	$pinfo->{y1} = $y;
+	$pinfo->{x2} = $x;
+	$pinfo->{y2} = $y;
+	$CANVAS->create('line', $pinfo->{x1}, $pinfo->{y1},
+			$pinfo->{x2}, $pinfo->{y2},
+			-fill => $obst_color, -width => $obst_width,
+			-tag => 'cur_line');
+	Msg('Hold and drag out line');
+    };
+
+    my $drag_line = sub {
+	my ($w, $pinfo) = @ARG;
+	my $e = $w->XEvent;
+	my ($x, $y) = ($e->x, $e->y);
+	$pinfo->{x2} = $x;
+	$pinfo->{y2} = $y;
+	$CANVAS->coords('cur_line', $pinfo->{x1}, $pinfo->{y1},
+			$pinfo->{x2}, $pinfo->{y2});
+	my $dist = sqrt(($pinfo->{x1} - $pinfo->{x2}) 
+			* ($pinfo->{x1} - $pinfo->{x2})
+			+ ($pinfo->{y1} - $pinfo->{y2}) 
+			* ($pinfo->{y1} - $pinfo->{y2}));
+	Msg(sprintf("from %6.1f,%6.1f to %6.1f,%6.1f (len = %6.1f)",
+		    unscale_dist($pinfo->{x1}),
+		    unscale_dist($pinfo->{y1}),
+		    unscale_dist($pinfo->{x2}),
+		    unscale_dist($pinfo->{y2}),
+		    unscale_dist($dist)));
+    };
+
+    Msg('Left click start point');
+    $CANVAS->Tk::bind('<Button-1>' => [sub{&$save_point(@ARG)},\%pinfo] );
+    $CANVAS->Tk::bind('<B1-Motion>' => [sub{&$drag_line(@ARG)}, \%pinfo] );
+    $CANVAS->Tk::bind('<ButtonRelease-1>' => sub {$done = 1;} );
+    while (!$done) {
+	DoOneEvent(DONT_WAIT | ALL_EVENTS);
+    }
+    $CANVAS->Tk::bind('<Button-1>' => sub{;} );
+    $CANVAS->Tk::bind('<B1-Motion>' => sub {;} );
+    $CANVAS->Tk::bind('<ButtonRelease-1>' => sub {;} );
+
+    $OBST[$num_obst]->{type} = 'line';
+    $OBST[$num_obst]->{uid} = $obst_uid++;;
+    $OBST[$num_obst]->{permeability} = $default_permeability;
+        $OBST[$num_obst]->{points} = {
+	x1 => unscale_dist($pinfo{x1}), y1 => unscale_dist($pinfo{y1}),
+	x2 => unscale_dist($pinfo{x2}), y2 => unscale_dist($pinfo{y2}),};
+
+    $CANVAS->addtag('obst','withtag','cur_line');
+    $CANVAS->addtag('obst'.$OBST[$num_obst]->{uid},'withtag','cur_line');
+    $CANVAS->dtag('cur_line');
+
+    Msg(sprintf("Added line (%6.1f,%6.1f -> %6.1f,%6.1f) perm %.2f)",
+		unscale_dist($pinfo{x1}),
+		unscale_dist($pinfo{y1}),
+		unscale_dist($pinfo{x2}),
+		unscale_dist($pinfo{y2}),
+		$OBST[$num_obst]->{permeability}));		  
+
+    $num_obst++;
+};
+
+sub DrawObstacles {
+    my ($i, $item);
+    for ($i = 0; $i < $num_obst; $i++) {
+	if ($OBST[$i]{type} eq 'line') {
+	    $item = $CANVAS->create('line', 
+				    scale_dist($OBST[$i]{points}{x1}),
+				    scale_dist($OBST[$i]{points}{y1}),
+				    scale_dist($OBST[$i]{points}{x2}),
+				    scale_dist($OBST[$i]{points}{y2}),
+			    -fill => $obst_color, -width => $obst_width,
+			    -tag => 'obst'.$OBST[$i]{uid});
+	    $CANVAS->addtag('obst','withtag',$item);
+	} elsif ($OBST[$i]{type} eq 'box') {
+	    $item = $CANVAS->create('rect', 
+				    scale_dist($OBST[$i]{points}{x1}),
+				    scale_dist($OBST[$i]{points}{y1}),
+				    scale_dist($OBST[$i]{points}{x2}),
+				    scale_dist($OBST[$i]{points}{y2}),
+			    -outline => $obst_color, -width => $obst_width,
+			    -tag => 'obst'.$OBST[$i]{uid});
+	    $CANVAS->addtag('obst','withtag',$item);
+	} else {
+	    Msg("unknown obstacle type '$OBST[$i]{type}");
+	}
+    }
+};
+
+sub DeleteObstByUID {
+    my ($uid) = @ARG;
+
+    if ($num_obst <= 0) { $num_obst = 0; return; }
+
+    my $i;
+    for ($i = 0; $i < $num_obst; $i++) {
+	if ($OBST[$i]->{uid} == $uid) {
+	    $OBST[$i] = $OBST[$num_obst - 1];
+	    $num_orig--;
+	    return;
+	}
+    }
+    print "DFU: UID not found?\n"; die;
+};
+
+sub DeleteObst {
+
+    my $done = 0;
+
+    my $delete = sub {
+	my @tags = $CANVAS->gettags('current');
+	if (join(' ',@tags) =~ /\bobst(\d+)\b/o) {
+	    $CANVAS->delete('current');
+	    DeleteObstByUID($1);
+	} 
+	$done = 1;
+    };
+
+    $CANVAS->bind('obst', '<Button-1>' => $delete);
+    my ($opt,$name,$class,$default,$save_cursor) = $MW->configure('-cursor');
+    $CANVAS->configure(-cursor => 'pirate');
+    while (!$done) {
+	DoOneEvent(DONT_WAIT | ALL_EVENTS);
+    }
+    $CANVAS->configure(-cursor => $save_cursor);
+    $CANVAS->bind('obst', '<Button-1>' => sub{;});
+};
+
+sub SaveObstacles {
+    my ($OB) = @ARG;
+    
+    if ($#ARG == -1) {
+	if (!open(OB,">$OB")) {
+	    Msg("Can't write obstacle file $OB $ERRNO\n");
+	    return -1;
+	}
+    } else {
+	if (!open(OB,">>$OB")) {
+	    Msg("Can't append obstacle file $OB $ERRNO\n");
+	    return -1;
+	}
+    }
+
+    my $i;
+    for ($i = 0; $i < $num_obst ; $i++) {
+	my $buf = sprintf("obstacle %s %f,%f %f,%f perm %f",
+			  $OBST[$i]->{type},
+			  $OBST[$i]->{points}{x1},
+			  $OBST[$i]->{points}{y1},
+			  $OBST[$i]->{points}{x2},
+			  $OBST[$i]->{points}{y2},
+			  $OBST[$i]->{permeability});
+
+	print OB <<"OBST"
+#
+# $buf
+#
+OBST
+    }
+    close OB;
+};
+
+sub ReadObstacles {
+    my ($OB) = @ARG;
+    
+    if (!open(OB,"<$OB")) {
+	Msg("Can't read obstacle file $OB $ERRNO\n");
+	return -1;
+    }
+    while (<OB>) {
+	if (/^\# obstacle (\w+) (\d+.\d+),(\d+.\d+) (\d+.\d+),(\d+.\d+) perm (\d+.\d+)/) {
+	    $OBST[$num_obst]->{type} = $1;
+	    $OBST[$num_obst]->{points}{x1} = $2;
+	    $OBST[$num_obst]->{points}{y1} = $3;
+	    $OBST[$num_obst]->{points}{x2} = $4;
+	    $OBST[$num_obst]->{points}{y2} = $5;
+	    $OBST[$num_obst]->{permeabilty} = $6;
+	    $OBST[$num_obst]->{uid} = $obst_uid++;
+	    $num_obst++;
+	}
+    }
+    if ($#ARG == -1) {close OB;}
+    DrawObstacles();
+};
+
+###########################################################################
+###########################################################################
+# Clear All
+###########################################################################
+
+sub ClearAllNoAsk {
+    $#MOVE = -1;
+    $#NUM_TIMES = -1;
+    $trace_loaded = 0;
+    my $i;
+    for ($i = 1; $i <= $NN; $i++) {
+	undisplay_waypoints($i);
+	if ($EDIT[$i]->{MW} != '') {
+	    $EDIT[$i]->{MW}->destroy();
+	}
+    }
+    $#NODE_ATTR = -1;
+    $#EDIT = -1;
+    $#WP = -1;
+    $NN = 0;
+    $CANVAS->delete('all');
+    $num_ends = 0;
+    $num_orig = 0;
+    $#ORIG = -1;
+    if ($OrigWin != '') { $OrigWin->destroy(); $OrigWin = ''; }
+    $#OBST = -1;
+    $num_obst = 0; $obst_uid = 0;
+    Msg('Cleared all...');
+};
+
+sub ClearAll {
+    
+    my ($erase, $cancel) = ('Erase', 'Cancel');
+    my $dialog = $MW->Dialog(
+	    -title          => 'Really Clear All?',
+            -text           => "You are about to erase the current trace and scenario files from Ad-Hockey.\nAre you sure you want to do this?",
+            -bitmap         => 'info',
+            -default_button => $erase,
+            -buttons        => [$erase, $cancel],
+            -wraplength => '4i',
+        );
+
+    my $button = $dialog->Show;
+    if ($button eq $cancel) {	
+	return 0;
+    }
+    ClearAllNoAsk();
+    return 1;
+};
+
+###########################################################################
+###########################################################################
+my $rin = '';
+my $ns_slave_initialized = 0;
+my $NS_SOCKET;
+
+sub CheckNSSlave {
+    if (!$ns_slave_initialized) {
+	my $paddr = sockaddr_in($slave_to_ns_port, INADDR_ANY);
+	socket(NS_SOCKET,PF_INET,SOCK_DGRAM,0) or
+	    Msg("Can't get socket to listen for ns: $!") and 
+		goto abort_ns_slave;
+	bind(NS_SOCKET,$paddr) or Msg("bind: $!") and goto abort_ns_slave;
+	vec($rin,fileno(NS_SOCKET),1) = 1;	
+	$ns_slave_initialized = 1;
+    }
+
+    # poll for a message, while preserving the $rin vector
+    my $rout = '';
+    my $msg = '';
+    my ($nfound,$timeleft) = select($rout = $rin, undef, undef, 0);
+    if ($nfound > 0) {
+	recv(NS_SOCKET, $msg, $NS_SLAVE_MSG_LEN,0) or die "recv $!";
+	my ($ns_time) = unpack($NS_SLAVE_MSG_FORMAT, $msg);
+	if ($ns_time != int($CUR_TIME)) {
+	    # need to resync ad-hockey with ns
+	    Msg("Resyncing time with ns...");
+	    change_time($ns_time);
+	    $speed_scale->set(10);  #reset speed to real time
+	}
+    }
+    
+    return;
+
+  abort_ns_slave:
+    $slave_to_ns = 0;
+    toggle_display() if $running;
+    return;    
+}
+
+
+
+###########################################################################
+###########################################################################
+###########################################################################
+###########################################################################
+sub DEAD_CODE {
+my $DEFAULT_CONNECTIONS = 'usrc-rts';
+
+my $controls;
+my $exit_but = $controls->Button(
+			       -text => "Exit",
+#			       -width => 10,
+			       -command => sub {exit; },
+);
+my $addnode_but = $controls->Button(
+			       -text => "Add Node",
+#			       -width => 10,
+			       -command => \&add_node,
+);
+my $print_but = $controls->Button(
+			       -text => "Print",
+#			       -width => 10,
+			       -command => \&print_it,
+);
+my $save_but = $controls->Button(
+			       -text => "Save",
+			       -width => 15,
+			       -command => sub {SaveScenario($main::SCEN)},
+);
+
+$addnode_but->pack(-side => 'left', -expand => 'yes');
+$save_but->pack(-side => 'left', -expand => 'yes');
+$print_but->pack(-side => 'left', -expand => 'yes');
+$exit_but->pack(-side => 'left', -expand => 'yes');
+
+my $display_frame = $MW->Frame(-borderwidth => 2, -relief => 'groove');
+my $display_label = $display_frame->Label(-text => 'Show Events: ',
+					  -font => $FONT,);
+my $show_rtrbut = $display_frame->Checkbutton(
+		  -text => 'RTR',
+		  -variable => \$show_rtr,
+		  -relief => 'flat',
+					   );
+my $show_agtbut = $display_frame->Checkbutton(
+		  -text => 'AGT',
+		  -variable => \$show_agt,
+		  -relief => 'flat',
+					    );
+$display_label->pack(-side => 'left');
+$show_rtrbut->pack(-side =>'left');
+$show_agtbut->pack(-side =>'left');
+
+my $connections_frame = $display_frame->Frame();
+my $connections_label = $connections_frame->Label(-text => 'Connections: ',
+						  -font => $FONT,);
+my $connections_entry = $connections_frame->Entry(
+       -relief => 'sunken',
+       -width => 16,
+       );
+$connections_entry->insert(0,$DEFAULT_CONNECTIONS);
+my $connections_on = $connections_frame->Button(
+       -text => 'show',
+#       -relief => 'flat',
+       -command => \&show_connections,
+       );
+my $connections_all = $connections_frame->Checkbutton(
+       -text => 'only feasible',
+       -variable => \$show_feasible_connections,
+       -relief => 'flat',
+       );
+$connections_label->pack(-side =>'left');
+$connections_entry->pack(-side =>'left');
+$connections_on->pack(-side =>'left');
+$connections_all->pack(-side =>'left');
+$connections_frame->pack();
+
+$display_frame->pack();
+
+
+###########################################################################
+###########################################################################
+# show connections
+###########################################################################
+sub show_connections {
+    my ($i, $name, @from_coords, @to_coords, @nodes, $item, $rt, $rt_ok);
+    my (@locations);
+    
+    $#locations = 0; # clear location of all nodes
+
+    # find the positions of all nodes
+    for ($i = 1 ; $i <= $NN ; $i++) {
+	@from_coords = $CANVAS->coords('n'.$i);
+	$locations[$i]->[0] =  $from_coords[0];
+	$locations[$i]->[1] =  $from_coords[1];
+#	print("node $i at $locations[$i]->[0] $locations[$i]->[1]\n");
+    }
+
+    $CANVAS->delete('connections'); 
+    my $CONNECTIONS = $connections_entry->get();
+    if (!open(CONNECTIONS)) { Msg("No such file: $CONNECTIONS"); return;} 
+ROUTE: while (<CONNECTIONS>) {
+	chop;
+	$#nodes = 0;
+	@nodes = split / /;
+	$rt = join(':',@nodes);
+#	printf("connection nodes: %s\n",$rt);
+
+	printf("."); # a busy marked to give the natives something to look at
+
+	$rt_ok = 1;
+	if ($show_feasible_connections) {
+	    my ($dist, $dx, $dy);
+	    for ($i = 0; $i < $#nodes - 1; $i++) {
+               $dx = $locations[$nodes[$i+1]]->[0]-$locations[$nodes[$i]]->[0];
+	       $dy = $locations[$nodes[$i+1]]->[1]-$locations[$nodes[$i]]->[1];
+		$dist = sqrt($dx * $dx + $dy * $dy);
+		if ($dist > scale_dist($RANGE)) {
+		    $rt_ok = 0;
+		    last;
+		}
+	    }
+	}
+
+	if ($rt_ok) {
+	    for ($i = 0; $i < $#nodes - 1; $i++) {
+#		print("line for $nodes[$i] to $nodes[$i+1]\n");
+#		print("drawing $locations[$nodes[$i]]->[0], $locations[$nodes[$i]]->[1] to $locations[$nodes[$i+1]]->[0], $locations[$nodes[$i+1]]->[1]\n");
+
+		$name = $nodes[0].'->'.$nodes[$#nodes];
+		$item = $CANVAS->create('line', 
+				       $locations[$nodes[$i]]->[0]+$DOT_SIZE,
+				       $locations[$nodes[$i]]->[1]+$DOT_SIZE,
+				       $locations[$nodes[$i+1]]->[0]+$DOT_SIZE,
+				       $locations[$nodes[$i+1]]->[1]+$DOT_SIZE,
+					-fill => $conn_color, -tag => $name);
+		$CANVAS->addtag('connections','withtag',$item);
+		$CANVAS->addtag('rt|'.$rt,'withtag',$item);
+	    }
+	    print("\n");
+	}
+    }
+    print("\n");
+}
+
+}				# end sub DEADCODE
+
+                                                                                                                                                                                                                                                                                                                                      //
+// model.cc
+//
+
+#include "defs.h"
+
+#include "random.h"
+#include "util.h"
+#include "model.h"
+#include "nodeman.h"
+
+// class Area
+
+// Constructor
+Area::Area(char *areaType)
+{
+    // areaType should be something like "rect(100,200)" or "circle(150)"
+    assert(areaType != NULL);
+
+    if (!strncmp(areaType, "rect", 4)) {    // Rectangle
+        type_ = AREA_RECT;
+        // parameters should be "rect(X,Y)"
+        params_ = new double[2];
+        sscanf(areaType, "rect(%lf,%lf)", &(params_[0]), &(params_[1]));
+    } else {
+        type_ = AREA_UNKNOWN;
+        params_ = NULL;
+    }
+}
+
+// Destructor
+Area::~Area()
+{
+    if (params_ != NULL)
+        delete params_;
+}
+
+// Member functions of class Area
+void Area::randomPos(Vector &v)
+{
+    if (type_ == AREA_RECT) {
+        v.x_ = UNIFORM * params_[0];
+        v.y_ = UNIFORM * params_[1];
+    } else {
+        assert(0);
+    }
+}
+
+void Area::center(Vector &v)
+{
+    if (type_ == AREA_RECT) {
+        v.x_ = params_[0] / 2;
+        v.y_ = params_[1] / 2;
+    } else {
+        assert(0);
+    }
+}
+
+double Area::maxX()
+{
+    if (type_ == AREA_RECT) {
+        return params_[0];
+    } else {
+        assert(0);
+        return -1; 
+    }
+}
+
+double Area::maxY()
+{
+    if (type_ == AREA_RECT) {
+        return params_[1];
+    } else {
+        assert(0);
+        return -1;
+    }
+}
+
+bool Area::inside(Vector &p)
+{
+    if (type_ == AREA_RECT) {
+        if (p.x_ < 0 || p.x_ > params_[0] || \
+            p.y_ < 0 || p.y_ > params_[1]) {
+            return false;
+        } else {
+            return true;
+        }
+    } else {
+        assert (0);
+        return false;
+    }
+}
+
+void Area::findNearestPoint(Vector &p)
+{
+    if (inside(p)) return;
+
+    if (type_ == AREA_RECT) {
+        if (p.x_ < 0) p.x_ = 0;
+        else if (p.x_ > params_[0]) p.x_ = params_[0];
+
+        if (p.y_ < 0) p.y_ = 0;
+        else if (p.y_ > params_[1]) p.y_ = params_[1];
+    } else {
+        assert(0);
+    }
+}
+
+// class Model
+
+// Constructor
+Model::Model()
+{
+    type_ = MODEL_UNKNOWN;
+    paramList_ = new List();
+    assert(paramList_ != NULL);
+
+    startTime_ = 0.0;
+    startID_ = 0;
+    numNodes_ = 0;
+    area_ = NULL;
+
+    nodes_ = NULL;
+
+    enableAcceleration_ = false;
+    ACC_T_ = 0;
+    ACC_A_ = 0;
+    shadowNodes_ = NULL;
+
+    initialized_ = false;
+}
+
+// Destructor
+Model::~Model()
+{
+    assert(paramList_ != NULL);
+    delete paramList_;
+
+    if (area_ != NULL)
+        delete area_;
+
+    if (shadowNodes_ != NULL) {
+        delete shadowNodes_;
+    }
+}
+
+// Member functions
+
+// Get the string value of a given parameter name
+char *Model::get(char *key)
+{
+    return (char *)(paramList_->get(key));
+}
+
+int Model::geti(char *key)
+{
+    return paramList_->geti(key);
+}
+
+long Model::getl(char *key)
+{
+    return paramList_->getl(key);
+}
+
+double Model::getf(char *key)
+{
+    return paramList_->getf(key);
+}
+
+// Set the string value of a given parameter
+int Model::set(char *key, char *value)
+{
+    char *v = Util::cloneStr(value);
+    return paramList_->set(key, v);
+}
+
+// Make a copy of the parameters of the current model object
+void Model::copyParam(Model *target)
+{
+    char *key, *value;
+    paramList_->reset();
+    while ( (key = paramList_->nextKey()) != NULL) {
+        value = Util::cloneStr((char *)(paramList_->get(key)));
+        target->set(key, value);
+    }
+}
+
+// get the type of the model
+ModelType Model::type()
+{
+    return type_;
+}
+
+// get access to a node
+Node *Model::getNode(node_id_t id)
+{
+    if (nodes_ == NULL || id < startID_ || id > startID_ + numNodes_) {
+        return NULL;
+    }
+    return &(nodes_[id - startID_]);
+}
+
+// dump the contents of the paramlist
+void Model::dump()
+{
+    if (paramList_ == NULL)
+        return;
+
+    char *key, *value;
+    paramList_->reset();
+    while ( (key = paramList_->nextKey()) != NULL) {
+        value = (char *)(paramList_->get(key));
+        printf("%s => %s\n", key, value);
+        fflush(stdout);
+    }
+}
+
+// get the type of distribution of the random variable by name
+void Model::getDistType(char *typeName, DistType &type)
+{
+    assert(typeName != NULL);
+    if (!strcmp(typeName, "constant")) {
+        type = DIST_CONST;
+    } else if (!strcmp(typeName, "uniform")) {
+        type = DIST_UNIFORM;
+    } else if (!strcmp(typeName, "gauss")) {
+        type = DIST_GAUSS;
+    } else {
+        type = DIST_UNKNOWN;
+    }
+}
+
+// get a double value by giving 2 parameters and the type of distribution
+double Model::getRandomDouble(DistType type, double param1, double param2)
+{
+    if (type == DIST_CONST) {
+        return param1;
+    } else if (type == DIST_UNIFORM) {
+        double min, max;
+        if (param1 < param2) {
+            min = param1;
+            max = param2;
+        } else {
+            min = param2;
+            max = param1;
+        }
+        return min + (max-min)*UNIFORM;
+    } else if (type == DIST_GAUSS) {
+        double mean = param1;
+        double variance = param2;
+        return (GAUSS * variance + mean);
+    } else {
+        // shouldn't come here
+        assert(0);
+        return 0;
+    }
+}
+
+
+// initialize model parameters
+void Model::init(model_time_t startTime, \
+                 model_time_t stopTime, \
+                 node_id_t startID, \
+                 int numNodes, \
+                 Area *area, \
+                 bool cp)
+{
+    assert (startTime >= 0 && stopTime > startTime);
+
+    startTime_ = startTime;
+    stopTime_ = stopTime;
+    startID_ = startID;
+    if (cp) {
+        numNodes_ = 1;
+    } else {
+        numNodes_ = numNodes;
+    }
+
+    area_ = area;
+    assert(area_ != NULL);
+
+    assert(startID_ >= 0);
+    assert(numNodes_ > 0 && numNodes_ <= MAX_NODES);
+
+    if (cp) {
+        nodes_ = new Node();
+        assert(nodes_);
+        bzero(nodes_, sizeof(Node));
+    } else {
+        // allocate the nodes from Node Manager
+        nodes_ = NodeMan::instance()->allocNode(numNodes_);
+    }
+
+    // init the nodes
+    initNodes(nodes_, numNodes_);
+
+    if (paramList_->get("ACC_T") && paramList_->get("ACC_A")) {
+        // if these two parameters are set
+        // enable acceleration
+        enableAcceleration_ = true;
+
+        // and init shadow nodes
+        createShadow();
+    }
+}
+
+void Model::createShadow()
+{
+    ACC_T_ = getf("ACC_T");
+    ACC_A_ = getf("ACC_A");
+
+    assert(ACC_T_ > 0 && ACC_A_ > 0);
+
+    shadowNodes_ = new Node[numNodes_];
+    assert(shadowNodes_);
+    initNodes(shadowNodes_, numNodes_);
+
+    pendingMoves_ = new List *[numNodes_];
+    assert(pendingMoves_);
+    for (int i=0; i<numNodes_; i++) {
+        pendingMoves_[i] = new List(true);
+        assert(pendingMoves_[i]);
+    }
+}
+
+void Model::initNodes(Node *nodes, int numNodes)
+{
+    for (int i=0; i<numNodes; i++) {
+        nodes[i].id_ = i+startID_;
+        nodes[i].startTime_ = startTime_;
+        nodes[i].arrivalTime_ = startTime_;
+        nodes[i].nextStartTime_ = startTime_;
+        nodes[i].pos_.x_ = -1.0;
+        nodes[i].pos_.y_ = -1.0;
+        nodes[i].dest_.x_ = -1.0;
+        nodes[i].dest_.y_ = -1.0;
+        nodes[i].speed_ = 0.0;
+        nodes[i].numMoves_ = 0;
+    }
+}
+
+model_time_t Model::nextMove(Move *move, bool probeOnly)
+{
+    assert(numNodes_ > 0 && initialized_);
+    
+    model_time_t min_time = stopTime_ + 1;
+
+    int min_node = findMinNode(min_time);
+
+    if (min_time > stopTime_) {     // simulation stopped
+        //min_time = -1;
+        move->time_ = -1;
+    } else {
+        if (probeOnly) {
+            //move->time_ = min_time; // why this causes problem?
+            // sometimes min_time != nodes_[min_node].nextStartTime_...
+            move->time_ = nodes_[min_node].nextStartTime_;
+            move->id_ = nodes_[min_node].id_;
+            move->firstMove_ = (nodes_[min_node].numMoves_ <= 1);
+        } else {
+            Node *node = &(nodes_[min_node]);
+            
+            if (enableAcceleration_) {
+                makeAcceleratedMove(node);
+            } else {
+                makeMove(node);
+                node->numMoves_++;
+            }
+
+            // create move
+            move->time_ = node->startTime_;
+            move->id_ = node->id_;
+            move->dest_ = node->dest_;
+            move->speed_ = node->speed_;
+            move->firstMove_ = (nodes_[min_node].numMoves_ <= 1);
+        }
+    }
+
+    //return min_time;
+    return move->time_;
+}
+
+// find the node with min next start time
+// returns the index of the node, minTime has the min time
+int Model::findMinNode(model_time_t &minTime)
+{
+    minTime = stopTime_ + 1;
+    int index = -1;
+
+    for (int i=0; i<numNodes_; i++) {
+        if (nodes_[i].nextStartTime_ < minTime) {
+            minTime = nodes_[i].nextStartTime_;
+            index = i;
+        }
+    }
+
+    return index;
+}
+
+void Model::makeAcceleratedMove(Node *node)
+{
+    // get the shadow node
+    int shadowIndex = node->id_ - startID_;
+    Node *sn = &(shadowNodes_[shadowIndex]);
+
+    // Note: moves are stored as struct Node in the pending move lists
+    //       we rely on the iterator of the List class
+    List *pList = pendingMoves_[shadowIndex];
+    Node *n = (Node *) (pList->nextValue());
+
+    // if pending moves empty
+    if (n == NULL) {
+        // update shadow
+        makeMove(sn);
+        sn->numMoves_++;
+
+        // generate pending moves
+        pList->clear();
+        makePendingMoves(pList, sn);
+
+        // get the first move
+        pList->reset();
+        n = (Node *) (pList->nextValue());
+        assert(n);
+    }
+
+    // copy next move from pending moves
+    memcpy(node, n, sizeof(Node));
+}
+
+void Model::makePendingMoves(List *pList, Node *sn)
+{
+    //if (sn->speed_ == 0) {      
+    if (sn->numMoves_ <= 1) {      
+        // first move, set position only, so just simply copy the move
+        Node *n = new Node();
+        assert(n);
+        memcpy(n, sn, sizeof(Node));
+        pList->set("dummy_key", n);
+        return;
+    } 
+
+    // normal moves
+
+    // the distance of the movement
+    double d = (sn->dest_ - sn->pos_).length();
+
+    // uniformed (has length of 1) velocity vector 
+    Vector v = (sn->dest_ - sn->pos_) / d;
+
+    // the max speed that can be achived with ACC_A_
+    double v_max = sqrt(ACC_A_ * d);
+
+    // record the pause time of the shadow move
+    model_time_t pause = sn->nextStartTime_ - sn->arrivalTime_;
+
+    // the time when node moves with constant (max) speed
+    model_time_t c_time = 0;
+
+    if (sn->speed_ > v_max) {   // unreachable speed
+        // reduce it to v_max
+        sn->speed_ = v_max;
+        c_time = 0;
+    } else {
+        // make v_max consistent with sn->speed_
+        v_max = sn->speed_;
+
+        // the distance covered in acceleration phase
+        double d1 = v_max * v_max / ACC_A_;
+        // the distance covered in constant speed phase
+        double d2 = d - d1;
+
+        c_time = d2 / v_max;
+    }
+
+    // speed increment in one time interval
+    double unit_a = ACC_A_ * ACC_T_;
+
+    // phase of movement
+    // 1 == positive acceleration
+    // 0 == constant speed
+    // -1 == negative acceleratoin
+    double phase = 1;
+
+    // keep track of the simulation time of the movement
+    model_time_t s_time = sn->startTime_;
+
+    // keep track of current position
+    Vector pos = sn->pos_;
+
+    // keep track of the speed
+    double speed = 0;
+
+    bool done = false;
+    while (!done) {
+        Node *n = new Node();
+        n->numMoves_ = sn->numMoves_;
+        assert(n);
+
+        double end_speed;
+        double average_speed;
+        model_time_t move_time;
+        // distance covered
+        double move_d;
+
+        if (phase == 1) {           // positive acceleration phase
+            if (speed < v_max - unit_a) {
+                move_time = ACC_T_;
+                end_speed = speed + unit_a;
+            } else {
+                move_time = (v_max - speed) / ACC_A_;
+                end_speed = v_max;
+
+                // shift to constant move
+                phase = 0;
+            }
+        } else if (phase == -1) {   // negative acceleration phase
+            if (speed > unit_a) {
+                move_time = ACC_T_;
+                end_speed = speed - unit_a;
+            } else {
+                move_time = speed / ACC_A_;
+                end_speed = 0;
+
+                // movements ends here
+                done = true;
+            }
+        } else {                // constant speed phase
+            end_speed = speed;
+            move_time = c_time;
+
+            // shift to negative acceleration phase
+            phase = -1;
+        }
+
+        average_speed = (end_speed + speed) / 2;
+        move_d = average_speed * move_time;
+
+        // create the move
+        n->id_ = sn->id_;
+        n->startTime_ = s_time;
+        n->arrivalTime_ = n->startTime_ + move_time;
+        if (done) {
+            // only count for pause time in the last move
+            n->nextStartTime_ = n->arrivalTime_ + pause;
+        } else {
+            n->nextStartTime_ = n->arrivalTime_;
+        }
+        n->speed_ = average_speed;
+        n->pos_ = pos;
+        n->dest_ = pos + v * move_d;
+
+        // add it to pList
+        pList->set("dummy_key", n);
+
+        // update variables
+        s_time = n->nextStartTime_;
+        speed = end_speed;
+        pos = n->dest_;
+    }
+
+    // modify shadow node, so that the simulation times are consistent
+    sn->nextStartTime_ = s_time;
+    sn->arrivalTime_ = s_time - pause;
+}
+
+// make the normal movement.
+void Model::makeMove(Node *node)
+{
+    // should be overloaded by sub classes
+    assert(0);
+}
+
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    ELF                      tƒ      4     ( > ;                                              #      %      '      )   U‰åƒìƒ} u$ÇD$!  ÇD$   ÇD$    Ç$	   èüÿÿÿÇD$   ÇD$   ‹E‰$èüÿÿÿ…ÀuI‹EÇ     Ç$   èüÿÿÿ‰Â‹E‰P‹E‹@P‹E‹@‰T$‰D$ÇD$!   ‹E‰$èüÿÿÿë‹EÇ ÿÿÿÿ‹EÇ@    ÉÃU‰åƒì‹E‹@…Àt‹E‹@‰$èüÿÿÿÉÃU‰åƒì‹E‹ …ÀuLÇ$    èüÿÿÿ‰$èüÿÿÿ‹E‹@İ ŞÉ‹EİÇ$    èüÿÿÿ‰$èüÿÿÿ‹E‹@ƒÀİ ŞÉ‹EİXÉÃÇD$  ÇD$-   ÇD$    Ç$/   èüÿÿÿU‰åƒì‹E‹ …Àu0‹E‹@İ İ8  Şù‹Eİ‹E‹@ƒÀİ İ8  Şù‹EİXÉÃÇD$è  ÇD$7   ÇD$    Ç$/   èüÿÿÿU‰åƒì‹E‹ …Àu
+‹E‹@İ ÉÃÇD$Ô  ÇD$@   ÇD$    Ç$/   èüÿÿÿU‰åƒì‹E‹ …Àu‹E‹@ƒÀİ ÉÃÇD$À  ÇD$J   ÇD$    Ç$/   èüÿÿÿU‰åƒì‹E‹ …Àuk‹Eİ ÙîßéİØ—À„ÀuK‹Eİ ‹E‹@İ ÙÉßéİØ—À„Àu1‹Eİ@ÙîßéİØ—À„Àu‹Eİ@‹E‹@ƒÀİ ÙÉßéİØ—À„Àt¸    ë+¸   ë$ÇD$¥  ÇD$Y   ÇD$    Ç$/   èüÿÿÿÉÃU‰åƒì‹E‰D$‹E‰$èüÿÿÿ„À…Á   ‹E‹ …À…   ‹Eİ ÙîßéİØ—À„Àt	‹EÙîİë'‹Eİ ‹E‹@İ ÙÉßéİØ—À„Àt‹E‹@İ ‹Eİ‹Eİ@ÙîßéİØ—À„Àt
+‹EÙîİXëV‹Eİ@‹E‹@ƒÀİ ÙÉßéİØ—À„Àt8‹E‹@ƒÀİ ‹EİXë%ÇD$€  ÇD$i   ÇD$    Ç$/   èüÿÿÿÉÃU‰åVSƒì‹EÇ    ‹EÇ@ÿÿÿÿÇ$   èüÿÿÿ‰Ã‰ØÇD$    ‰$èüÿÿÿ‰Ú‹E‰P$‹E‹@$…Àu$ÇD$b  ÇD$t   ÇD$    Ç$1   èüÿÿÿ‹EÙîİX‹EÇ@    ‹EÇ@    ‹EÇ@     ‹EÇ@(    ‹EÆ@, ‹EÙîİX0‹EÙîİX8‹EÇ@@    ‹EÆ@H ƒÄ[^]Ã‰Æ‰$èüÿÿÿ‰ğ‰$èüÿÿÿU‰åSƒì‹EÇ    ‹E‹@$…Àu$ÇD$J  ÇD$ˆ   ÇD$    Ç$1   èüÿÿÿ‹E‹X$…Ût‰$èüÿÿÿ‰$èüÿÿÿ‹E‹@ …Àt‹E‹X …Ût‰$èüÿÿÿ‰$èüÿÿÿ‹E‹@@…Àt‹E‹@@‰$èüÿÿÿ¸    ƒà„Àt‹E‰$èüÿÿÿƒÄ[]ÃU‰åƒì‹E‰$èüÿÿÿ‹E‰$èüÿÿÿÉÃU‰åƒì‹E‹@$‹U‰T$‰$èüÿÿÿÉÃU‰åƒì‹E‹@$‹U‰T$‰$èüÿÿÿÉÃU‰åƒì‹E‹@$‹U‰T$‰$èüÿÿÿÉÃU‰åƒì‹E‹@$‹U‰T$‰$èüÿÿÿÉÃU‰åƒì(‹E‰$èüÿÿÿ‰Eô‹E‹@$‹Uô‰T$‹U‰T$‰$èüÿÿÿÉÃU‰åƒì(‹E‹@$‰$èüÿÿÿë9‹E‹@$‹Uô‰T$‰$èüÿÿÿ‰$èüÿÿÿ‰Eğ‹Eğ‰D$‹Eô‰D$‹E‰$èüÿÿÿ‹E‹@$‰$èüÿÿÿ‰Eôƒ}ô •À„Àu«ÉÃU‰å‹E‹@]ÃU‰å‹E‹@(…Àt‹E‹@;Ew‹E‹P‹E‹@;Es¸    ë‹E‹H(‹E‹@‹U)Â‰ĞÁàĞÁà]ÃU‰åƒì(‹E‹@$…Àtm‹E‹@$‰$èüÿÿÿë?‹E‹@$‹Uô‰T$‰$èüÿÿÿ‰Eğ‹Eğ‰D$‹Eô‰D$Ç$F   èüÿÿÿ¡    ‰$èüÿÿÿ‹E‹@$‰$èüÿÿÿ‰Eôƒ}ô •À„Àu¥ëÉÃU‰åƒìƒ} u$ÇD$   ÇD$İ   ÇD$    Ç$P   èüÿÿÿÇD$c   ‹E‰$èüÿÿÿ…Àu‹EÇ     ëMÇD$l   ‹E‰$èüÿÿÿ…Àu‹EÇ    ë+ÇD$t   ‹E‰$èüÿÿÿ…Àu‹EÇ    ë	‹EÇ ÿÿÿÿÉÃU‰åƒìX‹E‰EĞ‹E‰EÔ‹E‰EÈ‹E‰EÌƒ} uİEĞéª   ƒ}uRİEÈİEĞÙÉßéİØ—À„ÀtİEĞİ]ğİEÈİ]èëİEÈİ]ğİEĞİ]èİEèÜeğİ]ÀÇ$    èüÿÿÿ‰$èüÿÿÿÜMÀÜEğëRƒ}u(İEĞİ]àİEÈİ]ØÇ$    èüÿÿÿ‰$èüÿÿÿÜMØÜEàë$ÇD$à  ÇD$ş   ÇD$    Ç$/   èüÿÿÿÉÃU‰åWVSƒì<‹E(‹U‰Uà‹U‰Uä‹U‰UØ‹U‰UÜˆEÔİEàÙîÙÉßéİØ“Àƒğ„ÀuİEØİEàÙÉßéİØ—Àƒğ„Àt$ÇD$€  ÇD$  ÇD$    Ç$|   èüÿÿÿ‹EİEàİX‹EİEØİX‹E‹U‰P€}Ô t‹EÇ@   ë	‹E‹U ‰P‹E‹U$‰P ‹E‹@ …Àu$ÇD$€  ÇD$  ÇD$    Ç$£   èüÿÿÿ‹E‹@…À~‹E‹@=è  ~$ÇD$€  ÇD$  ÇD$    Ç$´   èüÿÿÿ€}Ô „ƒ   Ç$H   èüÿÿÿ‰EĞ‹uĞ‰ó¸    º   ‰ß‰Ñó«‰4$èüÿÿÿ‹UĞ‹E‰P(‹E‹@(…Àu$ÇD$€  ÇD$  ÇD$    Ç$×   èüÿÿÿ‹E‹@(ÇD$H   ÇD$    ‰$èüÿÿÿë‹E‹Xèüÿÿÿ‰\$‰$èüÿÿÿ‰Â‹E‰P(‹E‹P‹E‹@(‰T$‰D$‹E‰$èüÿÿÿ‹E‹@$ÇD$Ş   ‰$èüÿÿÿ…Àt!‹E‹@$ÇD$ä   ‰$èüÿÿÿ…Àt¸   ë¸    „Àt‹EÆ@,‹E‰$èüÿÿÿƒÄ<[^_]ÃU‰åWVSƒì,ÇD$Ş   ‹E‰$èüÿÿÿ‹EİX0ÇD$ä   ‹E‰$èüÿÿÿ‹EİX8‹Eİ@0ÙîÙÉßéİØ—Àƒğ„Àu‹Eİ@8ÙîÙÉßéİØ—Àƒğ„Àt$ÇD$J  ÇD$8  ÇD$    Ç$ê   èüÿÿÿ‹E‹@‰Æ‰ğÁàğÁà‰$èüÿÿÿ‰Ç‰ø‰ÃFÿ‰Æë‰$èüÿÿÿƒÃHƒîƒşÿ•À„Àuè‰ú‹E‰P@‹E‹@@…Àu$ÇD$J  ÇD$;  ÇD$    Ç$  èüÿÿÿ‹E‹P‹E‹@@‰T$‰D$‹E‰$èüÿÿÿ‹E‹@Áà‰$èüÿÿÿ‰Â‹E‰PD‹E‹@D…Àu$ÇD$J  ÇD$?  ÇD$    Ç$  èüÿÿÿÇEä    ëoÇ$   èüÿÿÿ‰Ã‰ØÇD$   ‰$èüÿÿÿ‹E‹@D‹UäÁâ‰Ø‰‹E‹@D‹UäÁâĞ‹ …Àu$ÇD$J  ÇD$B  ÇD$    Ç$  èüÿÿÿƒEä‹E‹@;EäŸÀ„Àuë‰Æ‰$èüÿÿÿ‰ğ‰$èüÿÿÿƒÄ,[^_]ÃU‰åƒìÇEü    éõ   ‹Uü‰ĞÁàĞÁàE‹U‹J‹Uü‰‹Uü‰ĞÁàĞÁàE‹UİBİX‹Uü‰ĞÁàĞÁàE‹UİBİX‹Uü‰ĞÁàĞÁàE‹UİBİX‹Uü‰ĞÁàĞÁàEÙèÙàİX‹Uü‰ĞÁàĞÁàEÙèÙàİX$‹Uü‰ĞÁàĞÁàEÙèÙàİX,‹Uü‰ĞÁàĞÁàEÙèÙàİX4‹Uü‰ĞÁàĞÁàEÙîİX<‹Uü‰ĞÁàĞÁàEÇ@D    ƒEü‹Eü;EœÀ„À…úşÿÿÉÃU‰åƒìH‹EˆEä‹E‹@…À~‹E¶@Hƒğ„Àt$ÇD$   ÇD$X  ÇD$    Ç$/  èüÿÿÿ‹Eİ@ÙèŞÁİ]èEè‰D$‹E‰$èüÿÿÿ‰Eô‹Eİ@İEèßéİØ—À„Àt‹EÙèÙàİé@  €}ä tf‹E‹H(‹Uô‰ĞÁàĞÁàİ@‹Eİ‹E‹H(‹Uô‰ĞÁàĞÁà‹‹E‰P‹E‹H(‹Uô‰ĞÁàĞÁà‹@DƒøÂ‹EˆP$éÔ   ‹E‹H(‹Uô‰ĞÁàĞÁà‰Eğ‹E¶@,„Àt‹Eğ‰D$‹E‰$èüÿÿÿë(‹E‹ ƒÀ‹‹Eğ‰D$‹E‰$ÿÒ‹Eğ‹@DP‹Eğ‰PD‹Eğİ@‹Eİ‹Eğ‹‹E‰P‹EH‹Eğ‹P,‰T$‹P0‰T$‹P4‰T$‹@8‰D$‰$èüÿÿÿ‹Eğİ@<‹EİX‹E‹H(‹Uô‰ĞÁàĞÁà‹@DƒøÂ‹EˆP$‹Eİ ÉÃU‰åƒì‹Eİ@ÙèŞÁ‹EİÇEüÿÿÿÿÇEø    ëQ‹E‹H(‹Uø‰ĞÁàĞÁàİ@‹Eİ ßéİØ—À„Àt$‹E‹H(‹Uø‰ĞÁàĞÁàİ@‹Eİ‹Eø‰EüƒEø‹E‹@;EøŸÀ„ÀuŸ‹EüÉÃU‰åƒì(‹E‹‹E‹@‰Ñ)Á‰È‰Eğ‹E‹H@‹Uğ‰ĞÁàĞÁà‰Eì‹E‹@D‹UğÁâĞ‹ ‰Eè‹Eè‰$èüÿÿÿ‰Eôƒ}ô …   ‹E‹ ƒÀ‹‹Eì‰D$‹E‰$ÿÒ‹Eì‹@DP‹Eì‰PD‹Eè‰$èüÿÿÿ‹Eì‰D$‹Eè‰D$‹E‰$èüÿÿÿ‹Eè‰$èüÿÿÿ‹Eè‰$èüÿÿÿ‰Eôƒ}ô u$ÇD$à  ÇD$¨  ÇD$    Ç$M  èüÿÿÿÇD$H   ‹Eô‰D$‹E‰$èüÿÿÿÉÃU‰åWVSì  ‹E‹@Dƒø   Ç$H   èüÿÿÿ‰Æ‰µÿÿÿ‹ÿÿÿ¸    º   ‰ß‰Ñó«‹…ÿÿÿ‰$èüÿÿÿ‰uàƒ}à u$ÇD$   ÇD$µ  ÇD$    Ç$M  èüÿÿÿÇD$H   ‹E‰D$‹Eà‰$èüÿÿÿ‹Eà‰D$ÇD$O  ‹E‰$èüÿÿÿé‡  ‹EX,•Xÿÿÿ‹E‹H‰L$‹H ‰L$‹H$‰L$‹@(‰D$‰\$‰$èüÿÿÿƒì…Xÿÿÿ‰$èüÿÿÿİ]˜‹EX,•8ÿÿÿ‹E‹H‰L$‹H ‰L$‹H$‰L$‹@(‰D$‰\$‰$èüÿÿÿƒì…HÿÿÿİE˜İ\$•8ÿÿÿ‰T$‰$èüÿÿÿƒì‹Eİ@8ÜM˜İ$èüÿÿÿİ]Ğ‹Eİ@‹Eİ@Şéİ]Ùîİ]È‹Eİ@<İEĞÙÉßéİØ—À„Àt‹EİEĞİX<Ùîİ]Èë,‹Eİ@<İ]ĞİEĞÜMĞ‹Eİ@8Şùİ]ˆİE˜Üeˆİ]€İE€ÜuĞİ]È‹Eİ@8‹Eİ@0ŞÉİxÿÿÿÙèİ]À‹Eİ@İ]¸‹E‹P‰•(ÿÿÿ‹P ‰•,ÿÿÿ‹P$‰•0ÿÿÿ‹@(‰…4ÿÿÿÙîİ]°ÆEç éé  Ç$H   èüÿÿÿ‰Æ‰µ ÿÿÿ‹ ÿÿÿ¸    º   ‰ß‰Ñó«‹… ÿÿÿ‰$èüÿÿÿ‰uÜ‹E‹PD‹EÜ‰PDƒ}Ü u$ÇD$   ÇD$ò  ÇD$    Ç$M  èüÿÿÿİEÀÙèßéİØz\İEÀÙèßéİØuQİEĞÜ¥xÿÿÿİE°ÙÉßéİØ—À„Àt‹Eİ@0İ] İE°Ü…xÿÿÿİ]¨é‘   İEĞÜe°‹Eİ@8Şùİ] İEĞİ]¨Ùîİ]ÀësİEÀÙèÙàßéİØzSİEÀÙèÙàßéİØuFİE°İ…xÿÿÿÙÉßéİØ—À„Àt‹Eİ@0İ] İE°Ü¥xÿÿÿİ]¨ë,‹Eİ@8İE°Şñİ] Ùîİ]¨ÆEçëİE°İ]¨İEÈİ] ÙèÙàİ]ÀİE¨ÜE°İ8  Şùİpÿÿÿİ…pÿÿÿÜM İhÿÿÿ‹E‹‹EÜ‰‹EÜİE¸İX‹EÜİ@ÜE ‹EÜİX€}ç t‹EÜİ@ÜE‹EÜİXë‹EÜİ@‹EÜİX‹EÜİ…pÿÿÿİX<‹EÜP‹…(ÿÿÿ‰D$‹…,ÿÿÿ‰D$‹…0ÿÿÿ‰D$‹…4ÿÿÿ‰D$‰$èüÿÿÿ…ÿÿÿİ…hÿÿÿİ\$•Hÿÿÿ‰T$‰$èüÿÿÿƒì…ÿÿÿ‹•ÿÿÿ‰T$‹•ÿÿÿ‰T$‹• ÿÿÿ‰T$‹•$ÿÿÿ‰T$•(ÿÿÿ‰T$‰$èüÿÿÿƒì‹EÜP,‹…ÿÿÿ‰D$‹…ÿÿÿ‰D$‹…ÿÿÿ‰D$‹…ÿÿÿ‰D$‰$èüÿÿÿ‹EÜ‰D$ÇD$O  ‹E‰$èüÿÿÿ‹EÜİ@İ]¸İE¨İ]°‹EÜ‹P,‰T$‹P0‰T$‹P4‰T$‹@8‰D$…(ÿÿÿ‰$èüÿÿÿ¶Eçƒğ„À…ıÿÿ‹EİE¸İXİE¸Üe‹EİXeôƒÄ [^_]ÃU‰åƒìÇD$`  ÇD$;  ÇD$    Ç$/   èüÿÿÿU‰åƒìƒ}u2}ÿÿ  u)Ç$    èüÿÿÿ¸    ÇD$    ÇD$    ‰$èüÿÿÿÉÃU‰åƒìÇD$ÿÿ  Ç$   è¦ÿÿÿÉÃ%RU   :;I  $ >  $ >  9:;   :;   :;  9 :;  	<  
+:;   :;‡@I?2<  .?:;<   I4  .?:;<  4 :;I<  :;   :;I8
+   I   :;I  :;  :;   :;I   :;I8
+  I  ! I/  & I   I  .?:;I<   I     . ?:;I<   .?:;I<  !:;  ".?:;‡@I<  #.?:;‡@I<  $9:;  %<  &/ I  '<  (: :;  ):;  *. ?:;I<  +   ,G:;  - :;‡@I?<  . :;  /:;  0(   1 :;I8
+  2:;  3 :;I8
+2  4.?:;<  5.?:;‡@I<  6.?:;‡@<  7.?:;‡@I<  8.?4<  9.?:;‡@<  : I  ;:;  < I8
+4  =.?4<  >.?:;L<  ?.?:;‡@LM
+<  @.?:;‡@LM
+2<  A.?:;‡@2<  B.?:;‡@I2<  C.?:;‡@2<  D.?:;‡@I2<  EI  F.G   G I4  H :;I  I.1@  J 1
+  K.G@  L I4
+  M :;I
+  N.G:;   O :;I  P  Q4 I4
+  R  S4 1  T.G:;@  UU  V :;I
+  W4 :;I
+  X4 :;I
+  Y  Z :;I
+  [ :;I
+  \4 :;I
+  ]4 :;I
+  ^.4@  _. 4@  `4 :;I?<  a4 I?4<  b4 G
+  c4 G  d4 G  e4 G  f4 G   C+       v
+  Ì  '          ¨       ’  •4   int &  ÓF   i  std  Õ  3)   4;   C!  ½  C  [  ‘y  ’¨  “Å  ”í  •
+  –(  —F  ˜^  ™l  š”  ›»  œŞ    (   @  ¢c  £  ¤  ¦À  ©â  ¬	  ®+  °H  ²e  ³  ´©  µÅ  ¶á  ·ı  ¸	  ¹ñ	  º	
+  »*
+  ¼K
+  ½l
+  ¾™
+  ¿µ
+  Áß
+  Ã  Ä%  ÅN  Æw  Ç˜  È°  ÉÒ  Êô  Ë  Ì8  ÍQ  Îj  ÏŠ  Ğ«  ÑË  Òì  
+  ³  Ü     174  8‘  9­  	g  —  
+]  ”  Î        -  ]  ~  ç   á  ç  4      	Nø  	Oí  	P½  	X  	a*  	dF  	e]    I:   ö  ”
+–  ©  
+4   # Ô  
+‡  #¨  
+‡  #ó  
+‡  #Å  
+‡  #ş  
+‡  #[  
+‡  #  
+‡  #§   
+‡  # ’  
+‡  #$I  
+‡  #(r  
+ ‡  #,+  
+"w  #0“  
+$}  #4  
+&4   #8à  
+*4   #<è  
+,Ö  #@  
+0,  #D!  
+1  #F6   
+2ƒ  #G˜  
+6“  #HÀ  
+?á  #Lf  
+Hì  #T‚  
+Iì  #Xx  
+Jì  #\!  
+Kì  #`  
+L;   #d„  
+N4   #h  
+P™  #l ‹  AÕ  <  (¬  ³  ¶  0  µ  `F   Tç    Wô  (	  YF   ü  ]     U4   # Ä  ^Õ  # ¶  !  F    Ÿ  jÉ  u  4   >  ¶  p  _½  [  4    „
+  ç½  s  s   –    ›  ›  ›  4   s   ¡  Ñ  ¥  õ½  Å  ¡  s   6  4   â  â  s   è  ¡  ?  I4   
+  s  4    T  P4   (  s  â     y4   F  s  â     è½  ^  s     î½  „  v;     8  ;      !     k;   »  ›  8  ;      ã	  g4   Ó  Ó   Ù  !  P	  –;     ›    ;      8  á  ö½  (  ¡  s   .  ü½  @  ¡   Ä  Z4   c  ›  ;   â   Š  ƒ4     â  â     ½    ½  s     b4   À  s  â  ¡   .  ¯4   â  s  â  ¡   Î  o4   	  ›  ;   â  ¡   A  »4   +  â  â  ¡   v  j4   H  â  ¡   ê  ·4   e  â  ¡   ø  p;   ‡  ‡  ¡     ¶   B  ˜›  ©  ›  â    Z   4   Å  â  â    å  ½4   á  â  â    Í  ›  ı  ›  â    «  ù;   	  â  â   ³  U;   @	  ›  ;   â  @	   F	  K	  !tm ,†ñ	  ˆ  ‡4   # Z  ˆ4   #¼  ‰4   #5  Š4   #9  ‹4   #Ä  Œ4   #Ø  4   #Õ  4   #ó  4   # o  ’G  #$o  “8  #(   ;   	
+  â    a  ››  *
+  ›  â  ;     e  £4   K
+  â  â  ;       “›  l
+  ›  â  ;    Ë	  œ;   “
+  ‡  “
+  ;      â   ’	  ı;   µ
+  â  â   K  ÀÒ
+  Ò
+  â  Ù
+   S  ›  ‹	  Çü
+  ü
+  â  Ù
+   ¦  a  ›  %  ›  â  Ù
+   h  ÒG  G  â  Ù
+  4       _	  ×p  p  â  Ù
+  4    …   .   Á;   ˜  ›  â  ;    i  c4   °  ½   B  B4   Ò  â  â  ;    ó  G›  ô  ›  â  ;    e  L›    ›  â  ;    Œ  P›  8  ›  ¡  ;    ¸  W4   Q  â   ş  €4   j  â   "ƒ  İı  â  Š  â  ¡   #R  @   â  «  â  â   "®  ç¢  â  Ë  â  ¡   #8  J  â  ì  â  â   #á  9  â    â  ¡  ;    $‡  ò  ù  ³  Ü  ';   ()   %  V  &¸  4    %š  j  &¸  p   %‡  ~  &¸  ¶   '‚  &¸        É¬  ¬  â  Ù
+   ë	  ˜  áÕ  Õ  â  Ù
+  4    Õ	  O
+  èş  ş  â  Ù
+  4    ,  ©  W  ò  $û  8-  (9   X
+  )Ô  87‘     :‡  #   ;‡  #ê  A‡  #A  G‡  #ˆ  H‡  #c  I‡  #c  J‡  #B
+  K‡  #¼  L‡  # §  M‡  #$(  N¶  #(R  O¶  #)h
+  Q¶  #*  S¶  #+ß  U¶  #,µ  W¶  #-K  ^¶  #.’  _¶  #/   b¶  #0Ê  d¶  #1E  f¶  #2  h¶  #3—  o¶  #4p  p¶  #5  ”  }‡  ­  4   8   *€  €º  4  ³   )4   -  8Õ    G  W  Ë  +¶  ş  F   # ¶    F    ¶    F    ÿ   4   ,B  6ƒ  &¸  4   -«  8u  3  -W  9Q  3  -š  =I  ƒ  -Q  >©
+  3   -  ,V  6â  &¸  p  -«  8@  â  -W  9)  â  -š  =ò  ƒ  -Q  >  3   p  :    5p  q	  »  	  À   µ  °4   *  ½  í    Q  Ş½  F  ½  ø    Æ  Ûø  ]  8    á  ¬í  t  8   ,j  6Î  &¸  ¶  -«  8@  >  -W  9Ô  >  -š  =¬  ƒ  -Q  >±  3   ,~  6(  &¸    -«  8)  (  -W  9™	  (  -š  =Ş
+  ƒ  -Q  >  3     .X   
+´)q  
+ºk  "  
+»k  # Ê  
+¼q  ##  
+À4   # 4  Õ  4  Õ  ¶  “  F     -  ¶  ©  F   ' /Ğ  ,Î  0{  0m   0=  0    )¿    1key ‡  # ò  ì  #v    # Î  2  Ò  3°  --  # 3“  .4   #3Ù  /Ò  #3|  0Ò  #4  l  Ø  -   4  †  Ø  4    5get   ì  §  Ø  ‡   5set ¦  4   Í  Ø  ‡  ì   "[  é  4   î  Ø  ‡   "`  0  G    Ø  ‡   "   ½  Ò
+  0  Ø  ‡   "  !ë  ‡  Q  Ø  ‡   " 
+  $”   ‡  m  Ø   "ø   %f  ì  ‰  Ø   6v  &s  ¡  Ø   6	  )˜  ¹  Ø   7±  *(  4   Ø    Î    J  Ò
+  C  p  2  j  1x_ ;Ò
+  # 1y_ <Ò
+  #4  8  j  Ò
+  Ò
+   "‹  c   Ò
+  T  j   6/  ¶  q  j  ô   6ó  "ı    j  ô   6]
+  %Á  «  j  ô   6Ö  (Ç  È  j  Ò
+   "ó  +  4   é  j  ô   "•
+  .7  ô  
+  j  ô   "Ÿ
+  1ğ  ô  +  j  ô   "‹
+  4I   ô  L  j  Ò
+   7g	  7%  ô  j  Ò
+    ô  )[  H@ü  1id_ Aé  # ß  BŞ  #Õ  CŞ  #¾  DŞ  #^  Eô  #  Fô  #,J  GÒ
+  #<  HG  #D8[  Á    )O  (LO  i  MŞ  # 1id_ Né  #  Oô  #J  PÒ
+  #5  Q-  #$ /  Th  04  0    2)   [r  3C  kO  # 34  lr  #4)   ]«  x  ‡   4    ^Å  x  4    6(  _Ö   â  x  ~   6	  `½   ÿ  x  ~   "º  a2
+  Ò
+    x   "¿  bG  Ò
+  7  x   "Ú  d»  -  X  x  ~   9´  h
+  x  ~    Ò
+  h  :ô  /9  oÁ  0  0<   0ç  0M  0¬  0  0w  0Õ   p  ;)  L|Ç  Î  <ú  Ù  # 3C  ±„  #3ß  ´Ş  #3§  µŞ  #3m  ¶é  #3©  ·4   #3í  ¸x  # 3  »Ø  #$3‰  ¾Á  #(3=  Á-  #,3„	  ÂŞ  #03  ÃÒ
+  #83†  ÆÁ  #@3†   Éé  #D3È  Ë-  #H=)  Î  ï  õ   4)  pâ  ï   >‘  †Ç    ï  4    "¤  ½â  „    ï   "H	  Ãï  Á  >  ï  é   "y  †  Á  Z  ï   5get –Ù  ‡  {  ï  ‡   "[  ›æ  4   œ  ï  ‡   "`   o  G  ½  ï  ‡   "  ¥r  Ò
+  Ş  ï  ‡   5set «Í  4     ï  ‡  ‡   6[  ²œ  !  ï      6  Ì÷  9  ï   ?“  Š  Ç  x  ï  Ş  Ş  é  4   x  -   #Ì  V'  Ş  Ÿ  ï    -   6n  ŸÆ  ·  ï   @é  8.	  Ç  Ş  ï  Á   A]  ’  ı  ï  Á   A¬  ¯÷	  !  ï  Ø  Á   Aİ  3İ  ;  ï   A  F  _  ï  Á  4    B·  Å  4   ‚  ï     CË  Ûí  ¥  ï  ‡     D`  ê   Ò
+  ï  ©  Ò
+  Ò
+    E4   Ù   ß    Î  Ø  Ç  :û  Ç  Ç  ü  :Ş  :©  F  ?  G  ?  Hx Ò
+  Hy Ò
+   j  I      1       r  J"  ‘ J,  ‘pJ5  ‘h K8      ,   8   •  L  ?  ‘  KT         p   Ä  L  ?  ‘ Mv ô  ‘ Ké      ;   ¨   ó  L  ?  ‘Mv .ô  ‘ K
+      ;   à   "  L  ?  ‘Mv 1ô  ‘ K+      C     Q  L  ?  ‘Mf 4Ò
+  ‘h KL      C   P  €  L  ?  ‘Mf 7Ò
+  ‘h N’   ´  G  ´  O{	  ‡  PQ	  É  !    x  ¶  É  F    ¹  I€      ­   ˆ    JŒ  ‘ J–  ‘R   «   S¢  ×    N«    (  G  ´  G  3   I  ®   Î   À  F  J  ‘  TÅ  'Î   M  ø    L  ´  ‘ Mv '  ‘U    Q	  ¢      ~  ¶  ¢  F    ’  Tâ  1N  ±  <  î  L  ´  ‘ Mv 1î  ‘U   Q	     è    ~  ¶     F    ó  Tÿ  ;²  ï  €  C   L  ´  ‘ U0   Q	  C   Ô      T  Eğ  0  Ä  ƒ   L  ´  ‘ UH   Q	  ƒ   À      T7  O0  Ğ    Ó   L  ´  ‘ Mp OÓ   ‘R6  Î  Q	  Ø   ¥    ~  ó  TX  ^Ğ  ´  @  (!  L  ´  ‘ Mp ^(!  ‘RÖ  ²  Q	  =!  €    ~  ¶  =!  F   $ -!  FÎ   i!  G  i!  PQ	  ~!  b    ï  ¶  ~!  F    n!  IB!  ´  ˜  x  °!  JL!  ‘ U`   SW!      Fâ   á!  G  i!  G  3  PQ	  á!  J    ş  I°!  ˜  I  ¼  "  Jº!  ‘ RŸ  ,  SÏ!  ü    I°!  J  h  ô  5"  Jº!  ‘  KZ  h  …  ,  f"  L  i!  ‘ Mkey –‡  ‘ K{  †  £  d  —"  L  i!  ‘ Mkey ›‡  ‘ Kœ  ¤  Á  œ  È"  L  i!  ‘ Mkey  ‡  ‘ K½  Â  ß  Ô  ù"  L  i!  ‘ Mkey ¥‡  ‘ KŞ  à      N#  L  i!  ‘ Mkey «‡  ‘Vò  «‡  ‘Ræ    Wv ­‡  ‘l  K      D  ¥#  L  i!  ‘ Vˆ  ²   ‘R  }  Wkey ´‡  ‘lXò  ´‡  ‘h  K  €  ‹  |  È#  L  i!  ‘  K  Œ  ß  ´  ø#  L  i!  ‘ Mid Ãé  ‘ K!  à  `  ì  A$  L  i!  ‘ Ræ  ^  Wkey Ñ‡  ‘lXò  Ñ‡  ‘h  K‚  `    $  š$  L  i!  ‘ V|  Û‡  ‘V¤  Ûš$  ‘Rf  ÿ  Q	  ¯$         ¶  ¯$  F   ) Ÿ$  K¥    Ú  \  k%  L  i!  ‘ V¤  ê©  ‘V…  êÒ
+  ‘HVŒ  êÒ
+  ‘@R   Ø  Q	  {%  à  Y4  †  C%  Wmin ïÒ
+  ‘hWmax ïÒ
+  ‘` RŒ  ´  Xø  ùÒ
+  ‘XXw   úÒ
+  ‘P   ¶  {%  F   7 k%  Nì  @—%  G  —%   Á  I€%      <   ”  º%  JŒ%  ‘  K9  Ú  !  Ì  P&  L  i!  ‘ Z  Ş  ‘XZô  Ş  ‘PZ  é  ‘Z  4   ‘ZZ	  	x  ‘[cp 
+-  ‘LR	    Q	  `&  €    ¶  `&  F   Q P&  K!  "  2    ±&  L  i!  ‘ Ux   Q	  ±&  J  U   \i @4   ‘\   ó  K;  2  L  <  '  L  i!  ‘ Zò   FÁ  ‘Z  F4   ‘R8  J  \i H4   ‘t  Kx  L    t   '  L  i!  ‘ Z  V  ‘Zè  V-  ‘\RX    Q	   '     ]ê  ZŞ  ‘`]¬  \4   ‘lRD    ]æ  iÁ  ‘h   Ÿ$  K_     «  ¬  (  L  i!  ‘ Z„  (  ‘R&  ©  ]   „4   ‘tR<  ¦  \i †4   ‘p     KŞ  ¬  µ  ä  ‘(  L  i!  ‘ Zæ  Á  ‘R²  ³  ]{  “4   ‘h\sn ”Á  ‘d]7  ˜Ø  ‘`\n ™Á  ‘lQ	  ¡(  à    ¶  ¡(  F   & ‘(  Kı  ¶      G*  L  i!  ‘ Z7  ¯Ø  ‘[sn ¯Á  ‘RÂ  ö  Q	  W*     \d ¾Ò
+  ‘\v Áô  ‘À~]&  ÄÒ
+  ‘H]ü  ÇŞ  ‘ˆ]   ÊŞ  ‘@]b  İÒ
+  ‘ğ~]€   ãÒ
+  ‘¸]Ã  æŞ  ‘°\pos éô  ‘ ~]¦  ìÒ
+  ‘¨]0  î-  ‘_YÑ  o  Â)  \n ´Á  ‘X Yf  ’  î)  \d1 ÕÒ
+  ‘€\d2 ×Ò
+  ‘ø~ Ré  Ò  \n ğÁ  ‘T](
+  ôÒ
+  ‘ ]  õÒ
+  ‘è~]  öŞ  ‘˜]è  øÒ
+  ‘à~   ¶  W*  F   * G*  K·    ,  T  ¨*  L  i!  ‘ Zæ  8Á  ‘R  ,  Q	  ¨*  `    î  ^=  ,  l  €  â*  ZW  <4   ‘ Z  <4   ‘ _Z  l  ˆ  ¸  `2  ¦q  aY  ì  bÈ      c>  €€€€xdO  ÿÿÿeĞ   eš  cã  €€~fô  ÿ F      û      /usr/include/c++/4.5 /usr/lib/i386-linux-gnu/gcc/i686-linux-gnu/4.5.2/include /usr/include/c++/4.5/bits /usr/include /usr/include/c++/4.5/ext /usr/include/c++/4.5/debug /usr/include/bits /usr/include/c++/4.5/i686-linux-gnu/bits  model.h    model.cc    iostream   stddef.h   cstddef   cwchar   clocale   ios_base.h   cwctype   libio.h   stdio.h   stdarg.h   wcha

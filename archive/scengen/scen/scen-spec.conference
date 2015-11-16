@@ -1,0 +1,15 @@
+str((currTime-startTime))+";"+str(hopNeighbors) + ";" +str(hopTraff)+";"+str(trafficFromMe[0])+";"+str(trafficToMe[0]) + ";" +str(attackRunning)
+        outStr = outStr.replace("(", " pl ")
+        outStr = outStr.replace(")", " pr ")
+        outStr = outStr.replace("{", " bl ")
+        outStr = outStr.replace("}", " br ")
+        outStr = outStr.replace(";", " sep ")
+        #print "wrting",outStr
+        commands.getoutput("echo "+outStr + " >> /tmp/traff`hostname`.txt")
+    
+
+def getAttackRunning():
+    global attackRunning
+    attackRunning = commands.getoutput("cat /tmp/attack.txt")
+    if "No such file or directory" in attackRunning:
+        attackRunn

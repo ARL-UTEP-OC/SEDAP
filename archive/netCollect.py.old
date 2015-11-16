@@ -1,0 +1,245 @@
+#!/usr/bin/python
+import time
+import thread
+import sys
+import commands
+
+myIPs = sys.argv[1:]
+startTime=int(commands.getoutput("date +%s"))
+prevTime=startTime
+
+lines = []
+currTime = 0
+allTraff = 0
+tcp = 0
+udp = 0
+tcpolsr = 0
+ospf = 0
+udpolsr = 0
+ospf = 0
+dataSeen = False
+trafficFromMe = (0,0,0,0,0,0)
+trafficToMe = (0,0,0,0,0,0)
+attackRunning = "none"
+
+routes = {}
+hopNeighbors = {}
+hopTraff = {}
+#will hold hop/(ip,traff)
+maxHopTraff = {}
+
+def processLines():
+    global currTime
+    global hopNeighbors
+    global hopTraff
+    global trafficFromMe
+    global trafficToMe
+    global lines
+    global hopTraff
+    global hopNeighbors
+    global maxHopTraff
+    global dataSeen
+    global attackRunning
+
+    #print "Lines",lines
+    getRoutes()
+    getTraffTypeCounts()
+    writeMaxHopTraffic()
+    getAttackRunning()
+    writeDataExists()
+    print str((currTime-startTime))+";"+str(hopNeighbors) + ";" +str(hopTraff)+";"+str(trafficFromMe[0])+";"+str(trafficToMe[0]) + ";" +str(attackRunning)
+    #print "Lines",lines
+
+    lines = []
+    hopTraff= {}
+    hopNeighbors = {}
+    maxHopTraff = {}
+    dataSeen = False
+    trafficToMe = (0,0,0,0,0,0)
+    trafficFromMe =(0,0,0,0,0,0)
+    attackRunning = "none"
+
+def getRoutes():
+    global hopTraff
+    global routes
+    global hopNeighbors
+    global maxHopTraff
+    routes = commands.getoutput("route -n | awk 'NR>2 {print $1\",\"$2\",\"$5}'").split("\n")
+    #looks like: ROUTES ['10.0.2.0,*,1', 'link-local,*,1000', 'default,10.0.2.2,0']
+    ipHopDict = {}
+    for routeLine in routes:
+        splitLine = routeLine.split(",")
+        #if hop exists
+        if splitLine[2] in hopNeighbors:
+            #if ip does not exist in hop
+            if splitLine[0] not in hopNeighbors[splitLine[2]]:
+                 hopNeighbors[splitLine[2]][splitLine[0]] = (0,0,0,0,0,0,0,0,0,0,0,0,0,0)
+        else:
+            hopNeighbors[splitLine[2]] = {splitLine[0]: (0,0,0,0,0,0,0,0,0,0,0,0,0,0)}
+            maxHopTraff[splitLine[2]] = ("",-1)
+        if splitLine[0] not in ipHopDict:
+            ipHopDict[splitLine[0]] = splitLine[2]
+    routes = ipHopDict
+    #print "hopNeighbors",hopNeighbors
+    #print "ROUTES",routes
+    sys.stdout.flush()
+    
+def getTraffTypeCounts():
+    global lines
+    global currTime
+    global allTraff
+    global tcp
+    global udp
+    global tcpolsr
+    global ospf
+    global udpolsr
+    global ospf
+    global dataSeen
+    global hopNeighbors
+    global hopTraff
+    #will hold hop/(ip,traff)
+    global maxHopTraff
+    global trafficToMe
+    global trafficFromMe
+    
+    srcIP = ""
+    dstIP = ""
+
+    for line in lines:
+        #print "LINE",line
+        allTraff = 0
+        tcp = 0
+        udp = 0
+        tcpolsr = 0
+        ospf = 0
+        udpolsr = 0
+        ospf = 0
+
+        #split the line by comma
+        splitLine = line.split(",")
+#        currTime = splitLine[0]
+#        frameLen = splitLine[1]
+#       instead count number of packets:
+        frameLen = 1
+        srcIP = splitLine[3]
+        dstIP = splitLine[4]
+        if srcIP == "":
+            srcIP = splitLine[5]
+        if dstIP == "":
+            dstIP = splitLine[6]
+        #now count traffic types:
+        allTraff = int(frameLen)
+        if "tcp" in splitLine[2]:
+            if "olsr" in splitLine[2]:
+                tcpolsr = int(frameLen)
+            else:
+                tcp = int(frameLen)
+        if "udp" in splitLine[2]:
+            if "olsr" in splitLine[2]:
+                udpolsr = int(frameLen)
+            else:
+                udp = int(frameLen)
+        if "ospf" in splitLine[2]:
+                ospf = int(frameLen)        
+
+        #now update the hopNeighbors, hopTraff, and maxHopTraff
+        fromExists = 0
+        toExists = 0
+        if srcIP != "" and dstIP != "":
+            #if it's my traffic, keep it in a special spot:
+            if srcIP in myIPs or dstIP in myIPs:
+                if srcIP in myIPs:
+                    trafficFromMe = (trafficFromMe[0]+allTraff,trafficFromMe[1]+tcp,trafficFromMe[2]+tcpolsr,trafficFromMe[3]+ospf,trafficFromMe[4]+udp,trafficFromMe[5]+udpolsr)
+                if dstIP in myIPs:
+                    trafficToMe = (trafficToMe[0]+allTraff,trafficToMe[1]+tcp,trafficToMe[2]+tcpolsr,trafficToMe[3]+ospf,trafficToMe[4]+udp,trafficToMe[5]+udpolsr)
+            else:
+                #mark whether there was data seen:
+                if tcp > 0 or udp > 0:
+                    dataSeen = True
+                for hop in hopNeighbors:
+                    #check the from address and update accordingly
+                    #print "hopNeighbors",hopNeighbors
+                    if srcIP in hopNeighbors[hop]:
+                        hopNeighbors[hop][srcIP] = (hopNeighbors[hop][srcIP][0]+allTraff,hopNeighbors[hop][srcIP][1]+tcp,hopNeighbors[hop][srcIP][2]+tcpolsr,hopNeighbors[hop][srcIP][3]+ospf,hopNeighbors[hop][srcIP][4]+udp,hopNeighbors[hop][srcIP][5]+udpolsr,hopNeighbors[hop][srcIP][6]+ospf,int(hopNeighbors[hop][srcIP][7]),int(hopNeighbors[hop][srcIP][8]),int(hopNeighbors[hop][srcIP][9]),int(hopNeighbors[hop][srcIP][10]),int(hopNeighbors[hop][srcIP][11]),int(hopNeighbors[hop][srcIP][12]),int(hopNeighbors[hop][srcIP][13]))
+                        fromExists = 1
+                    if dstIP in hopNeighbors[hop]:
+                        hopNeighbors[hop][dstIP] = (int(hopNeighbors[hop][dstIP][0]),int(hopNeighbors[hop][dstIP][1]),int(hopNeighbors[hop][dstIP][2]),int(hopNeighbors[hop][dstIP][3]),int(hopNeighbors[hop][dstIP][4]),int(hopNeighbors[hop][dstIP][5]),int(hopNeighbors[hop][dstIP][6]),hopNeighbors[hop][dstIP][7]+allTraff,hopNeighbors[hop][dstIP][8]+tcp,hopNeighbors[hop][dstIP][9]+tcpolsr,hopNeighbors[hop][dstIP][10]+ospf,hopNeighbors[hop][dstIP][11]+udp,hopNeighbors[hop][dstIP][12]+udpolsr,hopNeighbors[hop][dstIP][13]+ospf)
+                        #check if this is the new max for the hop:
+                        if hop != "*" and hopNeighbors[hop][dstIP][0] > maxHopTraff[hop][1]:
+                            maxHopTraff[hop] = (dstIP,hopNeighbors[hop][dstIP][0])
+                        toExists = 1                                   
+                if fromExists == 0:
+                #will create a hop called * for the ip, since its not in any hop
+                    if "*" not in hopNeighbors:
+                        hopNeighbors["*"] = {srcIP : (allTraff,tcp,tcpolsr,ospf,udp,udpolsr,ospf,0,0,0,0,0,0,0)}
+                    else:  
+                        hopNeighbors["*"][srcIP] = (allTraff,tcp,tcpolsr,ospf,udp,udpolsr,ospf,0,0,0,0,0,0,0)
+                if toExists == 0:
+                    if "*" not in hopNeighbors:
+                        hopNeighbors["*"] = {dstIP : (allTraff,tcp,tcpolsr,ospf,udp,udpolsr,ospf,0,0,0,0,0,0,0)}            
+                    else:  
+                        hopNeighbors["*"][dstIP] = (allTraff,tcp,tcpolsr,ospf,udp,udpolsr,ospf,0,0,0,0,0,0,0)        
+                #now update the from/to hop traffic
+                if srcIP in routes: 
+                    hopTraffKey = "" + routes[srcIP] + "_"
+                else:
+                    hopTraffKey = "*_"
+                if dstIP in routes:
+                    hopTraffKey += routes[dstIP]
+                else:
+                    hopTraffKey += "*" 
+                if hopTraffKey in hopTraff:
+                    hopTraff[hopTraffKey] = (hopTraff[hopTraffKey][0]+allTraff,hopTraff[hopTraffKey][1]+tcp,hopTraff[hopTraffKey][2]+tcpolsr,hopTraff[hopTraffKey][3]+ospf,hopTraff[hopTraffKey][4]+udp,hopTraff[hopTraffKey][5]+udpolsr,hopTraff[hopTraffKey][6]+ospf)
+                else: 
+                    hopTraff[hopTraffKey] = (allTraff,tcp,tcpolsr,ospf,udp,udpolsr,ospf)
+                #print maxHopTraff
+
+def writeMaxHopTraffic():
+    commands.getoutput("rm /tmp/max`hostname`_*" +".txt")
+    for hop in maxHopTraff:
+        commands.getoutput("echo "+str(maxHopTraff[hop][0]) + " > /tmp/max`hostname`_" + str(hop) +".txt")
+
+def writeDataExists():
+    global currTime
+    global hopNeighbors
+    global hopTraff
+    global trafficFromMe
+    global trafficToMe
+    global lines
+    global hopTraff
+    global hopNeighbors
+    global maxHopTraff
+    global dataSeen
+    global attackRunning
+    if dataSeen:
+        outStr =str((currTime-startTime))+";"+str(hopNeighbors) + ";" +str(hopTraff)+";"+str(trafficFromMe[0])+";"+str(trafficToMe[0]) + ";" +str(attackRunning)
+        outStr = outStr.replace("(", " pl ")
+        outStr = outStr.replace(")", " pr ")
+        outStr = outStr.replace("{", " bl ")
+        outStr = outStr.replace("}", " br ")
+        outStr = outStr.replace(";", " sep ")
+        #print "wrting",outStr
+        commands.getoutput("echo "+outStr + " >> /tmp/traff`hostname`.txt")
+    
+
+def getAttackRunning():
+    global attackRunning
+    attackRunning = commands.getoutput("cat /tmp/attack.txt")
+    if "No such file or directory" in attackRunning:
+        attackRunning = "none"
+     
+
+while 1:
+    line = sys.stdin.readline()
+
+    currTime = int(line.split(",")[0].split(".")[0])
+#        currTime=int(commands.getoutput("date +%s"))
+    if currTime >= prevTime + 1:
+#        print "CurrTime",currTime
+        prevTime = currTime
+	processLines()
+    lines.append(line)
+#        time.sleep(0) #sleep for a specified amount of time.
+
+
+

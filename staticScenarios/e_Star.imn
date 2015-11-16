@@ -1,0 +1,26 @@
+time;
+	}
+
+	/**
+	 * Prints the calculated metrics
+	 * 
+	 * @param metrics Array with the metric names
+	 * @param values 2D array of calculated values
+	 * @param stats PrintWriter
+	 */
+	protected static void printOverall(String[] metrics, String[][] values, PrintWriter stats) {
+		String temp;
+		for (int i = 0; i < metrics.length; i++) {
+			temp = String.format("%1$-" + 40 + "s", metrics[i]);
+			for (int j = 0; j < values.length; j++) {
+				if (i == 0 && (metrics.length != values[j].length)) {
+					System.err.println("Not the same number of metrics and metric value sets.");
+					return;
+				}
+				temp += String.format("%1$-" + 30 + "s", values[j][i]);
+			}
+			stats.println(temp);
+		}
+	}
+
+	prote

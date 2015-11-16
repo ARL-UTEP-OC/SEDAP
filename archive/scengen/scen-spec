@@ -1,0 +1,7 @@
+For compilation and excution of the program, see README for details. This
+document here describes how to add new models and how to modify existing
+model implementations.
+
+1. To Add a New Model
+
+Suppose you have new mobility model named "MyModel". There ar
