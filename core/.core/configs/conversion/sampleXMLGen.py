@@ -64,10 +64,18 @@ script_pauseXML = etree.SubElement(modelXML, "script_pause")
 
 script_stopXML = etree.SubElement(modelXML, "script_stop")
 
+#Network Plan's Nodes
+for i in range(1,numNodes+1):
+	NodeXML = etree.SubElement(NetworkPlanXML, "Node", id=str(i), name='n'+str(i), type='router')
+
+
+
 ###########
 MotionPlanXML = etree.SubElement(ScenarioXML, "MotionPlan") 
 ServicePlanXML = etree.SubElement(ScenarioXML, "ServicePlan") 
 CoreMetaDataXML = etree.SubElement(ScenarioXML, "CoreMetaData") 
+
+
 
 #output the xml tree	
 print etree.tostring(ScenarioXML,pretty_print='true')
