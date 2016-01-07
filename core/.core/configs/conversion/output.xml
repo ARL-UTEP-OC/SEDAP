@@ -1,0 +1,267 @@
+<Scenario>
+  <NetworkPlan>
+    <NetworkDefinition type="WlanNode" name="wlan11" id="11">
+      <model peer="n1" netif="eth0" name="netem">
+        <bw>54000000</bw>
+        <delay>50000</delay>
+      </model>
+      <model peer="n2" netif="eth0" name="netem">
+        <bw>54000000</bw>
+        <delay>50000</delay>
+      </model>
+      <model peer="n3" netif="eth0" name="netem">
+        <bw>54000000</bw>
+        <delay>50000</delay>
+      </model>
+      <model peer="n4" netif="eth0" name="netem">
+        <bw>54000000</bw>
+        <delay>50000</delay>
+      </model>
+      <model peer="n5" netif="eth0" name="netem">
+        <bw>54000000</bw>
+        <delay>50000</delay>
+      </model>
+      <model peer="n6" netif="eth0" name="netem">
+        <bw>54000000</bw>
+        <delay>50000</delay>
+      </model>
+      <model peer="n7" netif="eth0" name="netem">
+        <bw>54000000</bw>
+        <delay>50000</delay>
+      </model>
+      <model peer="n8" netif="eth0" name="netem">
+        <bw>54000000</bw>
+        <delay>50000</delay>
+      </model>
+      <model peer="n9" netif="eth0" name="netem">
+        <bw>54000000</bw>
+        <delay>50000</delay>
+      </model>
+      <model peer="n10" netif="eth0" name="netem">
+        <bw>54000000</bw>
+        <delay>50000</delay>
+      </model>
+      <model type="wireless" name="basic_range">
+        <range>176</range>
+        <bandwidth>54000000</bandwidth>
+        <jitter>0</jitter>
+        <delay>50000</delay>
+        <error>0</error>
+      </model>
+      <model type="mobility" name="ns2script">
+        <file>/root/IntelAttacker/staticScenarios/chainCoords.scen</file>
+        <refresh_ms>50</refresh_ms>
+        <loop>0</loop>
+        <autostart>1.0</autostart>
+        <map/>
+        <script_start/>
+        <script_pause/>
+        <script_stop/>
+      </model>
+    </NetworkDefinition>
+    <Node type="router" name="n1" id="1">
+      <interface net="wlan11" name="eth0">
+        <address type="mac">00:00:00:aa:00:1</address>
+        <address>10.0.0.1/32</address>
+        <address>a::1/128</address>
+      </interface>
+    </Node>
+    <Node type="router" name="n2" id="2">
+      <interface net="wlan11" name="eth0">
+        <address type="mac">00:00:00:aa:00:2</address>
+        <address>10.0.0.2/32</address>
+        <address>a::2/128</address>
+      </interface>
+    </Node>
+    <Node type="router" name="n3" id="3">
+      <interface net="wlan11" name="eth0">
+        <address type="mac">00:00:00:aa:00:3</address>
+        <address>10.0.0.3/32</address>
+        <address>a::3/128</address>
+      </interface>
+    </Node>
+    <Node type="router" name="n4" id="4">
+      <interface net="wlan11" name="eth0">
+        <address type="mac">00:00:00:aa:00:4</address>
+        <address>10.0.0.4/32</address>
+        <address>a::4/128</address>
+      </interface>
+    </Node>
+    <Node type="router" name="n5" id="5">
+      <interface net="wlan11" name="eth0">
+        <address type="mac">00:00:00:aa:00:5</address>
+        <address>10.0.0.5/32</address>
+        <address>a::5/128</address>
+      </interface>
+    </Node>
+    <Node type="router" name="n6" id="6">
+      <interface net="wlan11" name="eth0">
+        <address type="mac">00:00:00:aa:00:6</address>
+        <address>10.0.0.6/32</address>
+        <address>a::6/128</address>
+      </interface>
+    </Node>
+    <Node type="router" name="n7" id="7">
+      <interface net="wlan11" name="eth0">
+        <address type="mac">00:00:00:aa:00:7</address>
+        <address>10.0.0.7/32</address>
+        <address>a::7/128</address>
+      </interface>
+    </Node>
+    <Node type="router" name="n8" id="8">
+      <interface net="wlan11" name="eth0">
+        <address type="mac">00:00:00:aa:00:8</address>
+        <address>10.0.0.8/32</address>
+        <address>a::8/128</address>
+      </interface>
+    </Node>
+    <Node type="router" name="n9" id="9">
+      <interface net="wlan11" name="eth0">
+        <address type="mac">00:00:00:aa:00:9</address>
+        <address>10.0.0.9/32</address>
+        <address>a::9/128</address>
+      </interface>
+    </Node>
+    <Node type="router" name="n10" id="10">
+      <interface net="wlan11" name="eth0">
+        <address type="mac">00:00:00:aa:00:10</address>
+        <address>10.0.0.10/32</address>
+        <address>a::10/128</address>
+      </interface>
+    </Node>
+  </NetworkPlan>
+  <MotionPlan>
+    <origin lat="47.5791667" alt="2.0" scale100="150.0" lon="-122.132322"/>
+    <Node name="wlan11">
+      <motion type="stationary">
+        <point>0,0</point>
+      </motion>
+    </Node>
+    <Node name="n1">
+      <motion type="stationary">
+        <point>224.0,113.0
+</point>
+      </motion>
+    </Node>
+    <Node name="n2">
+      <motion type="stationary">
+        <point>364.0,58.0
+</point>
+      </motion>
+    </Node>
+    <Node name="n3">
+      <motion type="stationary">
+        <point>503.0,72.0
+</point>
+      </motion>
+    </Node>
+    <Node name="n4">
+      <motion type="stationary">
+        <point>622.0,161.0
+</point>
+      </motion>
+    </Node>
+    <Node name="n5">
+      <motion type="stationary">
+        <point>685.0,269.0
+</point>
+      </motion>
+    </Node>
+    <Node name="n6">
+      <motion type="stationary">
+        <point>638.0,393.0
+</point>
+      </motion>
+    </Node>
+    <Node name="n7">
+      <motion type="stationary">
+        <point>552.0,466.0
+</point>
+      </motion>
+    </Node>
+    <Node name="n8">
+      <motion type="stationary">
+        <point>436.0,446.0
+</point>
+      </motion>
+    </Node>
+    <Node name="n9">
+      <motion type="stationary">
+        <point>329.0,392.0
+</point>
+      </motion>
+    </Node>
+    <Node name="n10">
+      <motion type="stationary">
+        <point>233.0,268.0
+</point>
+      </motion>
+    </Node>
+  </MotionPlan>
+  <ServicePlan>
+    <Node type="router">
+      <Service name="zebra"/>
+      <Service name="OSPFv2"/>
+      <Service name="OSPFv3"/>
+      <Service name="vtysh"/>
+      <Service name="IPForward"/>
+    </Node>
+    <Node name="n1">
+      <Service startup_idx="45" name="OLSR"/>
+      <Service startup_idx="5" name="IPForward"/>
+      <Service startup_idx="35" name="UserDefined" custom="True"/>
+    </Node>
+    <Node name="n2">
+      <Service startup_idx="45" name="OLSR"/>
+      <Service startup_idx="5" name="IPForward"/>
+      <Service startup_idx="35" name="UserDefined" custom="True"/>
+    </Node>
+    <Node name="n3">
+      <Service startup_idx="45" name="OLSR"/>
+      <Service startup_idx="5" name="IPForward"/>
+      <Service startup_idx="35" name="UserDefined" custom="True"/>
+    </Node>
+    <Node name="n4">
+      <Service startup_idx="45" name="OLSR"/>
+      <Service startup_idx="5" name="IPForward"/>
+      <Service startup_idx="35" name="UserDefined" custom="True"/>
+    </Node>
+    <Node name="n5">
+      <Service startup_idx="45" name="OLSR"/>
+      <Service startup_idx="5" name="IPForward"/>
+      <Service startup_idx="35" name="UserDefined" custom="True"/>
+    </Node>
+    <Node name="n6">
+      <Service startup_idx="45" name="OLSR"/>
+      <Service startup_idx="5" name="IPForward"/>
+      <Service startup_idx="35" name="UserDefined" custom="True"/>
+    </Node>
+    <Node name="n7">
+      <Service startup_idx="45" name="OLSR"/>
+      <Service startup_idx="5" name="IPForward"/>
+      <Service startup_idx="35" name="UserDefined" custom="True"/>
+    </Node>
+    <Node name="n8">
+      <Service startup_idx="45" name="OLSR"/>
+      <Service startup_idx="5" name="IPForward"/>
+      <Service startup_idx="35" name="UserDefined" custom="True"/>
+    </Node>
+    <Node name="n9">
+      <Service startup_idx="45" name="OLSR"/>
+      <Service startup_idx="5" name="IPForward"/>
+      <Service startup_idx="35" name="UserDefined" custom="True"/>
+    </Node>
+    <Node name="n10">
+      <Service startup_idx="45" name="OLSR"/>
+      <Service startup_idx="5" name="IPForward"/>
+      <Service startup_idx="35" name="UserDefined" custom="True"/>
+    </Node>
+  </ServicePlan>
+  <CoreMetaData>
+    <MetaData>
+      <param name="global_options">interface_names=no ip_addresses=yes ipv6_addresses=yes node_labels=yes link_labels=yes show_api=no background_images=no annotations=yes grid=no traffic_start=0</param>
+      <param name="canvas c1">{name {Canvas1}} {wallpaper-style {upperleft}} {wallpaper {sample4-bg.jpg}} {size {1000 750}}</param>
+    </MetaData>
+  </CoreMetaData>
+</Scenario>
+
