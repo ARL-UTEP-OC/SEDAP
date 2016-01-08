@@ -3,9 +3,32 @@
 import sys
 from lxml import etree
 
-numNodes = 10
-scenName = '/root/IntelAttacker/staticScenarios/chainCoords.scen'
-coordsFile = '/root/IntelAttacker/staticScenarios/cycleCoords.txt'
+#numNodes = 10
+#scenName = '/root/IntelAttacker/staticScenarios/chainCoords.scen'
+#coordsFile = '/root/IntelAttacker/staticScenarios/cycleCoords.txt'
+
+basepath='/root/IntelAttacker/staticScenarios/'
+############Reading the input parameters###############
+#get command line args:
+startTime = '1'#sys.argv[1]
+duration = '60'#sys.argv[2]
+numNodes = '10'#int(sys.argv[3])
+attackNodeNumber = '1'#sys.argv[4]
+attackScriptPath = 'forwarding'#sys.argv[5]
+attackScriptInputs = []
+#the script path contains inputs for the string separated by '.'
+attackScriptPathInputsSplit = attackScriptPath.split("spoofingAttack.sh")
+if len(attackScriptPathInputsSplit) > 1:
+    attackScriptPath = "spoofingAttack.sh"
+    attackScriptInputs.append(attackScriptPathInputsSplit[1])
+
+if attackScriptPath == "blackholeAttack.sh":
+    attackScriptInputs.append(attackNodeNumber)
+    attackScriptInputs.append(str(numNodes))       
+
+mobility = 'cycleCoords.scen'#sys.argv[6]
+routingProtocol= 'OLSR'#sys.argv[7]
+coordFile = 'cycleCoords.txt'#sys.argv[8]
 
 
 #Create the root element for the output file:
@@ -47,7 +70,7 @@ errorXML.text = '0'
 modelXML = etree.SubElement(NetworkDefinitionXML, "model", name='ns2script', type='mobility')
 
 fileXML = etree.SubElement(modelXML, "file")
-fileXML.text = scenName
+fileXML.text = basepath+mobility
 
 refresh_msXML = etree.SubElement(modelXML, "refresh_ms")
 refresh_msXML.text = '50'
@@ -93,12 +116,14 @@ pointXML = etree.SubElement(motionXML, "point")
 pointXML.text = '0,0'
 
 #read the "scenario".txt coordinate file for the rest of the node configurations
-coordLines = open(coordsFile)
+coordLines = open(basepath+coordFile)
 for i in range(1,numNodes+1):
 	NodeXML = etree.SubElement(MotionPlanXML, "Node", name='n'+str(i))
 	motionXML = etree.SubElement(NodeXML, "motion", type='stationary')
 	pointXML = etree.SubElement(motionXML, "point")
-	pointXML.text = coordLines.readline().replace(' ',',')
+	coords = coordLines.readline().split(' ')
+	pointXML.text = str(int(float(coords[0])))
+	pointXML.text = pointXML.text + "," + str(int(float(coords[1])))
 
 ########### End of MotionPlan#########
 
@@ -123,7 +148,7 @@ route add -net 224.0.0.0 netmask 224.0.0.0 dev eth0
     
 #!/bin/sh
 HN=`hostname`
-if [ `uname` = &quot;FreeBSD&quot; ]; then
+if [ `uname` = 'FreeBSD' ]; then
   SCRIPTDIR=/tmp/e0_$HN
 else SCRIPTDIR=/root/
 fi
@@ -134,27 +159,27 @@ cd 1_60_60_downAttack_sh_chainCoords_scen_OLSR_chainCoords_txt
 #get ip of current
 hostnameLen=`expr length $HN`
 hostnameLen=`expr $hostnameLen - 1`
-myIP=&quot;10.0.0.`expr substr $HN 2 $hostnameLen`&quot;
+myIP='10.0.0.`expr substr $HN 2 $hostnameLen`'
 
 #now insert attack script
 if [ `hostname` = n1 -o 1 = 0 ]
 then
 
 #start logging
-tshark -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | /root/IntelAttacker/netCollect.py $myIP &gt; $HN.capture &amp;    
+tshark -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | /root/IntelAttacker/netCollect.py $myIP > $HN.capture &    
 
-mgen flush input /root/IntelAttacker/flowGenerator/flows/flow`hostname`.mgn output /dev/null &amp;
+mgen flush input /root/IntelAttacker/flowGenerator/flows/flow`hostname`.mgn output /dev/null &
 
 (
-cat &lt;&lt; 'EOF'
+cat << 'EOF'
 #!/bin/bash
 
 startTime=$1
 duration=$2
 
-echo &quot;none&quot; &gt; /tmp/attack.txt
+echo 'none' > /tmp/attack.txt
 sleep $startTime
-echo &quot;down&quot; &gt; /tmp/attack.txt
+echo 'down' > /tmp/attack.txt
 ifconfig eth0 down
 sleep $duration
 
@@ -162,14 +187,14 @@ ifconfig eth0 up
 rm /tmp/attack.txt
 
 EOF
-) &gt; attack.sh
+) > attack.sh
 
 chmod 755 attack.sh
 
 ./attack.sh 60 60  
 else
-echo `hostname` &gt;&gt; /tmp/check.txt
-mgen flush input /root/IntelAttacker/flowGenerator/flows/flow`hostname`.mgn | /root/IntelAttacker/mgenCollect.py &gt; `hostname`.mgencapture &amp;
+echo `hostname` >> /tmp/check.txt
+mgen flush input /root/IntelAttacker/flowGenerator/flows/flow`hostname`.mgn | /root/IntelAttacker/mgenCollect.py > `hostname`.mgencapture &
 fi
 '''
 	CommandXML = etree.SubElement(ServiceXML, "Command", type='start')

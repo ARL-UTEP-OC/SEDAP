@@ -53,10 +53,10 @@
         <refresh_ms>50</refresh_ms>
         <loop>0</loop>
         <autostart>1.0</autostart>
-        <map/>
-        <script_start/>
-        <script_pause/>
-        <script_stop/>
+        <map></map>
+        <script_start></script_start>
+        <script_pause></script_pause>
+        <script_stop></script_stop>
       </model>
     </NetworkDefinition>
     <Node type="router" name="n1" id="1">
@@ -139,62 +139,52 @@
     </Node>
     <Node name="n1">
       <motion type="stationary">
-        <point>224.0,113.0
-</point>
+        <point>224,113</point>
       </motion>
     </Node>
     <Node name="n2">
       <motion type="stationary">
-        <point>364.0,58.0
-</point>
+        <point>364,58</point>
       </motion>
     </Node>
     <Node name="n3">
       <motion type="stationary">
-        <point>503.0,72.0
-</point>
+        <point>503,72</point>
       </motion>
     </Node>
     <Node name="n4">
       <motion type="stationary">
-        <point>622.0,161.0
-</point>
+        <point>622,161</point>
       </motion>
     </Node>
     <Node name="n5">
       <motion type="stationary">
-        <point>685.0,269.0
-</point>
+        <point>685,269</point>
       </motion>
     </Node>
     <Node name="n6">
       <motion type="stationary">
-        <point>638.0,393.0
-</point>
+        <point>638,393</point>
       </motion>
     </Node>
     <Node name="n7">
       <motion type="stationary">
-        <point>552.0,466.0
-</point>
+        <point>552,466</point>
       </motion>
     </Node>
     <Node name="n8">
       <motion type="stationary">
-        <point>436.0,446.0
-</point>
+        <point>436,446</point>
       </motion>
     </Node>
     <Node name="n9">
       <motion type="stationary">
-        <point>329.0,392.0
-</point>
+        <point>329,392</point>
       </motion>
     </Node>
     <Node name="n10">
       <motion type="stationary">
-        <point>233.0,268.0
-</point>
+        <point>233,268</point>
       </motion>
     </Node>
   </MotionPlan>
@@ -209,52 +199,622 @@
     <Node name="n1">
       <Service startup_idx="45" name="OLSR"/>
       <Service startup_idx="5" name="IPForward"/>
-      <Service startup_idx="35" name="UserDefined" custom="True"/>
+      <Service startup_idx="35" name="UserDefined" custom="True">
+        <File name="custom-post-config-commands.sh">
+route add default dev eth0
+route add -net 224.0.0.0 netmask 224.0.0.0 dev eth0
+    
+#!/bin/sh
+HN=`hostname`
+if [ `uname` = 'FreeBSD' ]; then
+  SCRIPTDIR=/tmp/e0_$HN
+else SCRIPTDIR=/root/
+fi
+cd $SCRIPTDIR
+mkdir 1_60_60_downAttack_sh_chainCoords_scen_OLSR_chainCoords_txt
+cd 1_60_60_downAttack_sh_chainCoords_scen_OLSR_chainCoords_txt
+    
+#get ip of current
+hostnameLen=`expr length $HN`
+hostnameLen=`expr $hostnameLen - 1`
+myIP='10.0.0.`expr substr $HN 2 $hostnameLen`'
+
+#now insert attack script
+if [ `hostname` = n1 -o 1 = 0 ]
+then
+
+#start logging
+tshark -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | /root/IntelAttacker/netCollect.py $myIP &gt; $HN.capture &amp;    
+
+mgen flush input /root/IntelAttacker/flowGenerator/flows/flow`hostname`.mgn output /dev/null &amp;
+
+(
+cat &lt;&lt; 'EOF'
+#!/bin/bash
+
+startTime=$1
+duration=$2
+
+echo 'none' &gt; /tmp/attack.txt
+sleep $startTime
+echo 'down' &gt; /tmp/attack.txt
+ifconfig eth0 down
+sleep $duration
+
+ifconfig eth0 up
+rm /tmp/attack.txt
+
+EOF
+) &gt; attack.sh
+
+chmod 755 attack.sh
+
+./attack.sh 60 60  
+else
+echo `hostname` &gt;&gt; /tmp/check.txt
+mgen flush input /root/IntelAttacker/flowGenerator/flows/flow`hostname`.mgn | /root/IntelAttacker/mgenCollect.py &gt; `hostname`.mgencapture &amp;
+fi
+</File>
+        <Command type="start">sh custom-post-config-commands.sh</Command>
+      </Service>
     </Node>
     <Node name="n2">
       <Service startup_idx="45" name="OLSR"/>
       <Service startup_idx="5" name="IPForward"/>
-      <Service startup_idx="35" name="UserDefined" custom="True"/>
+      <Service startup_idx="35" name="UserDefined" custom="True">
+        <File name="custom-post-config-commands.sh">
+route add default dev eth0
+route add -net 224.0.0.0 netmask 224.0.0.0 dev eth0
+    
+#!/bin/sh
+HN=`hostname`
+if [ `uname` = 'FreeBSD' ]; then
+  SCRIPTDIR=/tmp/e0_$HN
+else SCRIPTDIR=/root/
+fi
+cd $SCRIPTDIR
+mkdir 1_60_60_downAttack_sh_chainCoords_scen_OLSR_chainCoords_txt
+cd 1_60_60_downAttack_sh_chainCoords_scen_OLSR_chainCoords_txt
+    
+#get ip of current
+hostnameLen=`expr length $HN`
+hostnameLen=`expr $hostnameLen - 1`
+myIP='10.0.0.`expr substr $HN 2 $hostnameLen`'
+
+#now insert attack script
+if [ `hostname` = n1 -o 1 = 0 ]
+then
+
+#start logging
+tshark -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | /root/IntelAttacker/netCollect.py $myIP &gt; $HN.capture &amp;    
+
+mgen flush input /root/IntelAttacker/flowGenerator/flows/flow`hostname`.mgn output /dev/null &amp;
+
+(
+cat &lt;&lt; 'EOF'
+#!/bin/bash
+
+startTime=$1
+duration=$2
+
+echo 'none' &gt; /tmp/attack.txt
+sleep $startTime
+echo 'down' &gt; /tmp/attack.txt
+ifconfig eth0 down
+sleep $duration
+
+ifconfig eth0 up
+rm /tmp/attack.txt
+
+EOF
+) &gt; attack.sh
+
+chmod 755 attack.sh
+
+./attack.sh 60 60  
+else
+echo `hostname` &gt;&gt; /tmp/check.txt
+mgen flush input /root/IntelAttacker/flowGenerator/flows/flow`hostname`.mgn | /root/IntelAttacker/mgenCollect.py &gt; `hostname`.mgencapture &amp;
+fi
+</File>
+        <Command type="start">sh custom-post-config-commands.sh</Command>
+      </Service>
     </Node>
     <Node name="n3">
       <Service startup_idx="45" name="OLSR"/>
       <Service startup_idx="5" name="IPForward"/>
-      <Service startup_idx="35" name="UserDefined" custom="True"/>
+      <Service startup_idx="35" name="UserDefined" custom="True">
+        <File name="custom-post-config-commands.sh">
+route add default dev eth0
+route add -net 224.0.0.0 netmask 224.0.0.0 dev eth0
+    
+#!/bin/sh
+HN=`hostname`
+if [ `uname` = 'FreeBSD' ]; then
+  SCRIPTDIR=/tmp/e0_$HN
+else SCRIPTDIR=/root/
+fi
+cd $SCRIPTDIR
+mkdir 1_60_60_downAttack_sh_chainCoords_scen_OLSR_chainCoords_txt
+cd 1_60_60_downAttack_sh_chainCoords_scen_OLSR_chainCoords_txt
+    
+#get ip of current
+hostnameLen=`expr length $HN`
+hostnameLen=`expr $hostnameLen - 1`
+myIP='10.0.0.`expr substr $HN 2 $hostnameLen`'
+
+#now insert attack script
+if [ `hostname` = n1 -o 1 = 0 ]
+then
+
+#start logging
+tshark -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | /root/IntelAttacker/netCollect.py $myIP &gt; $HN.capture &amp;    
+
+mgen flush input /root/IntelAttacker/flowGenerator/flows/flow`hostname`.mgn output /dev/null &amp;
+
+(
+cat &lt;&lt; 'EOF'
+#!/bin/bash
+
+startTime=$1
+duration=$2
+
+echo 'none' &gt; /tmp/attack.txt
+sleep $startTime
+echo 'down' &gt; /tmp/attack.txt
+ifconfig eth0 down
+sleep $duration
+
+ifconfig eth0 up
+rm /tmp/attack.txt
+
+EOF
+) &gt; attack.sh
+
+chmod 755 attack.sh
+
+./attack.sh 60 60  
+else
+echo `hostname` &gt;&gt; /tmp/check.txt
+mgen flush input /root/IntelAttacker/flowGenerator/flows/flow`hostname`.mgn | /root/IntelAttacker/mgenCollect.py &gt; `hostname`.mgencapture &amp;
+fi
+</File>
+        <Command type="start">sh custom-post-config-commands.sh</Command>
+      </Service>
     </Node>
     <Node name="n4">
       <Service startup_idx="45" name="OLSR"/>
       <Service startup_idx="5" name="IPForward"/>
-      <Service startup_idx="35" name="UserDefined" custom="True"/>
+      <Service startup_idx="35" name="UserDefined" custom="True">
+        <File name="custom-post-config-commands.sh">
+route add default dev eth0
+route add -net 224.0.0.0 netmask 224.0.0.0 dev eth0
+    
+#!/bin/sh
+HN=`hostname`
+if [ `uname` = 'FreeBSD' ]; then
+  SCRIPTDIR=/tmp/e0_$HN
+else SCRIPTDIR=/root/
+fi
+cd $SCRIPTDIR
+mkdir 1_60_60_downAttack_sh_chainCoords_scen_OLSR_chainCoords_txt
+cd 1_60_60_downAttack_sh_chainCoords_scen_OLSR_chainCoords_txt
+    
+#get ip of current
+hostnameLen=`expr length $HN`
+hostnameLen=`expr $hostnameLen - 1`
+myIP='10.0.0.`expr substr $HN 2 $hostnameLen`'
+
+#now insert attack script
+if [ `hostname` = n1 -o 1 = 0 ]
+then
+
+#start logging
+tshark -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | /root/IntelAttacker/netCollect.py $myIP &gt; $HN.capture &amp;    
+
+mgen flush input /root/IntelAttacker/flowGenerator/flows/flow`hostname`.mgn output /dev/null &amp;
+
+(
+cat &lt;&lt; 'EOF'
+#!/bin/bash
+
+startTime=$1
+duration=$2
+
+echo 'none' &gt; /tmp/attack.txt
+sleep $startTime
+echo 'down' &gt; /tmp/attack.txt
+ifconfig eth0 down
+sleep $duration
+
+ifconfig eth0 up
+rm /tmp/attack.txt
+
+EOF
+) &gt; attack.sh
+
+chmod 755 attack.sh
+
+./attack.sh 60 60  
+else
+echo `hostname` &gt;&gt; /tmp/check.txt
+mgen flush input /root/IntelAttacker/flowGenerator/flows/flow`hostname`.mgn | /root/IntelAttacker/mgenCollect.py &gt; `hostname`.mgencapture &amp;
+fi
+</File>
+        <Command type="start">sh custom-post-config-commands.sh</Command>
+      </Service>
     </Node>
     <Node name="n5">
       <Service startup_idx="45" name="OLSR"/>
       <Service startup_idx="5" name="IPForward"/>
-      <Service startup_idx="35" name="UserDefined" custom="True"/>
+      <Service startup_idx="35" name="UserDefined" custom="True">
+        <File name="custom-post-config-commands.sh">
+route add default dev eth0
+route add -net 224.0.0.0 netmask 224.0.0.0 dev eth0
+    
+#!/bin/sh
+HN=`hostname`
+if [ `uname` = 'FreeBSD' ]; then
+  SCRIPTDIR=/tmp/e0_$HN
+else SCRIPTDIR=/root/
+fi
+cd $SCRIPTDIR
+mkdir 1_60_60_downAttack_sh_chainCoords_scen_OLSR_chainCoords_txt
+cd 1_60_60_downAttack_sh_chainCoords_scen_OLSR_chainCoords_txt
+    
+#get ip of current
+hostnameLen=`expr length $HN`
+hostnameLen=`expr $hostnameLen - 1`
+myIP='10.0.0.`expr substr $HN 2 $hostnameLen`'
+
+#now insert attack script
+if [ `hostname` = n1 -o 1 = 0 ]
+then
+
+#start logging
+tshark -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | /root/IntelAttacker/netCollect.py $myIP &gt; $HN.capture &amp;    
+
+mgen flush input /root/IntelAttacker/flowGenerator/flows/flow`hostname`.mgn output /dev/null &amp;
+
+(
+cat &lt;&lt; 'EOF'
+#!/bin/bash
+
+startTime=$1
+duration=$2
+
+echo 'none' &gt; /tmp/attack.txt
+sleep $startTime
+echo 'down' &gt; /tmp/attack.txt
+ifconfig eth0 down
+sleep $duration
+
+ifconfig eth0 up
+rm /tmp/attack.txt
+
+EOF
+) &gt; attack.sh
+
+chmod 755 attack.sh
+
+./attack.sh 60 60  
+else
+echo `hostname` &gt;&gt; /tmp/check.txt
+mgen flush input /root/IntelAttacker/flowGenerator/flows/flow`hostname`.mgn | /root/IntelAttacker/mgenCollect.py &gt; `hostname`.mgencapture &amp;
+fi
+</File>
+        <Command type="start">sh custom-post-config-commands.sh</Command>
+      </Service>
     </Node>
     <Node name="n6">
       <Service startup_idx="45" name="OLSR"/>
       <Service startup_idx="5" name="IPForward"/>
-      <Service startup_idx="35" name="UserDefined" custom="True"/>
+      <Service startup_idx="35" name="UserDefined" custom="True">
+        <File name="custom-post-config-commands.sh">
+route add default dev eth0
+route add -net 224.0.0.0 netmask 224.0.0.0 dev eth0
+    
+#!/bin/sh
+HN=`hostname`
+if [ `uname` = 'FreeBSD' ]; then
+  SCRIPTDIR=/tmp/e0_$HN
+else SCRIPTDIR=/root/
+fi
+cd $SCRIPTDIR
+mkdir 1_60_60_downAttack_sh_chainCoords_scen_OLSR_chainCoords_txt
+cd 1_60_60_downAttack_sh_chainCoords_scen_OLSR_chainCoords_txt
+    
+#get ip of current
+hostnameLen=`expr length $HN`
+hostnameLen=`expr $hostnameLen - 1`
+myIP='10.0.0.`expr substr $HN 2 $hostnameLen`'
+
+#now insert attack script
+if [ `hostname` = n1 -o 1 = 0 ]
+then
+
+#start logging
+tshark -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | /root/IntelAttacker/netCollect.py $myIP &gt; $HN.capture &amp;    
+
+mgen flush input /root/IntelAttacker/flowGenerator/flows/flow`hostname`.mgn output /dev/null &amp;
+
+(
+cat &lt;&lt; 'EOF'
+#!/bin/bash
+
+startTime=$1
+duration=$2
+
+echo 'none' &gt; /tmp/attack.txt
+sleep $startTime
+echo 'down' &gt; /tmp/attack.txt
+ifconfig eth0 down
+sleep $duration
+
+ifconfig eth0 up
+rm /tmp/attack.txt
+
+EOF
+) &gt; attack.sh
+
+chmod 755 attack.sh
+
+./attack.sh 60 60  
+else
+echo `hostname` &gt;&gt; /tmp/check.txt
+mgen flush input /root/IntelAttacker/flowGenerator/flows/flow`hostname`.mgn | /root/IntelAttacker/mgenCollect.py &gt; `hostname`.mgencapture &amp;
+fi
+</File>
+        <Command type="start">sh custom-post-config-commands.sh</Command>
+      </Service>
     </Node>
     <Node name="n7">
       <Service startup_idx="45" name="OLSR"/>
       <Service startup_idx="5" name="IPForward"/>
-      <Service startup_idx="35" name="UserDefined" custom="True"/>
+      <Service startup_idx="35" name="UserDefined" custom="True">
+        <File name="custom-post-config-commands.sh">
+route add default dev eth0
+route add -net 224.0.0.0 netmask 224.0.0.0 dev eth0
+    
+#!/bin/sh
+HN=`hostname`
+if [ `uname` = 'FreeBSD' ]; then
+  SCRIPTDIR=/tmp/e0_$HN
+else SCRIPTDIR=/root/
+fi
+cd $SCRIPTDIR
+mkdir 1_60_60_downAttack_sh_chainCoords_scen_OLSR_chainCoords_txt
+cd 1_60_60_downAttack_sh_chainCoords_scen_OLSR_chainCoords_txt
+    
+#get ip of current
+hostnameLen=`expr length $HN`
+hostnameLen=`expr $hostnameLen - 1`
+myIP='10.0.0.`expr substr $HN 2 $hostnameLen`'
+
+#now insert attack script
+if [ `hostname` = n1 -o 1 = 0 ]
+then
+
+#start logging
+tshark -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | /root/IntelAttacker/netCollect.py $myIP &gt; $HN.capture &amp;    
+
+mgen flush input /root/IntelAttacker/flowGenerator/flows/flow`hostname`.mgn output /dev/null &amp;
+
+(
+cat &lt;&lt; 'EOF'
+#!/bin/bash
+
+startTime=$1
+duration=$2
+
+echo 'none' &gt; /tmp/attack.txt
+sleep $startTime
+echo 'down' &gt; /tmp/attack.txt
+ifconfig eth0 down
+sleep $duration
+
+ifconfig eth0 up
+rm /tmp/attack.txt
+
+EOF
+) &gt; attack.sh
+
+chmod 755 attack.sh
+
+./attack.sh 60 60  
+else
+echo `hostname` &gt;&gt; /tmp/check.txt
+mgen flush input /root/IntelAttacker/flowGenerator/flows/flow`hostname`.mgn | /root/IntelAttacker/mgenCollect.py &gt; `hostname`.mgencapture &amp;
+fi
+</File>
+        <Command type="start">sh custom-post-config-commands.sh</Command>
+      </Service>
     </Node>
     <Node name="n8">
       <Service startup_idx="45" name="OLSR"/>
       <Service startup_idx="5" name="IPForward"/>
-      <Service startup_idx="35" name="UserDefined" custom="True"/>
+      <Service startup_idx="35" name="UserDefined" custom="True">
+        <File name="custom-post-config-commands.sh">
+route add default dev eth0
+route add -net 224.0.0.0 netmask 224.0.0.0 dev eth0
+    
+#!/bin/sh
+HN=`hostname`
+if [ `uname` = 'FreeBSD' ]; then
+  SCRIPTDIR=/tmp/e0_$HN
+else SCRIPTDIR=/root/
+fi
+cd $SCRIPTDIR
+mkdir 1_60_60_downAttack_sh_chainCoords_scen_OLSR_chainCoords_txt
+cd 1_60_60_downAttack_sh_chainCoords_scen_OLSR_chainCoords_txt
+    
+#get ip of current
+hostnameLen=`expr length $HN`
+hostnameLen=`expr $hostnameLen - 1`
+myIP='10.0.0.`expr substr $HN 2 $hostnameLen`'
+
+#now insert attack script
+if [ `hostname` = n1 -o 1 = 0 ]
+then
+
+#start logging
+tshark -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | /root/IntelAttacker/netCollect.py $myIP &gt; $HN.capture &amp;    
+
+mgen flush input /root/IntelAttacker/flowGenerator/flows/flow`hostname`.mgn output /dev/null &amp;
+
+(
+cat &lt;&lt; 'EOF'
+#!/bin/bash
+
+startTime=$1
+duration=$2
+
+echo 'none' &gt; /tmp/attack.txt
+sleep $startTime
+echo 'down' &gt; /tmp/attack.txt
+ifconfig eth0 down
+sleep $duration
+
+ifconfig eth0 up
+rm /tmp/attack.txt
+
+EOF
+) &gt; attack.sh
+
+chmod 755 attack.sh
+
+./attack.sh 60 60  
+else
+echo `hostname` &gt;&gt; /tmp/check.txt
+mgen flush input /root/IntelAttacker/flowGenerator/flows/flow`hostname`.mgn | /root/IntelAttacker/mgenCollect.py &gt; `hostname`.mgencapture &amp;
+fi
+</File>
+        <Command type="start">sh custom-post-config-commands.sh</Command>
+      </Service>
     </Node>
     <Node name="n9">
       <Service startup_idx="45" name="OLSR"/>
       <Service startup_idx="5" name="IPForward"/>
-      <Service startup_idx="35" name="UserDefined" custom="True"/>
+      <Service startup_idx="35" name="UserDefined" custom="True">
+        <File name="custom-post-config-commands.sh">
+route add default dev eth0
+route add -net 224.0.0.0 netmask 224.0.0.0 dev eth0
+    
+#!/bin/sh
+HN=`hostname`
+if [ `uname` = 'FreeBSD' ]; then
+  SCRIPTDIR=/tmp/e0_$HN
+else SCRIPTDIR=/root/
+fi
+cd $SCRIPTDIR
+mkdir 1_60_60_downAttack_sh_chainCoords_scen_OLSR_chainCoords_txt
+cd 1_60_60_downAttack_sh_chainCoords_scen_OLSR_chainCoords_txt
+    
+#get ip of current
+hostnameLen=`expr length $HN`
+hostnameLen=`expr $hostnameLen - 1`
+myIP='10.0.0.`expr substr $HN 2 $hostnameLen`'
+
+#now insert attack script
+if [ `hostname` = n1 -o 1 = 0 ]
+then
+
+#start logging
+tshark -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | /root/IntelAttacker/netCollect.py $myIP &gt; $HN.capture &amp;    
+
+mgen flush input /root/IntelAttacker/flowGenerator/flows/flow`hostname`.mgn output /dev/null &amp;
+
+(
+cat &lt;&lt; 'EOF'
+#!/bin/bash
+
+startTime=$1
+duration=$2
+
+echo 'none' &gt; /tmp/attack.txt
+sleep $startTime
+echo 'down' &gt; /tmp/attack.txt
+ifconfig eth0 down
+sleep $duration
+
+ifconfig eth0 up
+rm /tmp/attack.txt
+
+EOF
+) &gt; attack.sh
+
+chmod 755 attack.sh
+
+./attack.sh 60 60  
+else
+echo `hostname` &gt;&gt; /tmp/check.txt
+mgen flush input /root/IntelAttacker/flowGenerator/flows/flow`hostname`.mgn | /root/IntelAttacker/mgenCollect.py &gt; `hostname`.mgencapture &amp;
+fi
+</File>
+        <Command type="start">sh custom-post-config-commands.sh</Command>
+      </Service>
     </Node>
     <Node name="n10">
       <Service startup_idx="45" name="OLSR"/>
       <Service startup_idx="5" name="IPForward"/>
-      <Service startup_idx="35" name="UserDefined" custom="True"/>
+      <Service startup_idx="35" name="UserDefined" custom="True">
+        <File name="custom-post-config-commands.sh">
+route add default dev eth0
+route add -net 224.0.0.0 netmask 224.0.0.0 dev eth0
+    
+#!/bin/sh
+HN=`hostname`
+if [ `uname` = 'FreeBSD' ]; then
+  SCRIPTDIR=/tmp/e0_$HN
+else SCRIPTDIR=/root/
+fi
+cd $SCRIPTDIR
+mkdir 1_60_60_downAttack_sh_chainCoords_scen_OLSR_chainCoords_txt
+cd 1_60_60_downAttack_sh_chainCoords_scen_OLSR_chainCoords_txt
+    
+#get ip of current
+hostnameLen=`expr length $HN`
+hostnameLen=`expr $hostnameLen - 1`
+myIP='10.0.0.`expr substr $HN 2 $hostnameLen`'
+
+#now insert attack script
+if [ `hostname` = n1 -o 1 = 0 ]
+then
+
+#start logging
+tshark -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | /root/IntelAttacker/netCollect.py $myIP &gt; $HN.capture &amp;    
+
+mgen flush input /root/IntelAttacker/flowGenerator/flows/flow`hostname`.mgn output /dev/null &amp;
+
+(
+cat &lt;&lt; 'EOF'
+#!/bin/bash
+
+startTime=$1
+duration=$2
+
+echo 'none' &gt; /tmp/attack.txt
+sleep $startTime
+echo 'down' &gt; /tmp/attack.txt
+ifconfig eth0 down
+sleep $duration
+
+ifconfig eth0 up
+rm /tmp/attack.txt
+
+EOF
+) &gt; attack.sh
+
+chmod 755 attack.sh
+
+./attack.sh 60 60  
+else
+echo `hostname` &gt;&gt; /tmp/check.txt
+mgen flush input /root/IntelAttacker/flowGenerator/flows/flow`hostname`.mgn | /root/IntelAttacker/mgenCollect.py &gt; `hostname`.mgencapture &amp;
+fi
+</File>
+        <Command type="start">sh custom-post-config-commands.sh</Command>
+      </Service>
     </Node>
   </ServicePlan>
   <CoreMetaData>
