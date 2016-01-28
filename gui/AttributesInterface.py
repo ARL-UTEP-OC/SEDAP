@@ -67,10 +67,24 @@ class AttributesInterface:
         self.deleteBtn = self.builder.get_object("deleteBtn")
         self.deleteBtn.connect("clicked", self.on_delete_clicked)
         self.deleteBtn.set_sensitive(False)
+        #previous
+        self.previousBtn = self.builder.get_object("previousBtn")
+        self.previousBtn.connect("clicked", self.on_previous_clicked)
+        self.previousBtn.set_sensitive(False)
+        #next
+        self.nextBtn = self.builder.get_object("nextBtn")
+        self.nextBtn.connect("clicked", self.on_next_clicked)
+        self.nextBtn.set_sensitive(False)
+        
         #evaluate model
         self.evaluateBtn = self.builder.get_object("evaluateBtn")
         self.evaluateBtn.connect("clicked", self.on_evaluate_clicked)
         self.evaluateBtn.set_sensitive(False)
+        #save as model result
+        self.saveAsModelEvaluationBtn = self.builder.get_object("saveAsModelEvaluationBtn")
+        self.saveAsModelEvaluationBtn.connect("clicked", self.on_save_as_evaluate_clicked)
+        self.saveAsModelEvaluationBtn.set_sensitive(False)
+        
         # Dialogs
         # Dialog Open
         self.dialogOpen = self.builder.get_object("fileChooserDialogOpen")
@@ -82,6 +96,10 @@ class AttributesInterface:
         filter = gtk.FileFilter()
         filter.set_name("Python Files")
         filter.add_pattern("*.py")
+        self.dialogOpen.add_filter(filter)
+        filter = gtk.FileFilter()
+        filter.set_name("Weka Files")
+        filter.add_pattern("*.arff")
         self.dialogOpen.add_filter(filter)
         # Dialog Save As
         self.dialogSaveAs = self.builder.get_object("fileChooserDialogSaveAs")
@@ -104,6 +122,7 @@ class AttributesInterface:
         
     def text_edited(self, widget, path, text):
         self.liststoreAttributes[path][1] = str(text)
+        self.update_attributes()
         print  self.liststoreAttributes[path][1]
     
     def on_add_clicked(self, widget):
@@ -111,8 +130,15 @@ class AttributesInterface:
         value = self.valueTxt.get_text().strip()
         if name:
             self.liststoreAttributes.append([name,value])
+            self.update_attributes()
             self.nameTxt.set_text('')
             self.valueTxt.set_text('')
+    
+    def update_attributes(self):
+        flowAttributes = dict()
+        for row in self.liststoreAttributes:
+            flowAttributes[str(row[0])] = str(row[1])
+        self.attributes[self.currentAttrIndex]=flowAttributes
     
     def on_new_clicked(self, widget):
         self.liststoreAttributes.clear()
@@ -125,17 +151,28 @@ class AttributesInterface:
         response = self.dialogOpen.run()
         
         if response == 1:
+            filename = self.dialogOpen.get_filename()
             print("Open clicked")
-            self.xmlPath = self.dialogOpen.get_filename()
-            attributes = self.attr.readXML(self.xmlPath)
+            self.currentAttrIndex = 0
+            if ".xml"  in filename: 
+                self.xmlPath = filename
+                self.attributes = self.attr.readXML(self.xmlPath)
+            if ".arff"  in filename: 
+                self.arffPath = filename
+                self.attributes = self.attr.readARFF(self.arffPath)
+            # enabling next button
+            if len(self.attributes) > 1:
+                self.nextBtn.set_sensitive(True)
             
-            for key, value in attributes.iteritems():
+            self.liststoreAttributes.clear()
+            for key, value in self.attributes[self.currentAttrIndex].iteritems():
                 self.liststoreAttributes.append([key,str(value)])
             
-            self.textViewXml.get_buffer().set_text(self.attr.toString())
+            if ".xml"  in filename:
+                self.textViewXml.get_buffer().set_text(self.attr.toXMLString(self.attributes))
+                self.window.set_title("Flow Description Attributes - " + self.xmlPath)
             self.saveBtn.set_sensitive(True)
-            self.window.set_title("Flow Description Attributes - " + self.xmlPath)
-        
+            
         self.dialogOpen.hide()
         
     def on_open_model_clicked(self, widget):
@@ -158,7 +195,7 @@ class AttributesInterface:
         response = self.dialogSaveAs.run()
         path = "None"
         if response == 1:
-            print("Save clicked")
+            print("Save As Clicked")
             path = self.dialogSaveAs.get_filename()
         
         if path != "None":
@@ -170,17 +207,8 @@ class AttributesInterface:
         self.dialogSaveAs.hide()
         
     def on_save_clicked(self, widget):
-        flowAttributes = self.get_flow_attributes_dic()
-
-        self.attr.writeXML(self.xmlPath, flowAttributes)
-        self.textViewXml.get_buffer().set_text(self.attr.toString())
-    
-    def on_evaluate_clicked(self, widget):
-        mod = __import__('Model', fromlist=['Model'])
-        ModelClass = getattr(mod, 'Model')
-
-        instance = ModelClass()
-        self.textViewModelOutput.get_buffer().set_text(str(instance.evaluate(self.get_flow_attributes_dic())))
+        self.attr.writeXML(self.xmlPath, self.attributes)
+        self.textViewXml.get_buffer().set_text(self.attr.toXMLString(self.attributes))
         
     def on_delete_clicked(self, widget):
         selection  = self.treeView.get_selection()
@@ -190,12 +218,50 @@ class AttributesInterface:
         model.remove(myIter)
         self.deleteBtn.set_sensitive(False)
         
-    def get_flow_attributes_dic(self):
-        flowAttributes = dict()
-        for row in self.liststoreAttributes:
-            flowAttributes[str(row[0])] = str(row[1])
-        return flowAttributes
+    def on_previous_clicked(self, widget):
+        print "previous"
+        self.liststoreAttributes.clear()
+        self.currentAttrIndex-=1
+        for key, value in self.attributes[self.currentAttrIndex].iteritems():
+                self.liststoreAttributes.append([key,str(value)])
+        if self.currentAttrIndex == 0:
+            self.previousBtn.set_sensitive(False)
+        self.nextBtn.set_sensitive(True)
+         
+    def on_next_clicked(self, widget):
+        print "next"
+        self.liststoreAttributes.clear()
+        self.currentAttrIndex+=1
+        for key, value in self.attributes[self.currentAttrIndex].iteritems():
+                self.liststoreAttributes.append([key,str(value)])
+        if (self.currentAttrIndex+1) >= len(self.attributes):
+            self.nextBtn.set_sensitive(False)
+        self.previousBtn.set_sensitive(True)
         
+    def on_evaluate_clicked(self, widget):
+        mod = __import__('Model', fromlist=['Model'])
+        ModelClass = getattr(mod, 'Model')
+        instance = ModelClass()
+        
+        self.evaluationResults = list()
+        for flowAttributes in self.attributes:
+            results = instance.evaluate(flowAttributes)
+            self.evaluationResults.append(results)
+        self.textViewModelOutput.get_buffer().set_text(str('\n'.join(map(str, self.evaluationResults))))
+        self.saveAsModelEvaluationBtn.set_sensitive(True)
+        
+    def on_save_as_evaluate_clicked(self, widget):
+        response = self.dialogSaveAs.run()
+        path = "None"
+        if response == 1:
+            print("Save as clicked")
+            path = self.dialogSaveAs.get_filename()
+        
+        if path != "None":
+                 self.attr.writeModelEvaluationXML(path,self.attributes,self.evaluationResults)
+
+        self.dialogSaveAs.hide()
+             
     def create_columns(self, treeView):
         rendererText = gtk.CellRendererText()
         column = gtk.TreeViewColumn("Attribute", rendererText, text=0)

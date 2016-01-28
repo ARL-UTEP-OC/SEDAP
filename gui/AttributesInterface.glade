@@ -124,6 +124,16 @@
       <action-widget response="1">saveAsBtnDialog</action-widget>
     </action-widgets>
   </object>
+  <object class="GtkImage" id="imageBack">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="stock">gtk-go-back</property>
+  </object>
+  <object class="GtkImage" id="imageForward">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="stock">gtk-go-forward</property>
+  </object>
   <object class="GtkListStore" id="liststoreAttributes"/>
   <object class="GtkWindow" id="window1">
     <property name="can_focus">False</property>
@@ -335,6 +345,33 @@
                         <property name="position">4</property>
                       </packing>
                     </child>
+                    <child>
+                      <object class="GtkButton" id="previousBtn">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="receives_default">True</property>
+                        <property name="image">imageBack</property>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">False</property>
+                        <property name="position">5</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkButton" id="nextBtn">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="receives_default">True</property>
+                        <property name="image">imageForward</property>
+                        <property name="image_position">right</property>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">False</property>
+                        <property name="position">6</property>
+                      </packing>
+                    </child>
                   </object>
                   <packing>
                     <property name="resize">False</property>
@@ -433,9 +470,16 @@
                     <property name="hscrollbar_policy">automatic</property>
                     <property name="vscrollbar_policy">automatic</property>
                     <child>
-                      <object class="GtkTextView" id="textViewModelOutput">
+                      <object class="GtkViewport" id="viewport1">
                         <property name="visible">True</property>
-                        <property name="can_focus">True</property>
+                        <property name="can_focus">False</property>
+                        <child>
+                          <object class="GtkLabel" id="label7">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="label" translatable="yes">Model Evaluation Result</property>
+                          </object>
+                        </child>
                       </object>
                     </child>
                   </object>
@@ -446,6 +490,17 @@
                   </packing>
                 </child>
                 <child>
+                  <object class="GtkTextView" id="textViewModelOutput">
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                  </object>
+                  <packing>
+                    <property name="expand">True</property>
+                    <property name="fill">True</property>
+                    <property name="position">2</property>
+                  </packing>
+                </child>
+                <child>
                   <object class="GtkHSeparator" id="hseparator1">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
@@ -453,7 +508,7 @@
                   <packing>
                     <property name="expand">False</property>
                     <property name="fill">True</property>
-                    <property name="position">2</property>
+                    <property name="position">3</property>
                   </packing>
                 </child>
                 <child>
@@ -488,11 +543,24 @@
                         <property name="position">1</property>
                       </packing>
                     </child>
+                    <child>
+                      <object class="GtkButton" id="saveAsModelEvaluationBtn">
+                        <property name="label" translatable="yes">Save As</property>
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="receives_default">True</property>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">False</property>
+                        <property name="position">2</property>
+                      </packing>
+                    </child>
                   </object>
                   <packing>
                     <property name="expand">False</property>
                     <property name="fill">False</property>
-                    <property name="position">3</property>
+                    <property name="position">4</property>
                   </packing>
                 </child>
               </object>
