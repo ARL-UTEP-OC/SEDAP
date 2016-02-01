@@ -227,6 +227,24 @@ interaction_rule(
                 logInService(TargetHost, Protocol, Port)),
   rule_desc('password sniffing through spoof',
   0.8)).
+  
+  
+    interaction_rule(
+  (principalCompromised(Victim) :-
+                hasAccount(Victim, TargetHost, User),
+                /* Has client program Server*/
+                 clientProgram(H, _client),
+                /* Same network*/
+                /*attackerLocated(Zone),*/
+                hacl(Zone, H, _, _),
+                /* Client has arp*/
+                networkServiceInfo(H, ripdv1, _protocol, _port, _),
+                /* vulnerability */
+                 vulExists(H, ripdv1Vul, ripdv1, remoteExploit, ripSpoof),
+                /* has login service */
+                logInService(TargetHost, Protocol, Port)),
+  rule_desc('password sniffing through spoof',
+  0.8)).
 
 /*
 interaction_rule(

@@ -1,4 +1,4 @@
-attackerLocated(subnet1).
+attackerLocated(router2).
 attackGoal(execCode(ftpServer,_)).
 malicious(Attacker).
 
