@@ -11,7 +11,7 @@ do
 		do
 
 
-			for attack in "spoofingAttack.sh3" "spoofingAttack.sh4" "spoofingAttack.sh5" "spoofingAttack.sh6" "spoofingAttack.sh7" "spoofingAttack.sh8" "spoofingAttack.sh9" "spoofingAttack.sh10" "forwardingAttack.sh" "blackholeAttack.sh" "downAttack.sh"
+			for attack in "spoofingAttack.sh1", "spoofingAttack.sh2", "spoofingAttack.sh3" "spoofingAttack.sh4" "spoofingAttack.sh5" "spoofingAttack.sh6" "spoofingAttack.sh7" "spoofingAttack.sh8" "spoofingAttack.sh9" "spoofingAttack.sh10" "forwardingAttack.sh" "blackholeAttack.sh" "downAttack.sh"
 			do
 				mobility=$scenario".scen"
 				coordFile=$scenario".txt"

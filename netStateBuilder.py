@@ -6,6 +6,30 @@ import commands
 import ast
 import networkx as nx
 
+#input:
+
+#output: 
+#1. fromHop
+#2. toHop
+#3. type
+#4. distance
+#5. passthrough
+#10. srcSpoofed
+#11. destSpoofed
+#12. hopsToSpoofed
+#14. hopsFromSpoofedToDest
+#15. spoofedBetweenAttacker
+#16. isDstBetweenSpoofedAndAttacker
+#17. spoofedBetweenAttackergw
+#18. isDstBetweenSpoofedAndAttackergw
+#19. isAttackerBetweenSpoofedAndAttacker
+#20. isAttackerBetweenSpoofedAndAttackergw
+#21. isSrcBetweenSpoofedAndDst
+#22. isSrcBetweenSpoofedAndDstgw
+#23. altPathWithoutAttacker
+#24. duringLinkLost
+
+
 nBeforeAttack = sys.argv[1]
 mAfterAttack = sys.argv[2]
 attackNodeNum = sys.argv[3]
@@ -39,13 +63,6 @@ gateways = {}
 #passThroughsAfter = {}
 
 attackNodeIP = ""
-
-#fromHop, toHop,#hopsDataTravels, traffType, PacketsSeenBeforeAttack
-#attack, numPackets deviation during attack, passthrough, deviationAfterAttack 
-#---pending---:
-#recoverTime
-#iDstSpoofed, isSrcAttacker, secondsUntilHit
-
 
 def getAttackerPerspective():
     global attackerPathsSeen
