@@ -22,8 +22,8 @@ import networkx as nx
 #16. isDstBetweenSpoofedAndAttacker
 #17. spoofedBetweenAttackergw
 #18. isDstBetweenSpoofedAndAttackergw
-#19. isAttackerBetweenSpoofedAndAttacker
-#20. isAttackerBetweenSpoofedAndAttackergw
+#19. isAttackerBetweenSpoofedAndDst
+#20. isAttackerBetweenSpoofedAndDstgw
 #21. isSrcBetweenSpoofedAndDst
 #22. isSrcBetweenSpoofedAndDstgw
 #23. altPathWithoutAttacker
@@ -467,7 +467,7 @@ def bBetweenAandC(a,b,c):
     global gateways
     done = "false"
     mysrc = a
-#    print a,b,c,"hop to ",mysrc,",",c
+	#print a,b,c,"hop to ",mysrc,",",c
     if mysrc == b:
         return "true"
     while "true":
@@ -475,6 +475,7 @@ def bBetweenAandC(a,b,c):
             mysrc = gateways[(mysrc,c)]
 #            print "hop to ",mysrc,",",c
             if mysrc == "0.0.0.0":
+				#false because I didn't encounter b and I've reached the destination
                 return "false"
             if mysrc == b:
                 return "true"
