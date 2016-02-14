@@ -409,7 +409,8 @@ def readConfig(filename):
 		nodes[name.text.rstrip().lstrip()] = 'test'
 
 
-logging.basicConfig(stream=sys.stderr, level=logging.DEBUG)
+#Will eventually convert print to logging
+#logging.basicConfig(stream=sys.stderr, level=logging.DEBUG)
 filename = sys.argv[1]
 readConfig(filename)
 print "Nodes\n", nodes
