@@ -2,6 +2,7 @@
 import sys
 import networkx as nx
 import xml.etree.ElementTree as ET
+from lxml import etree
 from netaddr import *
 import logging
 
@@ -18,25 +19,30 @@ victim = None
 attackNode = None
 flows = [] #(src, dest, type)
 
+#Create the root element for the output file:
+attributesXML = etree.Element("Attribute")
+flowDescriptionAttributesXML = etree.SubElement(attributesXML, "FlowDescriptionAttributes")
+
 #parameters for output
-fromHop=''
-toHop=''
-typeName=''
-distance=''
-passthrough=''
-srcSpoofed=''
-destSpoofed=''
-hopsToSpoofed=''
-hopsFromSpoofedToDest=''
-spoofedBetweenAttacker=''
-isDstBetweenSpoofedAndAttacker=''
-spoofedBetweenAttackergw=''
-isDstBetweenSpoofedAndAttackergw=''
-isAttackerBetweenSpoofedAndDst=''
-isAttackerBetweenSpoofedAndDstgw=''
-isSrcBetweenSpoofedAndDst=''
-isSrcBetweenSpoofedAndDstgw=''
-altPathWithoutAttacker=''
+flowDescriptionAttributes = {}
+flowDescriptionAttributes["fromHop"]=''
+flowDescriptionAttributes["toHop"]=''
+flowDescriptionAttributes["typeName"]=''
+flowDescriptionAttributes["distance"]=''
+flowDescriptionAttributes["passthrough"]=''
+flowDescriptionAttributes["srcSpoofed"]=''
+flowDescriptionAttributes["destSpoofed"]=''
+flowDescriptionAttributes["hopsToSpoofed"]=''
+flowDescriptionAttributes["hopsFromSpoofedToDest"]=''
+flowDescriptionAttributes["spoofedBetweenAttacker"]=''
+flowDescriptionAttributes["isDstBetweenSpoofedAndAttacker"]=''
+flowDescriptionAttributes["spoofedBetweenAttackergw"]=''
+flowDescriptionAttributes["isDstBetweenSpoofedAndAttackergw"]=''
+flowDescriptionAttributes["isAttackerBetweenSpoofedAndDst"]=''
+flowDescriptionAttributes["isAttackerBetweenSpoofedAndDstgw"]=''
+flowDescriptionAttributes["isSrcBetweenSpoofedAndDst"]=''
+flowDescriptionAttributes["isSrcBetweenSpoofedAndDstgw"]=''
+flowDescriptionAttributes["altPathWithoutAttacker"]=''
 
 
 def extractLinksfromRoutes(nodeIP, routes):
@@ -108,135 +114,120 @@ def getSubPath(param1, param2):
 		else:
 			return answer
 	return answer
+	
 
 def generateParametersFromTrafficProfile():
 	global flows
-	global fromHop
-	global toHop
-	global typeName
-	global distance
-	global passthrough
-	global srcSpoofed
-	global destSpoofed
-	global hopsToSpoofed
-	global hopsFromSpoofedToDest
-	global spoofedBetweenAttacker
-	global isDstBetweenSpoofedAndAttacker
-	global spoofedBetweenAttackergw
-	global isDstBetweenSpoofedAndAttackergw
-	global isAttackerBetweenSpoofedAndDst
-	global isAttackerBetweenSpoofedAndDstgw
-	global isSrcBetweenSpoofedAndDst
-	global isSrcBetweenSpoofedAndDstgw
-	global altPathWithoutAttacker
+	global flowDescriptionAttributes
+	global flowDescriptionAttributesXML
 	
 	for flow in flows:
-		#fromHop
+		#flowDescriptionAttributes["fromHop"]
 		src = flow[0]
 		dst = flow[1]
 		
-		print "looking for: ",(attackNode,src)
+		logging.debug( "looking for: %s",(attackNode,src))
 		if ((attackNode,src)) in directLinks:
-			fromHop = directLinks[(attackNode,src)]
+			flowDescriptionAttributes["fromHop"] = directLinks[(attackNode,src)][1]
 		elif ((attackNode,src)) in gateways:
-			fromHop = gateways[(attackNode,src)]
+			flowDescriptionAttributes["fromHop"] = gateways[(attackNode,src)][1]
 		else:
-			print fromHop,"not found"
+			print flowDescriptionAttributes["fromHop"],"not found"
 			exit
-		print "fromHop",fromHop
+		logging.debug("fromHop %s",flowDescriptionAttributes["fromHop"])
 
-		#toHop
-		print "looking for: ",(attackNode,dst)
+		#flowDescriptionAttributes["toHop"]
+		logging.debug("looking for: %s",(attackNode,dst))
 		if ((attackNode,dst)) in directLinks:
-			toHop = directLinks[(attackNode,dst)]
+			flowDescriptionAttributes["toHop"] = directLinks[(attackNode,dst)][1]
 		elif ((attackNode,dst)) in gateways:
-			toHop = gateways[(attackNode,dst)]
+			flowDescriptionAttributes["toHop"] = gateways[(attackNode,dst)][1]
 		else:
-			print toHop,"not found"
+			print flowDescriptionAttributes["toHop"],"not found"
 			exit
-		print "toHop",toHop
+		logging.debug("toHop %s",flowDescriptionAttributes["toHop"])
 		
 		#type
-		typeName = flow[2]
-		print "type",typeName
+		flowDescriptionAttributes["typeName"] = flow[2]
+		logging.debug("type %s",flowDescriptionAttributes["typeName"])
 		
-		#distance
-		print "looking for: ",(src,dst)
+		#flowDescriptionAttributes["distance"]
+		logging.debug("looking for:  %s",(src,dst))
 		if ((src,dst)) in directLinks:
-			distance = directLinks[(flow[0],dst)][1]
+			flowDescriptionAttributes["distance"] = directLinks[(flow[0],dst)][1]
 		elif ((src,dst)) in gateways:
-			distance = gateways[(src,dst)][1]
+			flowDescriptionAttributes["distance"] = gateways[(src,dst)][1]
 		else:
-			print distance,"not found"
+			print flowDescriptionAttributes["distance"],"not found"
 			exit
-		print "distance",distance
+		logging.debug("distance %s",flowDescriptionAttributes["distance"])
 		###path function test
-		print "looking for path: ",(src,dst)
-		print "\nPath\n",getPathThroughGW(src, dst)
+		logging.debug("looking for path:  %s",(src,dst))
+		logging.debug("\nPath\n %s",getPathThroughGW(src, dst))
 		###
 		
-		print "\npassthrough check: ",attackNode, "in", (src,dst)
+		logging.debug("\npassthrough check:  %s  in %s",attackNode, (src,dst))
 		if attackNode in getPathThroughGW(src,dst):
-			passthrough=True
+			flowDescriptionAttributes["passthrough"]="True"
 		else:
-			passthrough=False
+			flowDescriptionAttributes["passthrough"]="False"
 ########The following parameters are only valid if attack is spoofing#####
-		print "\nsrc spoofed: ",src, victim
+		logging.debug("\nsrc spoofed:  %s %s",src, victim)
 		if src == victim:
-			srcSpoofed=True
+			flowDescriptionAttributes["srcSpoofed"]="True"
 		else:
-			srcSpoofed=False
-		print "srcSpoofed",srcSpoofed
+			flowDescriptionAttributes["srcSpoofed"]="False"
+		logging.debug("srcSpoofed %s",flowDescriptionAttributes["srcSpoofed"])
 
-		print "\ndst spoofed: ",dst, victim
+		logging.debug("\ndst spoofed:  %s %s",dst, victim)
 		if dst == victim:
-			dstSpoofed=True
+			dstSpoofed="True"
 		else:
-			dstSpoofed=False
-		print "dstSpoofed",dstSpoofed
+			dstSpoofed="False"
+		logging.debug("dstSpoofed %s",dstSpoofed)
 
-		print "checking hopsToSpoofed from:",attackNode,"to",victim
+		logging.debug("checking hopsToSpoofed from: %s to %s",attackNode,victim)
 		if (attackNode,victim) in directLinks:
-			hopsToSpoofed=directLinks[(attackNode,victim)][1]
+			flowDescriptionAttributes["hopsToSpoofed"]=directLinks[(attackNode,victim)][1]
 		elif (attackNode,victim) in gateways:
-			hopsToSpoofed=gateways[(attackNode,victim)][1]
+			flowDescriptionAttributes["hopsToSpoofed"]=gateways[(attackNode,victim)][1]
 		else: 
-			hopsToSpoofed='-1'
-		print "hopsToSpoofed",hopsToSpoofed
+			flowDescriptionAttributes["hopsToSpoofed"]='-1'
+		logging.debug("hopsToSpoofed %s",flowDescriptionAttributes["hopsToSpoofed"])
 			
-		print "checking hopsFromSpoofedToDest from:",victim,"to",dst
+		logging.debug("checking hopsFromSpoofedToDest from: %s to %s",victim,dst)
 		if (victim,dst) in directLinks:
-			hopsFromSpoofedToDest=directLinks[(victim,dst)][1]
+			flowDescriptionAttributes["hopsFromSpoofedToDest"]=directLinks[(victim,dst)][1]
 		elif (victim,dst) in gateways:
-			hopsFromSpoofedToDest=gateways[(victim,dst)][1]
+			flowDescriptionAttributes["hopsFromSpoofedToDest"]=gateways[(victim,dst)][1]
 		else: 
-			hopsFromSpoofedToDest='-1'
-		print "hopsFromSpoofedToDest",hopsFromSpoofedToDest		
+			flowDescriptionAttributes["hopsFromSpoofedToDest"]='-1'
+		logging.debug("hopsFromSpoofedToDest %s",flowDescriptionAttributes["hopsFromSpoofedToDest"]	)
 		
-		print "checking spoofedBetweenAttacker. Is:",victim,"between (or equal to either)",src,"to",attackNode
+		logging.debug("checking spoofedBetweenAttacker. Is: %s between (or equal to either) %s to %s",victim,src,attackNode)
 		if victim == src:
-			spoofedBetweenAttacker=True
+			flowDescriptionAttributes["spoofedBetweenAttacker"]="True"
 		elif victim in getPathThroughGW(src,attackNode):
-			spoofedBetweenAttacker=True
+			flowDescriptionAttributes["spoofedBetweenAttacker"]="True"
 		else:
-			spoofedBetweenAttacker=False
-		print "spoofedBetweenAttacker",spoofedBetweenAttacker
+			flowDescriptionAttributes["spoofedBetweenAttacker"]="False"
+		logging.debug("spoofedBetweenAttacker %s",flowDescriptionAttributes["spoofedBetweenAttacker"])
 		
-		print "checking isDstBetweenSpoofedAndAttacker. Is:",dst,"between (or equal to either)",victim,"to",attackNode
+		logging.debug("checking isDstBetweenSpoofedAndAttacker. Is: %s between (or equal to either) %s to %s",dst,victim,attackNode)
 		if dst == victim:
-			isDstBetweenSpoofedAndAttacker=True
+			flowDescriptionAttributes["isDstBetweenSpoofedAndAttacker"]="True"
 		elif dst in getPathThroughGW(victim,attackNode):
-			isDstBetweenSpoofedAndAttacker=True
+			flowDescriptionAttributes["isDstBetweenSpoofedAndAttacker"]="True"
 		else:
-			isDstBetweenSpoofedAndAttacker=False
-		print "isDstBetweenSpoofedAndAttacker",isDstBetweenSpoofedAndAttacker
+			flowDescriptionAttributes["isDstBetweenSpoofedAndAttacker"]="False"
+		logging.debug("isDstBetweenSpoofedAndAttacker %s",flowDescriptionAttributes["isDstBetweenSpoofedAndAttacker"])
 		
 #######
 		#algorithm used to check: if path(src,dst) startswith(path(src,att)-1) true; else false
-		print "checking spoofedBetweenAttackergw. Is:",victim,"between or is a gateway (or equal to either)",src,"to",attackNode
+		logging.debug("checking spoofedBetweenAttackergw. Is %s between or is a gateway (or equal to either) %s to %s:",victim,src,attackNode)
 		subPath = []
 		if victim == src:
-			spoofedBetweenAttackergw=True
+			flowDescriptionAttributes["spoofedBetweenAttackergw"]="True"
 		else:
 			#real path
 			pathA = getPathThroughGW(src,attackNode)
@@ -244,24 +235,24 @@ def generateParametersFromTrafficProfile():
 			pathB = getPathThroughGW(src,victim)
 			#now check if pathA starts with pathB-1
 			if len(pathB) == 0 and len(pathB) > len(pathA):
-				spoofedBetweenAttackergw=False
+				flowDescriptionAttributes["spoofedBetweenAttackergw"]="False"
 			else:
 				pathB = pathB[:len(pathB)-1]
 				#check if param1 is a subpath of param2
 				subPath = getSubPath(pathB, pathA)
-				print "subPath of:",src,victim,attackNode,"\nSUBPATH:",subPath
-				spoofedBetweenAttackergw=False
+				logging.debug("subPath of: %s %s %s \nSUBPATH: %s",src,victim,attackNode,subPath)
+				flowDescriptionAttributes["spoofedBetweenAttackergw"]="False"
 		if len(subPath) == 0:
-			spoofedBetweenAttackergw=False
+			flowDescriptionAttributes["spoofedBetweenAttackergw"]="False"
 		else:
-			spoofedBetweenAttackergw=True
-		print "spoofedBetweenAttackergw",spoofedBetweenAttackergw
+			flowDescriptionAttributes["spoofedBetweenAttackergw"]="True"
+		logging.debug("spoofedBetweenAttackergw %s",flowDescriptionAttributes["spoofedBetweenAttackergw"])
 
 #######
-		print "checking isDstBetweenSpoofedAndAttackergw Is:",victim,"between or is a gateway (or equal to either)",dst,"to",attackNode
+		logging.debug("checking isDstBetweenSpoofedAndAttackergw Is: %s between or is a gateway (or equal to either) %s to %s",victim,dst,attackNode)
 		subPath = []
 		if victim == dst:
-			isDstBetweenSpoofedAndAttackergw=True
+			flowDescriptionAttributes["isDstBetweenSpoofedAndAttackergw"]="True"
 		else:
 			#real path
 			pathA = getPathThroughGW(dst,attackNode)
@@ -269,35 +260,35 @@ def generateParametersFromTrafficProfile():
 			pathB = getPathThroughGW(dst,victim)
 			#now check if pathA starts with pathB-1
 			if len(pathB) == 0 and len(pathB) > len(pathA):
-				isDstBetweenSpoofedAndAttackergw=False
+				flowDescriptionAttributes["isDstBetweenSpoofedAndAttackergw"]="False"
 			else:
 				pathB = pathB[:len(pathB)-1]
 				#check if param1 is a subpath of param2
 				subPath = getSubPath(pathB, pathA)
-				print "subPath of:",dst,victim,attackNode,"\nSUBPATH:",subPath
-				isDstBetweenSpoofedAndAttackergw=False
+				logging.debug("subPath of: %s %s %s \nSUBPATH: %s",dst,victim,attackNode,subPath)
+				flowDescriptionAttributes["isDstBetweenSpoofedAndAttackergw"]="False"
 		if len(subPath) == 0:
-			isDstBetweenSpoofedAndAttackergw=False
+			flowDescriptionAttributes["isDstBetweenSpoofedAndAttackergw"]="False"
 		else:
-			isDstBetweenSpoofedAndAttackergw=True
-		print "isDstBetweenSpoofedAndAttackergw",isDstBetweenSpoofedAndAttackergw
+			flowDescriptionAttributes["isDstBetweenSpoofedAndAttackergw"]="True"
+		logging.debug("isDstBetweenSpoofedAndAttackergw %s",flowDescriptionAttributes["isDstBetweenSpoofedAndAttackergw"])
 
 #######
-		print "checking isAttackerBetweenSpoofedAndDst. Is:",attackNode,"between (or equal to either)",victim,"to",dst
+		logging.debug("checking isAttackerBetweenSpoofedAndDst. Is: %s between (or equal to either) %s to %s",attackNode,victim,dst)
 		if attackNode == victim:
-			isAttackerBetweenSpoofedAndDst=True
+			flowDescriptionAttributes["isAttackerBetweenSpoofedAndDst"]="True"
 		elif attackNode in getPathThroughGW(victim,dst):
-			isAttackerBetweenSpoofedAndDst=True
+			flowDescriptionAttributes["isAttackerBetweenSpoofedAndDst"]="True"
 		else:
-			isAttackerBetweenSpoofedAndDst=False
-		print "isAttackerBetweenSpoofedAndDst",isAttackerBetweenSpoofedAndDst
+			flowDescriptionAttributes["isAttackerBetweenSpoofedAndDst"]="False"
+		logging.debug("isAttackerBetweenSpoofedAndDst %s",flowDescriptionAttributes["isAttackerBetweenSpoofedAndDst"])
 
 #######
 
-		print "checking isAttackerBetweenSpoofedAndDstgw Is:",attackNode,"between or is a gateway (or equal to either)",victim,"to",dst
+		logging.debug("checking isAttackerBetweenSpoofedAndDstgw Is: %s between or is a gateway (or equal to either) %s to %s",attackNode,victim,dst)
 		subPath = []
 		if attackNode == victim:
-			isAttackerBetweenSpoofedAndDstgw=True
+			flowDescriptionAttributes["isAttackerBetweenSpoofedAndDstgw"]="True"
 		else:
 			#real path
 			pathA = getPathThroughGW(victim,dst)
@@ -305,40 +296,40 @@ def generateParametersFromTrafficProfile():
 			pathB = getPathThroughGW(victim,attackNode)
 			#now check if pathA starts with pathB-1
 			if len(pathB) == 0 and len(pathB) > len(pathA):
-				isAttackerBetweenSpoofedAndDstgw=False
+				flowDescriptionAttributes["isAttackerBetweenSpoofedAndDstgw"]="False"
 			else:
 				pathB = pathB[:len(pathB)-1]
 				#check if param1 is a subpath of param2
 				subPath = getSubPath(pathB, pathA)
-				print "subPath of:",victim,attackNode,dst,"\nSUBPATH:",subPath
-				isAttackerBetweenSpoofedAndDstgw=False
+				logging.debug("subPath of: %s %s %s \nSUBPATH: %s",victim,attackNode,dst,subPath)
+				flowDescriptionAttributes["isAttackerBetweenSpoofedAndDstgw"]="False"
 		if len(subPath) == 0:
-			isAttackerBetweenSpoofedAndDstgw=False
+			flowDescriptionAttributes["isAttackerBetweenSpoofedAndDstgw"]="False"
 		else:
-			isAttackerBetweenSpoofedAndDstgw=True
-		print "isAttackerBetweenSpoofedAndDstgw",isAttackerBetweenSpoofedAndDstgw
+			flowDescriptionAttributes["isAttackerBetweenSpoofedAndDstgw"]="True"
+		logging.debug("isAttackerBetweenSpoofedAndDstgw %s",flowDescriptionAttributes["isAttackerBetweenSpoofedAndDstgw"])
 	
 		
 #######
 #21. isSrcBetweenSpoofedAndDst	-- src between vic and dst
 #######
-		print "checking isSrcBetweenSpoofedAndDst. Is:",src,"between (or equal to either)",victim,"to",dst
+		logging.debug("checking isSrcBetweenSpoofedAndDst. Is: %s between (or equal to either) %s to %s",src,victim,dst)
 		if src == victim:
-			isSrcBetweenSpoofedAndDst=True
+			flowDescriptionAttributes["isSrcBetweenSpoofedAndDst"]="True"
 		elif src in getPathThroughGW(victim,dst):
-			isSrcBetweenSpoofedAndDst=True
+			flowDescriptionAttributes["isSrcBetweenSpoofedAndDst"]="True"
 		else:
-			isSrcBetweenSpoofedAndDst=False
-		print "isSrcBetweenSpoofedAndDst",isSrcBetweenSpoofedAndDst
+			flowDescriptionAttributes["isSrcBetweenSpoofedAndDst"]="False"
+		logging.debug("isSrcBetweenSpoofedAndDst %s",flowDescriptionAttributes["isSrcBetweenSpoofedAndDst"])
 
 
 #######	
-#22. isSrcBetweenSpoofedAndDstgw	-- src a gw of any node between vic and dst
+#22. flowDescriptionAttributes["isSrcBetweenSpoofedAndDstgw"]	-- src a gw of any node between vic and dst
 
-		print "checking isSrcBetweenSpoofedAndDstgw Is:",src,"between or is a gateway (or equal to either)",victim,"to",dst
+		logging.debug("checking isSrcBetweenSpoofedAndDstgw Is: %s between or is a gateway (or equal to either) %s to %s",src,victim,dst)
 		subPath = []
 		if src == victim:
-			isSrcBetweenSpoofedAndDstgw=True
+			flowDescriptionAttributes["isSrcBetweenSpoofedAndDstgw"]="True"
 		else:
 			#real path
 			pathA = getPathThroughGW(victim,dst)
@@ -346,35 +337,44 @@ def generateParametersFromTrafficProfile():
 			pathB = getPathThroughGW(victim,src)
 			#now check if pathA starts with pathB-1
 			if len(pathB) == 0 and len(pathB) > len(pathA):
-				isSrcBetweenSpoofedAndDstgw=False
+				flowDescriptionAttributes["isSrcBetweenSpoofedAndDstgw"]="False"
 			else:
 				pathB = pathB[:len(pathB)-1]
 				#check if param1 is a subpath of param2
 				subPath = getSubPath(pathB, pathA)
-				print "subPath of:",victim,src,dst,"\nSUBPATH:",subPath
-				isSrcBetweenSpoofedAndDstgw=False
+				logging.debug("subPath of: %s %s %s \nSUBPATH: %s",victim,src,dst,subPath)
+				flowDescriptionAttributes["isSrcBetweenSpoofedAndDstgw"]="False"
 		if len(subPath) == 0:
-			isSrcBetweenSpoofedAndDstgw=False
+			flowDescriptionAttributes["isSrcBetweenSpoofedAndDstgw"]="False"
 		else:
-			isSrcBetweenSpoofedAndDstgw=True
-		print "isSrcBetweenSpoofedAndDstgw",isSrcBetweenSpoofedAndDstgw	
+			flowDescriptionAttributes["isSrcBetweenSpoofedAndDstgw"]="True"
+		logging.debug("isSrcBetweenSpoofedAndDstgw %s",flowDescriptionAttributes["isSrcBetweenSpoofedAndDstgw"]	)
 
 #######	
-#23. altPathWithoutAttacker
+#23. flowDescriptionAttributes["altPathWithoutAttacker"]
 
 #clone the graph, remove the attacker and then check if a path exists from src to dst
-		print "checking altPathWithoutAttacker: attackNode",attackNode,"src:",src,"dst:",dst
+		logging.debug("checking altPathWithoutAttacker: attackNode %s src: %s dst: %s",attackNode,src,dst)
 		if not nx.has_path(G,src,dst):
-			altPathWithoutAttacker=False
+			flowDescriptionAttributes["altPathWithoutAttacker"]="False"
 		else:
 			tmpGraph = G.copy()
 			tmpGraph.remove_node(attackNode)
 			if not nx.has_path(tmpGraph,src,dst):
-				altPathWithoutAttacker=False
+				flowDescriptionAttributes["altPathWithoutAttacker"]="False"
 			else:
-				altPathWithoutAttacker=True
-		print "altPathWithoutAttacker",altPathWithoutAttacker		
-		print "\n\n"
+				flowDescriptionAttributes["altPathWithoutAttacker"]="True"
+		logging.debug("altPathWithoutAttacker %s",flowDescriptionAttributes["altPathWithoutAttacker"])
+		logging.debug("\n\n")
+		
+		#######now generate XML tags:
+		for attribute in flowDescriptionAttributes:
+			attributeXML = etree.SubElement(flowDescriptionAttributesXML, "Attribute")
+			nameXML = etree.SubElement(attributeXML, "name")
+			nameXML.text = attribute
+			valueXML = etree.SubElement(attributeXML, "value")
+			valueXML.text = flowDescriptionAttributes[attribute]
+
 
 #first read the input configuration xml file
 def readConfig(filename):
@@ -413,9 +413,11 @@ def readConfig(filename):
 #logging.basicConfig(stream=sys.stderr, level=logging.DEBUG)
 filename = sys.argv[1]
 readConfig(filename)
-print "Nodes\n", nodes
-print "\nGateways\n",gateways
-print "\nDirect Links\n",directLinks
-print "\nG\n",G.edges()
+logging.debug("Nodes\n%s", nodes)
+logging.debug("\nGateways\n%s",gateways)
+logging.debug("\nDirect Links\n%s",directLinks)
+logging.debug("\nG\n%s",G.edges())
 
 generateParametersFromTrafficProfile()
+
+print etree.tostring(attributesXML,pretty_print='true')
