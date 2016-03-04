@@ -37,7 +37,6 @@ class Attributes(object):
         file = open(filePath, 'r')
         data = False
         for line in file:
-            print line
             
             if "@data"  in line: 
                 data = True
@@ -77,14 +76,14 @@ class Attributes(object):
     
     def writeXML(self,filePath,attributes):
         prettyXml = self.toXMLString(attributes)
-        print prettyXml
+        # print prettyXml
         
         text_file = open(filePath, "w")
         text_file.write(prettyXml)
     
     def writeModelEvaluationXML(self,filePath,attributes,results):
         copyAttributes = list(attributes)
-        print results
+        # print results
         for index, flowAttributes in enumerate(copyAttributes):
             flowAttributes["modelEvaluation"]=str(results[index])
         self.writeXML(filePath,copyAttributes)
@@ -108,5 +107,6 @@ class Attributes(object):
     
     def prettify(self,root):
         rough_string = ET.tostring(root, 'utf-8',method="xml")
-        reparsed = minidom.parseString(rough_string)
-        return reparsed.toprettyxml()
+       ### reparsed = minidom.parseString(rough_string)
+        ###return reparsed.toprettyxml()
+        return rough_string
