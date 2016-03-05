@@ -50,6 +50,8 @@ class AttributesInterface:
         #new
         self.newBtn = self.builder.get_object("newBtn")
         self.newBtn.connect("clicked", self.on_new_clicked)
+        self.newFlowBtn = self.builder.get_object("newFlowBtn")
+        self.newFlowBtn.connect("clicked", self.on_new_flow_clicked)
         #set up file chooser dialog open attribute
         self.openBtn = self.builder.get_object("openBtn")
         self.openBtn.connect("clicked", self.on_open_attribute_clicked)
@@ -63,10 +65,14 @@ class AttributesInterface:
         self.saveBtn = self.builder.get_object("saveBtn")
         self.saveBtn.connect("clicked", self.on_save_clicked)
         self.saveBtn.set_sensitive(False)
-        #save
-        self.deleteBtn = self.builder.get_object("deleteBtn")
-        self.deleteBtn.connect("clicked", self.on_delete_clicked)
-        self.deleteBtn.set_sensitive(False)
+        #delete attribute
+        self.deleteAttributeBtn = self.builder.get_object("deleteAttributeBtn")
+        self.deleteAttributeBtn.connect("clicked", self.on_delete_attr_clicked)
+        self.deleteAttributeBtn.set_sensitive(False)
+         #delete flow
+        self.deleteFlowBtn = self.builder.get_object("deleteFlowBtn")
+        self.deleteFlowBtn.connect("clicked", self.on_delete_flow_clicked)
+        self.deleteFlowBtn.set_sensitive(True)
         #previous
         self.previousBtn = self.builder.get_object("previousBtn")
         self.previousBtn.connect("clicked", self.on_previous_clicked)
@@ -75,6 +81,9 @@ class AttributesInterface:
         self.nextBtn = self.builder.get_object("nextBtn")
         self.nextBtn.connect("clicked", self.on_next_clicked)
         self.nextBtn.set_sensitive(False)
+        # status label
+        self.statusLabel = self.builder.get_object("statusLabel")
+        self.statusLabel.set_markup("<b></b>")
         
         #evaluate model
         self.evaluateBtn = self.builder.get_object("evaluateBtn")
@@ -116,9 +125,13 @@ class AttributesInterface:
         self.textViewModelOutput  = self.builder.get_object("textViewModelOutput")
         #attributes
         self.attr = Attributes(self)
+        self.new()
 
     def on_cursor_changed(self, widget, *args):
-        self.deleteBtn.set_sensitive(True)
+        self.deleteAttributeBtn.set_sensitive(True)
+        
+    def update_status_label(self):
+          self.statusLabel.set_markup(" <b> Total: </b>" + str(len(self.flowAttributesList)) + "<b> Index: </b>" + str(self.currentFlowAttrIndex))
         
     def text_edited(self, widget, path, text):
         self.liststoreAttributes[path][1] = str(text)
@@ -138,40 +151,64 @@ class AttributesInterface:
         flowAttributes = dict()
         for row in self.liststoreAttributes:
             flowAttributes[str(row[0])] = str(row[1])
-        self.attributes[self.currentAttrIndex]=flowAttributes
+        self.flowAttributesList[self.currentFlowAttrIndex]=flowAttributes
     
     def on_new_clicked(self, widget):
         self.liststoreAttributes.clear()
         self.xmlPath = "None"
         self.saveBtn.set_sensitive(False)
-        self.deleteBtn.set_sensitive(False)
+        self.deleteAttributeBtn.set_sensitive(False)
+        self.previousBtn.set_sensitive(True)
+        self.nextBtn.set_sensitive(False)
+        self.deleteFlowBtn.set_sensitive(True)
         self.window.set_title("Flow Description Attributes - New")
-    
+        self.new()
+        #update status label
+        self.update_status_label()
+        
+    def on_new_flow_clicked(self, widget):
+        self.liststoreAttributes.clear()
+        self.new_flow();
+        #update status label
+        self.update_status_label()
+
+    def new(self):
+        self.flowAttributesList = list()
+        self.new_flow();
+        
+    def new_flow(self):
+        flowAttributes = dict()
+        self.flowAttributesList.append(flowAttributes)
+        self.currentFlowAttrIndex = len(self.flowAttributesList)-1
+       
     def on_open_attribute_clicked(self, widget):
         response = self.dialogOpen.run()
         
         if response == 1:
             filename = self.dialogOpen.get_filename()
             print("Open clicked")
-            self.currentAttrIndex = 0
+            self.currentFlowAttrIndex = 0
             if ".xml"  in filename: 
                 self.xmlPath = filename
-                self.attributes = self.attr.readXML(self.xmlPath)
+                self.flowAttributesList = self.attr.readXML(self.xmlPath)
             if ".arff"  in filename: 
                 self.arffPath = filename
-                self.attributes = self.attr.readARFF(self.arffPath)
+                self.flowAttributesList = self.attr.readARFF(self.arffPath)
             # enabling next button
-            if len(self.attributes) > 1:
+            if len(self.flowAttributesList) > 1:
                 self.nextBtn.set_sensitive(True)
-            
-            self.liststoreAttributes.clear()
-            for key, value in self.attributes[self.currentAttrIndex].iteritems():
-                self.liststoreAttributes.append([key,str(value)])
+            # loading attributes
+            self.load_flow()
+            #enabling delete flow button
+            if len(self.flowAttributesList) > 1:
+                self.deleteFlowBtn.set_sensitive(True)
             
             if ".xml"  in filename:
-                self.textViewXml.get_buffer().set_text(self.attr.toXMLString(self.attributes))
+                self.textViewXml.get_buffer().set_text(self.attr.toXMLString(self.flowAttributesList))
                 self.window.set_title("Flow Description Attributes - " + self.xmlPath)
             self.saveBtn.set_sensitive(True)
+        #update status label
+        self.update_status_label()
             
         self.dialogOpen.hide()
         
@@ -207,36 +244,58 @@ class AttributesInterface:
         self.dialogSaveAs.hide()
         
     def on_save_clicked(self, widget):
-        self.attr.writeXML(self.xmlPath, self.attributes)
-        self.textViewXml.get_buffer().set_text(self.attr.toXMLString(self.attributes))
+        self.attr.writeXML(self.xmlPath, self.flowAttributesList)
+        self.textViewXml.get_buffer().set_text(self.attr.toXMLString(self.flowAttributesList))
         
-    def on_delete_clicked(self, widget):
+    def on_delete_attr_clicked(self, widget):
         selection  = self.treeView.get_selection()
         model, paths = selection.get_selected_rows()
         for path in paths:
             myIter = model.get_iter(path)
         model.remove(myIter)
-        self.deleteBtn.set_sensitive(False)
+        self.deleteAttributeBtn.set_sensitive(False)
+        
+    def on_delete_flow_clicked(self, widget):
+        del self.flowAttributesList[self.currentFlowAttrIndex]
+        if len(self.flowAttributesList) == 0:
+            self.new_flow();
+        self.currentFlowAttrIndex=0
+        self.load_flow()
+        self.previousBtn.set_sensitive(False)
+        if len(self.flowAttributesList)>1:
+            self.nextBtn.set_sensitive(True)
+        else:
+            self.nextBtn.set_sensitive(False)
+            
+        #update status label
+        self.update_status_label()
         
     def on_previous_clicked(self, widget):
         print "previous"
-        self.liststoreAttributes.clear()
-        self.currentAttrIndex-=1
-        for key, value in self.attributes[self.currentAttrIndex].iteritems():
-                self.liststoreAttributes.append([key,str(value)])
-        if self.currentAttrIndex == 0:
+        self.currentFlowAttrIndex-=1
+        self.load_flow()
+        if self.currentFlowAttrIndex == 0:
             self.previousBtn.set_sensitive(False)
         self.nextBtn.set_sensitive(True)
+        
+        #update status label
+        self.update_status_label()
          
     def on_next_clicked(self, widget):
         print "next"
-        self.liststoreAttributes.clear()
-        self.currentAttrIndex+=1
-        for key, value in self.attributes[self.currentAttrIndex].iteritems():
-                self.liststoreAttributes.append([key,str(value)])
-        if (self.currentAttrIndex+1) >= len(self.attributes):
+        self.currentFlowAttrIndex+=1
+        self.load_flow()
+        if (self.currentFlowAttrIndex+1) >= len(self.flowAttributesList):
             self.nextBtn.set_sensitive(False)
         self.previousBtn.set_sensitive(True)
+        
+        #update status label
+        self.update_status_label()
+        
+    def load_flow(self):
+        self.liststoreAttributes.clear()
+        for key, value in self.flowAttributesList[self.currentFlowAttrIndex].iteritems():
+                self.liststoreAttributes.append([key,str(value)])
         
     def on_evaluate_clicked(self, widget):
         mod = __import__('Model', fromlist=['Model'])
@@ -244,7 +303,7 @@ class AttributesInterface:
         instance = ModelClass()
         
         self.evaluationResults = list()
-        for flowAttributes in self.attributes:
+        for flowAttributes in self.flowAttributesList:
             results = instance.evaluate(flowAttributes)
             self.evaluationResults.append(results)
         self.textViewModelOutput.get_buffer().set_text(str('\n'.join(map(str, self.evaluationResults))))
@@ -258,7 +317,7 @@ class AttributesInterface:
             path = self.dialogSaveAs.get_filename()
         
         if path != "None":
-                 self.attr.writeModelEvaluationXML(path,self.attributes,self.evaluationResults)
+                 self.attr.writeModelEvaluationXML(path,self.flowAttributesList,self.evaluationResults)
 
         self.dialogSaveAs.hide()
              
