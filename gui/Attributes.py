@@ -100,13 +100,10 @@ class Attributes(object):
                 ET.SubElement(attribute, 'Value').text = value
             
         self.tree = ET.ElementTree(root)
-        #root.write(filePath)
         return self.prettify(root)
-        # root = self.tree.getroot()
-        # return self.prettify(root)
     
     def prettify(self,root):
         rough_string = ET.tostring(root, 'utf-8',method="xml")
-       ### reparsed = minidom.parseString(rough_string)
-        ###return reparsed.toprettyxml()
-        return rough_string
+        reparsed = minidom.parseString(rough_string) # comment to stop prettyfy
+        return reparsed.toprettyxml() # comment to stop prettyfy
+        ##return rough_string # uncoment for ugly xml
