@@ -27,7 +27,7 @@ gateway(router2).
 
 /* client */
 clientProgram(ftpClientHost,ftpClient_app).
-networkServiceInfo(ftpClientHost, arpd, _protocol, _port, _).
+networkServiceInfo(ftpClientHost, arpd, _NA_layer2 , _NA_layer2 , _NA_layer2). 
 vulExists(ftpClientHost, arpSpoofVuln, arpd).
 vulProperty(arpSpoofVuln, remoteExploit, arpSpoof).
 
