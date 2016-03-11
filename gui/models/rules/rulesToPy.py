@@ -16,6 +16,8 @@ for line in rules:
 		logicalOperator = '=='
 	varName = elements[0].strip()
 	cmpVal = elements[2].strip()
+	if (cmpVal.replace('.','').replace('-','').isdigit() == False):
+		cmpVal = "'" + cmpVal + "'"
 	if len(elements) > 3:
 		ans = elements[4]
 

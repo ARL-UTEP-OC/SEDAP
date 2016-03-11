@@ -20,8 +20,7 @@ attackNode = None
 flows = [] #(src, dest, type)
 
 #Create the root element for the output file:
-attributesXML = etree.Element("Attribute")
-flowDescriptionAttributesXML = etree.SubElement(attributesXML, "FlowDescriptionAttributes")
+attributesXML = etree.Element("Attributes")
 
 #parameters for output
 flowDescriptionAttributes = {}
@@ -148,7 +147,12 @@ def generateParametersFromTrafficProfile():
 		logging.debug("toHop %s",flowDescriptionAttributes["toHop"])
 		
 		#type
-		flowDescriptionAttributes["typeName"] = flow[2]
+		typeName = flow[2]
+		if typeName.startswith("'") == False:
+			typeName = "'"+flow[2]
+		if typeName.endswith("'") == False:
+			typeName = typeName+"'"
+		flowDescriptionAttributes["typeName"] = typeName
 		logging.debug("type %s",flowDescriptionAttributes["typeName"])
 		
 		#flowDescriptionAttributes["distance"]
@@ -181,10 +185,10 @@ def generateParametersFromTrafficProfile():
 
 		logging.debug("\ndst spoofed:  %s %s",dst, victim)
 		if dst == victim:
-			dstSpoofed="True"
+			flowDescriptionAttributes["destSpoofed"]="True"
 		else:
-			dstSpoofed="False"
-		logging.debug("dstSpoofed %s",dstSpoofed)
+			flowDescriptionAttributes["destSpoofed"]="False"
+		logging.debug("destSpoofed %s",flowDescriptionAttributes["destSpoofed"])
 
 		logging.debug("checking hopsToSpoofed from: %s to %s",attackNode,victim)
 		if (attackNode,victim) in directLinks:
@@ -368,11 +372,13 @@ def generateParametersFromTrafficProfile():
 		logging.debug("\n\n")
 		
 		#######now generate XML tags:
+		#print "Here!!!"
+		flowDescriptionAttributesXML = etree.SubElement(attributesXML, "FlowDescriptionAttributes")
 		for attribute in flowDescriptionAttributes:
 			attributeXML = etree.SubElement(flowDescriptionAttributesXML, "Attribute")
-			nameXML = etree.SubElement(attributeXML, "name")
+			nameXML = etree.SubElement(attributeXML, "Name")
 			nameXML.text = attribute
-			valueXML = etree.SubElement(attributeXML, "value")
+			valueXML = etree.SubElement(attributeXML, "Value")
 			valueXML.text = flowDescriptionAttributes[attribute]
 
 

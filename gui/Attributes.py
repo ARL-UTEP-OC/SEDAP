@@ -27,7 +27,6 @@ class Attributes(object):
             for attribute in flowAttribute.findall('Attribute'):
                 flowAttributes[attribute.find('Name').text] = str(attribute.find('Value').text)
             attributes.append(flowAttributes)
-        
         return attributes
     
     def readARFF(self, filePath):

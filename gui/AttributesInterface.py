@@ -304,7 +304,9 @@ class AttributesInterface:
         
         self.evaluationResults = list()
         for flowAttributes in self.flowAttributesList:
+            print "sending in: \n",flowAttributes
             results = instance.evaluate(flowAttributes)
+            
             self.evaluationResults.append(results)
         self.textViewModelOutput.get_buffer().set_text(str('\n'.join(map(str, self.evaluationResults))))
         self.saveAsModelEvaluationBtn.set_sensitive(True)

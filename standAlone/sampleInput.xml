@@ -15,7 +15,7 @@
 	      10.0.0.6/32
    	      </dst>
 	      <type>
-	      udp
+	      UDP
 	      </type>
 	   </flow>
 	   <flow>
@@ -26,7 +26,7 @@
 	      10.0.0.8/32
    	      </dst>
 	      <type>
-	      udp
+	      UDP
 	      </type>
 	   </flow>
    </traffic-profile>
