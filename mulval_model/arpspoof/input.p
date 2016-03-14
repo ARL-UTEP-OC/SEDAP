@@ -2,20 +2,19 @@
 Topology
 
 ftpClientHost ---- subnet1 ---- router1 ---- router2 ---- ftpServer
-				  /
-				 /
-				/
-			   /
+                  /
+                 /
+                /
+               /
 		attacker
 
 In this scenario, the attacker takes advantage of the fact
-that ftp is cleartext and conduct a MITM thanks to the use
+that ftp is cleartext and conducts a MITM thanks to the use
 of arp
 */
 
 attackerLocated(subnet1).
 attackGoal(execCode(ftpServerHost,userLevel)).
-malicious(Attacker).
 
 hacl(subnet1, ftpClientHost, _allProtocols , _allPorts).
 hacl(subnet1, router1, _allProtocols , _allPorts).

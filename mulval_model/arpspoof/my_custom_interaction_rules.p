@@ -236,15 +236,15 @@ interaction_rule(
                 /* A client program is running on the Host  */
                  clientProgram(H, _client),
                 /* Route hijacking does not require that the victim and attacker are in the same subnet*/
-                /*attackerLocated(Zone),*/
-                hacl(Zone, H, _anyProtocol, _anyPort),
+                /*attackerLocated(Zone),
+                hacl(Zone, H, _anyProtocol, _anyPort),*/
                 /* nrlolsr is being used */
                 networkServiceInfo(H, nrlolsr, _protocol, _port, _),
                 /* nrlolsr is misconfigured allowing traffic hijacking */
                  vulExists(H, nrlolsrVul, nrlolsr, remoteExploit, nrlolsrHijack),
                 /* The User has an account on a login service on the remote host */
                 logInService(RemoteHost, Protocol, Port)),
-  rule_desc('password sniffing through hijack',
+  rule_desc('password sniffing through route hijack',
   0.8)).
   
   interaction_rule(
@@ -253,15 +253,15 @@ interaction_rule(
                 /* A client program is running on the Host  */
                  clientProgram(H, _client),
 				/* Route hijacking does not require that the victim and attacker are in the same subnet*/
-                /*attackerLocated(Zone),*/
-                hacl(Zone, H, _, _),
+                /*attackerLocated(Zone),
+                hacl(Zone, H, _, _),*/
                 /* OSPF_MDR is being used */
                 networkServiceInfo(H, ospf_mdr, _protocol, _port, _),
                 /* OSPF_MDR is misconfigured allowing traffic hijacking */
                  vulExists(H, ospf_mdrVul, ospf_mdr, remoteExploit, ospf_mdrHijack),
                 /* The User has an account on a login service on the remote host */
                 logInService(RemoteHost, Protocol, Port)),
-  rule_desc('password sniffing through hijack',
+  rule_desc('password sniffing through route hijack',
   0.8)).
 
 /*

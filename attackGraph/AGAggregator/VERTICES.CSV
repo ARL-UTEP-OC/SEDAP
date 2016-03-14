@@ -1,0 +1,25 @@
+1,"execCode(ftpServerHost,userLevel)","OR",0
+2,"RULE 0 (When a principal is compromised any machine he has an account on will also be compromised)","AND",0
+3,"canAccessHost(ftpServerHost)","OR",0
+4,"RULE 10 (Access a host through a log-in service)","AND",0
+5,"netAccess(ftpServerHost,tcp,21)","OR",0
+6,"RULE 6 (multi-hop access by gateway)","AND",0
+7,"hacl(router3,ftpServerHost,tcp,21)","LEAF",1
+8,"netAccess(router3,tcp,21)","OR",0
+9,"RULE 6 (multi-hop access by gateway)","AND",0
+10,"hacl('router2/32',router3,tcp,21)","LEAF",1
+11,"netAccess('router2/32',tcp,21)","OR",0
+12,"RULE 8 (direct on-host access)","AND",0
+13,"attackerLocated('router2/32')","LEAF",1
+14,"gateway('router2/32')","LEAF",1
+15,"RULE 7 (direct network access)","AND",0
+16,"gateway(router3)","LEAF",1
+17,"logInService(ftpServerHost,tcp,21)","OR",0
+18,"RULE 19 (log in for ftpd)","AND",0
+19,"networkServiceInfo(ftpServerHost,ftpd,tcp,21,userLevel)","LEAF",1
+20,"hasAccount(victimUser,ftpServerHost,userLevel)","LEAF",1
+21,"principalCompromised(victimUser)","OR",0
+22,"RULE 15 (password sniffing through route hijack)","AND",0
+23,"vulExists(ftpClientHost,nrlolsrVul,nrlolsr,remoteExploit,nrlolsrHijack)","LEAF",1
+24,"networkServiceInfo(ftpClientHost,nrlolsr,olsr,_,_)","LEAF",1
+25,"clientProgram(ftpClientHost,ftpClient_app)","LEAF",1

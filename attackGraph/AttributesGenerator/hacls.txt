@@ -1,0 +1,20 @@
+/* edges in graph represent connections among nodes as well as gateways */
+hacl('10.0.0.10/32', '10.0.0.9/32',_proto,_port).
+hacl('10.0.0.2/32', '10.0.0.1/32',_proto,_port).
+hacl('10.0.0.2/32', '10.0.0.3/32',_proto,_port).
+hacl('10.0.0.7/32', '10.0.0.6/32',_proto,_port).
+hacl('10.0.0.7/32', '10.0.0.8/32',_proto,_port).
+hacl('10.0.0.9/32', '10.0.0.8/32',_proto,_port).
+hacl('10.0.0.4/32', '10.0.0.3/32',_proto,_port).
+hacl('10.0.0.4/32', '10.0.0.5/32',_proto,_port).
+hacl('10.0.0.6/32', '10.0.0.5/32',_proto,_port).
+gateway('10.0.0.10/32').
+gateway('10.0.0.2/32').
+gateway('10.0.0.7/32').
+gateway('10.0.0.9/32').
+gateway('10.0.0.8/32').
+gateway('10.0.0.4/32').
+gateway('10.0.0.6/32').
+gateway('10.0.0.5/32').
+gateway('10.0.0.3/32').
+gateway('10.0.0.1/32').

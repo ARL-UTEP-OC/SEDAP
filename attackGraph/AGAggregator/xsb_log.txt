@@ -1,0 +1,32 @@
+[xsb_configuration loaded]
+[sysinitrc loaded]
+[xsbbrat loaded]
+
+XSB Version 3.5.0 (Maotai) of July 6, 2013
+[x86_64-unknown-linux-gnu 64 bits; mode: optimal; engine: slg-wam; scheduling: local]
+[Patch date: 2014-07-03 17:24:44 -0400 (Thu, 03 Jul 2014)]
+
+| ?- [Compiling ./run]
+[run compiled, cpu time used: 0.0040 seconds]
+[run loaded]
+[libmulval loaded]
+[translate loaded]
+[attack_trace loaded]
+[auxiliary loaded]
+[/root/gitIntelAttacker/impactpredictionmodels/attackGraph/AGAggregator/running_rules.P dynamically loaded, cpu time used: 0.0040 seconds]
+[/root/gitIntelAttacker/impactpredictionmodels/attackGraph/AGAggregator/sampleInput_IPs.P dynamically loaded, cpu time used: 0.0000 seconds]
+[/root/install/mulval/src/analyzer/advances_notrim.P dynamically loaded, cpu time used: 0.0000 seconds]
+@@@@@@@@@@@@@@Done transforming in mode dynamic_decl
+
+[/root/gitIntelAttacker/impactpredictionmodels/attackGraph/AGAggregator/dynamic_decl.gen dynamically loaded, cpu time used: 0.0000 seconds]
+@@@@@@@@@@@@@@Done transforming in mode completeTrace2
+
+@@@@@@@@@@@@@@Done transforming in mode completeTrace2
+
+@@@@@@@@@@@@@@Done transforming in mode stripExplanation
+
+Running attack simulation...
+
+yes
+| ?- 
+End XSB (cputime 0.02 secs, elapsetime 0.02 secs)
