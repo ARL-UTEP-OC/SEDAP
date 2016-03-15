@@ -27,7 +27,7 @@ primitive(vulProperty(_vulID, _range, _consequence)).
 primitive(hacl(_src, _dst, _prot, _port)).
 primitive(attackerLocated(_host)).
 primitive(hasAccount(_principal, _host, _account)).
-primitive(networkServiceInfo(_host, _program, _protocol, _port, _user)).
+primitive(networkServiceInfo(_host, _program, _protocol, _port, _perm)).
 primitive(setuidProgramInfo(_host, _program, _owner)).
 primitive(nfsExportInfo(_server, _path, _access, _client)).
 primitive(nfsMounted(_client, _clientpath, _server, _serverpath, _access)).
@@ -39,6 +39,7 @@ primitive(vulExists(_machine,_vulID,_program,_range,_consequence)).
 primitive(canAccessFile(_host, _user, _access, _path)).
 primitive(isWebServer(_host)).
 primitive(gateway(_host)).
+primitive(flowExists(_src, _dst, _protocol, _port, _user)).
 meta(cvss(_vulID, _ac)).
 
 
@@ -215,52 +216,54 @@ interaction_rule(
   interaction_rule(
   (principalCompromised(Victim) :-
                 hasAccount(Victim, RemoteHost, User),
-                /* A client program is running on the Host  */
-                 clientProgram(H, _client),
                 /* Arp spoof works only if the victim and attacker are in the same subnet*/
                 attackerLocated(Zone),
                 hacl(Zone, H, _anyProtocol, _anyPort),
                 /* Victim is using standard arp for address resolution*/
                 networkServiceInfo(H, arpd, _protocol, _port, _),
                 /* The standard arpd protocol is vulnerable to spoofing */
-                 vulExists(H, arpSpoofVuln, arpd, remoteExploit, arpSpoof),
+                vulExists(H, arpSpoofVuln, arpd, remoteExploit, arpSpoof),
                 /* The User has an account on a login service on the remote host */
-                logInService(RemoteHost, Protocol, Port)),
+                logInService(RemoteHost, Protocol, Port),
+                /* There is an active connection from the host to the remote machine */
+                flowExists(H, RemoteHost, Protocol, Port, User)), 
   rule_desc('password sniffing through spoof',
   0.8)).
   
   /*The following 2 rules were added to enable route hijacking*/
     interaction_rule(
   (principalCompromised(Victim) :-
+				/* The victim has a user account on the remote host */
                 hasAccount(Victim, RemoteHost, User),
-                /* A client program is running on the Host  */
-                 clientProgram(H, _client),
                 /* Route hijacking does not require that the victim and attacker are in the same subnet*/
                 /*attackerLocated(Zone),
                 hacl(Zone, H, _anyProtocol, _anyPort),*/
                 /* nrlolsr is being used */
-                networkServiceInfo(H, nrlolsr, _protocol, _port, _),
+                networkServiceInfo(H, nrlolsr, olsr, _no_port, _user),
                 /* nrlolsr is misconfigured allowing traffic hijacking */
-                 vulExists(H, nrlolsrVul, nrlolsr, remoteExploit, nrlolsrHijack),
+                vulExists(H, nrlolsrVul, nrlolsr, remoteExploit, nrlolsrHijack),
                 /* The User has an account on a login service on the remote host */
-                logInService(RemoteHost, Protocol, Port)),
+                logInService(RemoteHost, Protocol, Port),
+                /* There is an active connection from the host to the remote machine */
+                flowExists(H, RemoteHost, Protocol, Port, User)), 
   rule_desc('password sniffing through route hijack',
   0.8)).
   
   interaction_rule(
   (principalCompromised(Victim) :-
+				/* The victim has a user account on the remote host */
                 hasAccount(Victim, RemoteHost, User),
-                /* A client program is running on the Host  */
-                 clientProgram(H, _client),
-				/* Route hijacking does not require that the victim and attacker are in the same subnet*/
+                /* Route hijacking does not require that the victim and attacker are in the same subnet*/
                 /*attackerLocated(Zone),
-                hacl(Zone, H, _, _),*/
-                /* OSPF_MDR is being used */
-                networkServiceInfo(H, ospf_mdr, _protocol, _port, _),
-                /* OSPF_MDR is misconfigured allowing traffic hijacking */
-                 vulExists(H, ospf_mdrVul, ospf_mdr, remoteExploit, ospf_mdrHijack),
+                hacl(Zone, H, _anyProtocol, _anyPort),*/
+                /* quagga_ospf_mdr3 is being used */
+                networkServiceInfo(H, quagga_ospf_mdr3, ospf_mdr, _no_port, _user),
+                /* quagga_ospf_mdr3 is misconfigured allowing traffic hijacking */
+                vulExists(H, quagga_ospf_mdr3_Vul, ospf_mdr, remoteExploit, quagga_ospf_mdr3Hijack),
                 /* The User has an account on a login service on the remote host */
-                logInService(RemoteHost, Protocol, Port)),
+                logInService(RemoteHost, Protocol, Port),
+                /* There is an active connection from the host to the remote machine */
+                flowExists(H, RemoteHost, Protocol, Port, User)), 
   rule_desc('password sniffing through route hijack',
   0.8)).
 

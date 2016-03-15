@@ -25,6 +25,10 @@
       <Value>False</Value>
     </Attribute>
     <Attribute>
+      <Name>dst</Name>
+      <Value>'10.0.0.6/32'</Value>
+    </Attribute>
+    <Attribute>
       <Name>spoofedBetweenAttackergw</Name>
       <Value>True</Value>
     </Attribute>
@@ -59,6 +63,10 @@
     <Attribute>
       <Name>isSrcBetweenSpoofedAndDstgw</Name>
       <Value>False</Value>
+    </Attribute>
+    <Attribute>
+      <Name>src</Name>
+      <Value>'10.0.0.1/32'</Value>
     </Attribute>
     <Attribute>
       <Name>isAttackerBetweenSpoofedAndDstgw</Name>
@@ -99,6 +107,10 @@
       <Value>True</Value>
     </Attribute>
     <Attribute>
+      <Name>dst</Name>
+      <Value>'10.0.0.8/32'</Value>
+    </Attribute>
+    <Attribute>
       <Name>spoofedBetweenAttackergw</Name>
       <Value>True</Value>
     </Attribute>
@@ -133,6 +145,10 @@
     <Attribute>
       <Name>isSrcBetweenSpoofedAndDstgw</Name>
       <Value>False</Value>
+    </Attribute>
+    <Attribute>
+      <Name>src</Name>
+      <Value>'10.0.0.3/32'</Value>
     </Attribute>
     <Attribute>
       <Name>isAttackerBetweenSpoofedAndDstgw</Name>

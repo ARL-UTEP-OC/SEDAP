@@ -7,7 +7,7 @@
 
 :-load_dyn('running_rules.P').
 
-:-load_dyn('input.p').
+:-load_dyn('sampleInput_IPs.P').
 
 :-assert(traceMode(completeTrace2)).
 

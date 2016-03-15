@@ -121,9 +121,18 @@ def generateParametersFromTrafficProfile():
 	global flowDescriptionAttributesXML
 	
 	for flow in flows:
-		#flowDescriptionAttributes["fromHop"]
 		src = flow[0]
 		dst = flow[1]
+					
+		#flowDescriptionAttributes["src"]
+		flowDescriptionAttributes["src"] = "'"+str(src)+"'"
+		logging.debug("src %s",flowDescriptionAttributes["src"])
+		
+		#flowDescriptionAttributes["dst"]
+		flowDescriptionAttributes["dst"] = "'"+str(dst)+"'"
+		logging.debug("dst %s",flowDescriptionAttributes["dst"])
+
+		#flowDescriptionAttributes["fromHop"]
 		
 		logging.debug( "looking for: %s",(attackNode,src))
 		if ((attackNode,src)) in directLinks:
@@ -374,6 +383,7 @@ def generateParametersFromTrafficProfile():
 		#######now generate XML tags:
 		#print "Here!!!"
 		flowDescriptionAttributesXML = etree.SubElement(attributesXML, "FlowDescriptionAttributes")
+		
 		for attribute in flowDescriptionAttributes:
 			attributeXML = etree.SubElement(flowDescriptionAttributesXML, "Attribute")
 			nameXML = etree.SubElement(attributeXML, "Name")

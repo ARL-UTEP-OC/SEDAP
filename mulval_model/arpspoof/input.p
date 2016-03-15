@@ -14,7 +14,7 @@ of arp
 */
 
 attackerLocated(subnet1).
-attackGoal(execCode(ftpServerHost,userLevel)).
+attackGoal(execCode(ftpServerHost,victimAccount)).
 
 hacl(subnet1, ftpClientHost, _allProtocols , _allPorts).
 hacl(subnet1, router1, _allProtocols , _allPorts).
@@ -25,7 +25,6 @@ gateway(router1).
 gateway(router2). 
 
 /* client */
-clientProgram(ftpClientHost,ftpClient_app).
 networkServiceInfo(ftpClientHost, arpd, _NA_layer2 , _NA_layer2 , _NA_layer2). 
 vulExists(ftpClientHost, arpSpoofVuln, arpd).
 vulProperty(arpSpoofVuln, remoteExploit, arpSpoof).
@@ -36,5 +35,8 @@ networkServiceInfo(router2 , arpd, _NA_layer2 , _NA_layer2 , _NA_layer2).
 
 /* ftp server */
 networkServiceInfo(ftpServerHost , ftpd, tcp , 21, userLevel). 
-hasAccount(victimUser, ftpServerHost, userLevel).
+hasAccount(victim, ftpServerHost, victimAccount).
 networkServiceInfo(ftpServerHost, arpd, _NA_layer2 , _NA_layer2 , _NA_layer2). 
+
+/* comms */
+flowExists(ftpClientHost, ftpServerHost, tcp, 21, victimAccount).

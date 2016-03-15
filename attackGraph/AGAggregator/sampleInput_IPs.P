@@ -1,42 +1,36 @@
 /*
 Topology
-									 (10.0.0.4)  (10.0.0.5)  (10.0.0.6)
-ftpClientHost -- subnet1 -- router1 -- 'router2/32' -- router3 -- ftpServer
- (10.0.0.1)               (10.0.0.3)      |
-                                          |
-                                       subnet2  
-                                          |
-                                          |
-                                       attacker  (10.0.0.7)
+								  (10.0.0.3) (10.0.0.4) (10.0.0.5)
+ftpClient -- subnet1 -- router1 -- router2 -- router3 -- ftpServerHost
+ (10.0.0.1)           (10.0.0.2)      |
+                                      |
+                                   attacker  (10.0.0.6)
 
-In this scenario, the attacker takes advantage of the fact
+In this scenario, the '10.0.0.6/32' takes advantage of the fact
 that ftp is cleartext and conducts route hijack attack thanks to 
 a misconfigured routing protocol
 */
 
-attackerLocated('router2/32').
-attackGoal(execCode(ftpServerHost,userLevel)).
+attackerLocated('10.0.0.3/32').
+attackGoal(execCode('10.0.0.5/32',_)).
 
-hacl(ftpClientHost, router1, _allProtocols , _allPorts).
-hacl(router1, 'router2/32', _allProtocols , _allPorts).
-hacl('router2/32', router3, _allProtocols , _allPorts).
-hacl(router3, ftpServerHost, tcp , 21).
+hacl('10.0.0.1/32', '10.0.0.2/32', _allProtocols , _allPorts).
+hacl('10.0.0.2/32', '10.0.0.3/32', _allProtocols , _allPorts).
+hacl('10.0.0.3/32', '10.0.0.4/32', _allProtocols , _allPorts).
+hacl('10.0.0.4/32', '10.0.0.5/32', tcp , 21).
 
-gateway(router1). 
-gateway('router2/32').
-gateway(router3).
+gateway('10.0.0.2/32'). 
+gateway('10.0.0.3/32').
+gateway('10.0.0.4/32').
 
 /* client */
-clientProgram(ftpClientHost,ftpClient_app).
-networkServiceInfo(ftpClientHost, nrlolsr, olsr , _NA_layer3 , _NA_layer3). 
-vulExists(ftpClientHost, nrlolsrVul, nrlolsr, remoteExploit, nrlolsrHijack).
-
-/* routers */
-networkServiceInfo(router1 , nrlolsr, olsr , _NA_layer3 , _NA_layer3). 
-networkServiceInfo('router2/32' , nrlolsr, olsr , _NA_layer3 , _NA_layer3). 
-networkServiceInfo(router3 , nrlolsr, olsr , _NA_layer3 , _NA_layer3). 
+networkServiceInfo('10.0.0.1/32', nrlolsr, olsr , _NA_port_layer3 , _NA_perm_layer3). 
+vulExists('10.0.0.1/32', nrlolsrVul, nrlolsr, remoteExploit, nrlolsrHijack).
+hasAccount(victim, '10.0.0.5/32', victimAccount).
 
 /* ftp server */
-networkServiceInfo(ftpServerHost , ftpd, tcp , 21, userLevel). 
-hasAccount(victimUser, ftpServerHost, userLevel).
-networkServiceInfo(ftpServerHost, nrlolsr, olsr , _NA_layer3 , _NA_layer3). 
+networkServiceInfo('10.0.0.5/32' , ftpd, tcp , 21, victimAccount). 
+
+/* comms */
+flowExists('10.0.0.1/32', '10.0.0.5/32', tcp, 21, victimAccount).
+

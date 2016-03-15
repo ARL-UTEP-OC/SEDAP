@@ -14,6 +14,10 @@
 			<Value>False</Value>
 		</Attribute>
 		<Attribute>
+			<Name>duringLinkLost</Name>
+			<Value>False</Value>
+		</Attribute>
+		<Attribute>
 			<Name>distance</Name>
 			<Value>5</Value>
 		</Attribute>
@@ -22,16 +26,16 @@
 			<Value>False</Value>
 		</Attribute>
 		<Attribute>
+			<Name>dst</Name>
+			<Value>'10.0.0.6/32'</Value>
+		</Attribute>
+		<Attribute>
 			<Name>isAttackerBetweenSpoofedAndDst</Name>
 			<Value>False</Value>
 		</Attribute>
 		<Attribute>
 			<Name>isDstBetweenSpoofedAndAttacker</Name>
 			<Value>True</Value>
-		</Attribute>
-		<Attribute>
-			<Name>modelEvaluation</Name>
-			<Value>False</Value>
 		</Attribute>
 		<Attribute>
 			<Name>isSrcBetweenSpoofedAndDst</Name>
@@ -54,6 +58,10 @@
 			<Value>False</Value>
 		</Attribute>
 		<Attribute>
+			<Name>altPathWithoutAttacker</Name>
+			<Value>True</Value>
+		</Attribute>
+		<Attribute>
 			<Name>destSpoofed</Name>
 			<Value>False</Value>
 		</Attribute>
@@ -66,8 +74,8 @@
 			<Value>'UDP'</Value>
 		</Attribute>
 		<Attribute>
-			<Name>altPathWithoutAttacker</Name>
-			<Value>True</Value>
+			<Name>src</Name>
+			<Value>'10.0.0.1/32'</Value>
 		</Attribute>
 		<Attribute>
 			<Name>hopsFromSpoofedToDest</Name>
@@ -92,6 +100,10 @@
 			<Value>False</Value>
 		</Attribute>
 		<Attribute>
+			<Name>duringLinkLost</Name>
+			<Value>True</Value>
+		</Attribute>
+		<Attribute>
 			<Name>distance</Name>
 			<Value>5</Value>
 		</Attribute>
@@ -100,16 +112,16 @@
 			<Value>True</Value>
 		</Attribute>
 		<Attribute>
+			<Name>dst</Name>
+			<Value>'10.0.0.8/32'</Value>
+		</Attribute>
+		<Attribute>
 			<Name>isAttackerBetweenSpoofedAndDst</Name>
 			<Value>True</Value>
 		</Attribute>
 		<Attribute>
 			<Name>isDstBetweenSpoofedAndAttacker</Name>
 			<Value>False</Value>
-		</Attribute>
-		<Attribute>
-			<Name>modelEvaluation</Name>
-			<Value>True</Value>
 		</Attribute>
 		<Attribute>
 			<Name>isSrcBetweenSpoofedAndDst</Name>
@@ -132,6 +144,10 @@
 			<Value>False</Value>
 		</Attribute>
 		<Attribute>
+			<Name>altPathWithoutAttacker</Name>
+			<Value>False</Value>
+		</Attribute>
+		<Attribute>
 			<Name>destSpoofed</Name>
 			<Value>False</Value>
 		</Attribute>
@@ -144,8 +160,8 @@
 			<Value>'UDP'</Value>
 		</Attribute>
 		<Attribute>
-			<Name>altPathWithoutAttacker</Name>
-			<Value>False</Value>
+			<Name>src</Name>
+			<Value>'10.0.0.3/32'</Value>
 		</Attribute>
 		<Attribute>
 			<Name>hopsFromSpoofedToDest</Name>

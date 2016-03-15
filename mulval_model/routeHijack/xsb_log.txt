@@ -7,14 +7,14 @@ XSB Version 3.5.0 (Maotai) of July 6, 2013
 [Patch date: 2014-07-03 17:24:44 -0400 (Thu, 03 Jul 2014)]
 
 | ?- [Compiling ./run]
-[run compiled, cpu time used: 0.0000 seconds]
+[run compiled, cpu time used: 0.0040 seconds]
 [run loaded]
 [libmulval loaded]
 [translate loaded]
 [attack_trace loaded]
 [auxiliary loaded]
 [/root/gitIntelAttacker/impactpredictionmodels/mulval_model/routeHijack/running_rules.P dynamically loaded, cpu time used: 0.0000 seconds]
-[/root/gitIntelAttacker/impactpredictionmodels/mulval_model/routeHijack/input.p dynamically loaded, cpu time used: 0.0000 seconds]
+[/root/gitIntelAttacker/impactpredictionmodels/mulval_model/routeHijack/sampleInput_IPs.P dynamically loaded, cpu time used: 0.0040 seconds]
 [/root/install/mulval/src/analyzer/advances_notrim.P dynamically loaded, cpu time used: 0.0000 seconds]
 @@@@@@@@@@@@@@Done transforming in mode dynamic_decl
 
@@ -29,4 +29,4 @@ Running attack simulation...
 
 yes
 | ?- 
-End XSB (cputime 0.01 secs, elapsetime 0.02 secs)
+End XSB (cputime 0.02 secs, elapsetime 0.02 secs)
