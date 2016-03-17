@@ -9,12 +9,12 @@
       <Value>False</Value>
     </Attribute>
     <Attribute>
-      <Name>isDstBetweenSpoofedAndAttacker</Name>
+      <Name>spoofedBetweenAttackergw</Name>
       <Value>True</Value>
     </Attribute>
     <Attribute>
-      <Name>isSrcBetweenSpoofedAndDst</Name>
-      <Value>False</Value>
+      <Name>typeName</Name>
+      <Value>'UDP'</Value>
     </Attribute>
     <Attribute>
       <Name>victim</Name>
@@ -37,10 +37,6 @@
       <Value>False</Value>
     </Attribute>
     <Attribute>
-      <Name>routingProtocol</Name>
-      <Value>'olsr'</Value>
-    </Attribute>
-    <Attribute>
       <Name>dst</Name>
       <Value>'10.0.0.6/32'</Value>
     </Attribute>
@@ -49,19 +45,23 @@
       <Value>5</Value>
     </Attribute>
     <Attribute>
+      <Name>dest</Name>
+      <Value></Value>
+    </Attribute>
+    <Attribute>
       <Name>altPathWithoutAttacker</Name>
       <Value>True</Value>
     </Attribute>
     <Attribute>
-      <Name>routingProgram</Name>
-      <Value>'nrlolsr'</Value>
+      <Name>isSrcBetweenSpoofedAndDst</Name>
+      <Value>False</Value>
     </Attribute>
     <Attribute>
-      <Name>spoofedBetweenAttacker</Name>
+      <Name>isDstBetweenSpoofedAndAttacker</Name>
       <Value>True</Value>
     </Attribute>
     <Attribute>
-      <Name>spoofedBetweenAttackergw</Name>
+      <Name>spoofedBetweenAttacker</Name>
       <Value>True</Value>
     </Attribute>
     <Attribute>
@@ -77,16 +77,16 @@
       <Value>True</Value>
     </Attribute>
     <Attribute>
-      <Name>typeName</Name>
-      <Value>'UDP'</Value>
-    </Attribute>
-    <Attribute>
       <Name>fromHop</Name>
       <Value>6</Value>
     </Attribute>
     <Attribute>
       <Name>destSpoofed</Name>
       <Value>False</Value>
+    </Attribute>
+    <Attribute>
+      <Name>victimNode</Name>
+      <Value></Value>
     </Attribute>
     <Attribute>
       <Name>isSrcBetweenSpoofedAndDstgw</Name>
@@ -107,12 +107,12 @@
       <Value>True</Value>
     </Attribute>
     <Attribute>
-      <Name>isDstBetweenSpoofedAndAttacker</Name>
-      <Value>False</Value>
+      <Name>spoofedBetweenAttackergw</Name>
+      <Value>True</Value>
     </Attribute>
     <Attribute>
-      <Name>isSrcBetweenSpoofedAndDst</Name>
-      <Value>False</Value>
+      <Name>typeName</Name>
+      <Value>'UDP'</Value>
     </Attribute>
     <Attribute>
       <Name>victim</Name>
@@ -135,10 +135,6 @@
       <Value>False</Value>
     </Attribute>
     <Attribute>
-      <Name>routingProtocol</Name>
-      <Value>'olsr'</Value>
-    </Attribute>
-    <Attribute>
       <Name>dst</Name>
       <Value>'10.0.0.8/32'</Value>
     </Attribute>
@@ -147,19 +143,23 @@
       <Value>5</Value>
     </Attribute>
     <Attribute>
+      <Name>dest</Name>
+      <Value></Value>
+    </Attribute>
+    <Attribute>
       <Name>altPathWithoutAttacker</Name>
       <Value>False</Value>
     </Attribute>
     <Attribute>
-      <Name>routingProgram</Name>
-      <Value>'nrlolsr'</Value>
+      <Name>isSrcBetweenSpoofedAndDst</Name>
+      <Value>False</Value>
+    </Attribute>
+    <Attribute>
+      <Name>isDstBetweenSpoofedAndAttacker</Name>
+      <Value>False</Value>
     </Attribute>
     <Attribute>
       <Name>spoofedBetweenAttacker</Name>
-      <Value>True</Value>
-    </Attribute>
-    <Attribute>
-      <Name>spoofedBetweenAttackergw</Name>
       <Value>True</Value>
     </Attribute>
     <Attribute>
@@ -175,16 +175,16 @@
       <Value>True</Value>
     </Attribute>
     <Attribute>
-      <Name>typeName</Name>
-      <Value>'UDP'</Value>
-    </Attribute>
-    <Attribute>
       <Name>fromHop</Name>
       <Value>4</Value>
     </Attribute>
     <Attribute>
       <Name>destSpoofed</Name>
       <Value>False</Value>
+    </Attribute>
+    <Attribute>
+      <Name>victimNode</Name>
+      <Value></Value>
     </Attribute>
     <Attribute>
       <Name>isSrcBetweenSpoofedAndDstgw</Name>

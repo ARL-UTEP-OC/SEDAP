@@ -24,6 +24,13 @@ attributesXML = etree.Element("Attributes")
 
 #parameters for output
 flowDescriptionAttributes = {}
+flowDescriptionAttributes["src"]=''
+flowDescriptionAttributes["dst"]=''
+flowDescriptionAttributes["attackNode"]=''
+flowDescriptionAttributes["victim"]=''
+flowDescriptionAttributes["routingProgram"]=''
+flowDescriptionAttributes["routingProtocol"]=''
+flowDescriptionAttributes["victim"]=''
 flowDescriptionAttributes["fromHop"]=''
 flowDescriptionAttributes["toHop"]=''
 flowDescriptionAttributes["typeName"]=''
@@ -58,14 +65,14 @@ def extractLinksfromRoutes(nodeIP, routes):
 		if elements[0] == '0.0.0.0' or elements [0].startswith('224.'):
 			continue
 		#otherwise, if 2nd column is 0.0.0.0, then this is a direct link
-		dest = elements[0] + "/" + elements[2]
+		dst = elements[0] + "/" + elements[2]
 		if elements[1] == '0.0.0.0':
-			directLinks[(nodeIP,IPNetwork(dest))] = (elements[1], elements[4])
+			directLinks[(nodeIP,IPNetwork(dst))] = (elements[1], elements[4])
 			#also add direct links to our networkx graph for later processing
-			G.add_edge(nodeIP,IPNetwork(dest))
+			G.add_edge(nodeIP,IPNetwork(dst))
 		#otherwise, this we extract the gateway
 		else:
-			gateways[(nodeIP,IPNetwork(dest))] = (elements[1], elements[4])
+			gateways[(nodeIP,IPNetwork(dst))] = (elements[1], elements[4])
 
 def getPathThroughGW(src, dst):
 	path = []
@@ -119,8 +126,21 @@ def generateParametersFromTrafficProfile():
 	global flows
 	global flowDescriptionAttributes
 	global flowDescriptionAttributesXML
+	global attackNode
+	global victimNode
+	global routingName
+	global routingProtocol
 	
 	for flow in flows:
+		
+		#flowDescriptionAttributes["attackNode"]
+		flowDescriptionAttributes["attackNode"] = "'"+str(attackNode)+"'"
+		logging.debug("attackNode %s",flowDescriptionAttributes["attackNode"])
+
+		#flowDescriptionAttributes["victim"]
+		flowDescriptionAttributes["victim"] = "'"+str(victim)+"'"
+		logging.debug("victim %s",flowDescriptionAttributes["victim"])
+		
 		src = flow[0]
 		dst = flow[1]
 					
@@ -132,8 +152,15 @@ def generateParametersFromTrafficProfile():
 		flowDescriptionAttributes["dst"] = "'"+str(dst)+"'"
 		logging.debug("dst %s",flowDescriptionAttributes["dst"])
 
-		#flowDescriptionAttributes["fromHop"]
+		#flowDescriptionAttributes["routingProgram"]
+		flowDescriptionAttributes["routingProgram"] = "'"+str(routingProgram)+"'"
+		logging.debug("routingProgram %s",flowDescriptionAttributes["routingProgram"])
 		
+		#flowDescriptionAttributes["routingProtocol"]
+		flowDescriptionAttributes["routingProtocol"] = "'"+str(routingProtocol)+"'"
+		logging.debug("routingProtocol %s",flowDescriptionAttributes["routingProtocol"])
+		
+		#flowDescriptionAttributes["fromHop"]
 		logging.debug( "looking for: %s",(attackNode,src))
 		if ((attackNode,src)) in directLinks:
 			flowDescriptionAttributes["fromHop"] = directLinks[(attackNode,src)][1]
@@ -399,15 +426,25 @@ def readConfig(filename):
 	global victim
 	global attackNode
 	global flows
+	global routingProgram
+	global routingProtocol
+	
 	
 	tree = ET.parse(filename)
 	root = tree.getroot()
 	scenarioConfig = root.find('scenario-config')
 	attackName = scenarioConfig.find('attack-name').text.rstrip().lstrip()
-	if len(attackName.split("spoofingAttack.sh")) > 1:
-		#####Temporary hack, won't work if IPs are different!!!!!#######
-		victim = IPNetwork("10.0.0."+""+attackName.split("spoofingAttack.sh")[1])
+	
+	if attackName == "spoofingAttack":
+		victim = IPNetwork(scenarioConfig.find('victim-node').text.rstrip().lstrip())
+	else:
+		print "Only works with spoofing attack for now!"
+		exit()
 	attackNode = IPNetwork(scenarioConfig.find('attack-node').text.rstrip().lstrip())
+	
+	routingProgram = scenarioConfig.find('routing-mechanism').find('program').text.rstrip().lstrip()
+	routingProtocol = scenarioConfig.find('routing-mechanism').find('protocol').text.rstrip().lstrip()
+	
 	trafficProfile = scenarioConfig.find('traffic-profile')
 	#extract the traffic flows
 	for flow in trafficProfile.findall('flow'):

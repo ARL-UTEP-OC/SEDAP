@@ -1,11 +1,22 @@
 <xml>
 <scenario-config>
    <attack-name>
-   spoofingAttack.sh5
+   spoofingAttack
    </attack-name>
    <attack-node>
    10.0.0.7/32
    </attack-node>
+   <victim-node>
+   10.0.0.5/32
+   </victim-node>
+   <routing-mechanism>
+	   <program>
+	   nrlolsr
+	   </program>
+	   <protocol>
+	   olsr
+	   </protocol>
+   </routing-mechanism>
    <traffic-profile>
 	   <flow>
 	      <src>
