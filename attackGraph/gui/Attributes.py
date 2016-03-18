@@ -27,6 +27,7 @@ class Attributes(object):
             for attribute in flowAttribute.findall('Attribute'):
                 flowAttributes[attribute.find('Name').text] = str(attribute.find('Value').text)
             attributes.append(flowAttributes)
+        
         return attributes
     
     def readARFF(self, filePath):
@@ -70,21 +71,22 @@ class Attributes(object):
                 flowAttributes["isSrcBetweenSpoofedAndDstgw"]=attr[34]
                 flowAttributes["altPathWithoutAttacker"]=attr[35]
                 attributes.append(flowAttributes)
+        file.close()
                 
         return attributes
     
-    def writeXML(self,filePath,attributes):
+    def writeXML(self,fileName,attributes):
         prettyXml = self.toXMLString(attributes)
         # print prettyXml
-        
-        text_file = open(filePath, "w")
+        text_file = open(fileName, "w")
         text_file.write(prettyXml)
+        text_file.close()
     
     def writeModelEvaluationXML(self,filePath,attributes,results):
         copyAttributes = list(attributes)
         # print results
         for index, flowAttributes in enumerate(copyAttributes):
-            flowAttributes["duringLinkLost"]=str(results[index])
+            flowAttributes["modelEvaluation"]=str(results[index])
         self.writeXML(filePath,copyAttributes)
         
     def toXMLString(self, attributes):
