@@ -257,7 +257,7 @@ class AttributesInterface:
     
     def on_save_as_clicked(self, widget):
         chooser = gtk.FileChooserDialog(title=None,action=gtk.FILE_CHOOSER_ACTION_SAVE,
-                                  buttons=(gtk.STOCK_CANCEL,gtk.RESPONSE_CANCEL,gtk.STOCK_OPEN,gtk.RESPONSE_OK))
+                                  buttons=(gtk.STOCK_OK,gtk.RESPONSE_OK,gtk.STOCK_CANCEL,gtk.RESPONSE_CANCEL))
         
         filter = gtk.FileFilter()
         filter.set_name("XML Files")
@@ -357,7 +357,7 @@ class AttributesInterface:
 
     def on_convert_to_py_clicked(self, widget):
         try: 
-            self.textViewPyRules.get_buffer().set_text(self.rules.convert(self.rules.wekaRules))
+            self.textViewPyRules.get_buffer().set_text(self.rules.convert())
             self.saveAsPyBtn.set_sensitive(True)
         except Exception, Argument:
             # Display error
@@ -365,7 +365,7 @@ class AttributesInterface:
         
     def on_save_as_py_clicked(self, widget):
         chooser = gtk.FileChooserDialog(title=None,action=gtk.FILE_CHOOSER_ACTION_SAVE,
-                                  buttons=(gtk.STOCK_CANCEL,gtk.RESPONSE_CANCEL,gtk.STOCK_OPEN,gtk.RESPONSE_OK))
+                                  buttons=(gtk.STOCK_OK,gtk.RESPONSE_OK,gtk.STOCK_CANCEL,gtk.RESPONSE_CANCEL))
         filter = gtk.FileFilter()
         filter.set_name("Python Files")
         filter.add_pattern("*.py")

@@ -13,13 +13,14 @@ class Rules(object):
         pass
     
     def readRules(self, filePath):
-        file = open(filePath, 'r')
-        self.wekaRules = file.read()
-        return self.wekaRules
-    
-    def convert(self, rules):
+        self.filePath = filePath
+        file = open(filePath)
+        return file.read()
+     
+    def convert(self):
         
         convRules =''
+        rules = open(self.filePath)
     
         for line in rules:
             ans = ''
