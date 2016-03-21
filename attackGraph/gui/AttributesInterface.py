@@ -10,6 +10,7 @@ Created on Dec 18, 2015
 import sys
 from Attributes import Attributes
 from Rules import Rules
+from Routes import Routes
 try:
     import pygtk
     pygtk.require("2.0")
@@ -39,10 +40,18 @@ class AttributesInterface:
         #self.window.set_resizable(False)
         self.window.set_border_width(10)
         self.window.show()
-        
+      
         self.treeView = self.builder.get_object("treeview")
         self.create_columns(self.treeView)
         self.treeView.connect("cursor-changed", self.on_cursor_changed)
+        
+        # Routes
+        self.openRoutesBtn = self.builder.get_object("openRoutesBtn")
+        self.openRoutesBtn.connect("clicked", self.on_open_routes_clicked)
+        self.convertRoutesBtn = self.builder.get_object("convertRoutesBtn")
+        self.convertRoutesBtn.connect("clicked", self.on_convert_routes_clicked)
+        self.saveAsConvertedRoutesBtn = self.builder.get_object("saveAsConvertedRoutesBtn")
+        self.saveAsConvertedRoutesBtn.connect("clicked", self.on_save_as_conv_routes_clicked)
         # add new elements
         self.addBtn = self.builder.get_object("addBtn")
         self.addBtn.connect("clicked", self.on_add_clicked)
@@ -106,6 +115,9 @@ class AttributesInterface:
         #list store & tree
         self.liststoreAttributes = gtk.ListStore(str,str)
         self.treeView.set_model(self.liststoreAttributes)
+        
+        self.textViewRoutes  = self.builder.get_object("textViewRoutes")
+        self.textViewConvertedRoutes  = self.builder.get_object("textViewConvertedRoutes")
         self.textViewXml  = self.builder.get_object("textViewXml")
         self.textViewModel  = self.builder.get_object("textViewModel")
         self.textViewModelOutput  = self.builder.get_object("textViewModelOutput")
@@ -116,6 +128,48 @@ class AttributesInterface:
         self.new()
         
         self.rules = Rules(self)
+        
+        self.routes = Routes(self)
+
+    def on_open_routes_clicked(self, widget):
+        dialog = self.open_dialog(["xml"])
+        response = dialog.run()
+        
+        if response == gtk.RESPONSE_OK:
+            filename = dialog.get_filename()
+            self.textViewRoutes.get_buffer().set_text(self.routes.readRoutes(filename))
+            self.convertRoutesBtn.set_sensitive(True)
+            #rules.convert(rulesStr)
+        dialog.destroy()
+        
+    def on_convert_routes_clicked(self, widget):
+        try: 
+            self.textViewConvertedRoutes.get_buffer().set_text(self.routes.convert())
+            self.saveAsConvertedRoutesBtn.set_sensitive(True)
+        except Exception, Argument:
+            # Display error
+            self.error_dialog("Error", "Could not convert Routes",str(Argument))
+            
+    def on_save_as_conv_routes_clicked(self, widget):
+        chooser = gtk.FileChooserDialog(title=None,action=gtk.FILE_CHOOSER_ACTION_SAVE,
+                                  buttons=(gtk.STOCK_OK,gtk.RESPONSE_OK,gtk.STOCK_CANCEL,gtk.RESPONSE_CANCEL))
+        filter = gtk.FileFilter()
+        filter.set_name("XML Files")
+        filter.add_pattern("*.xml")
+        chooser.add_filter(filter)
+        chooser.set_default_response(gtk.RESPONSE_OK)
+        
+        response = chooser.run()
+        
+        path = "None"
+        if response == gtk.RESPONSE_OK:
+            print("Save as clicked")
+            path = chooser.get_filename()
+        
+        if path != "None":
+            self.routes.writeRoute(self.routes.convert(), path)
+
+        chooser.destroy()
 
     def on_cursor_changed(self, widget, *args):
         self.deleteAttributeBtn.set_sensitive(True)
@@ -170,24 +224,10 @@ class AttributesInterface:
         flowAttributes = dict()
         self.flowAttributesList.append(flowAttributes)
         self.currentFlowAttrIndex = len(self.flowAttributesList)-1
-       
+    
     def on_open_attribute_clicked(self, widget):
         #creating dialog
-        dialog = gtk.FileChooserDialog("Please choose a file", self.window,
-            gtk.FILE_CHOOSER_ACTION_OPEN,
-            (gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL,
-             gtk.STOCK_OPEN, gtk.RESPONSE_OK))
-        
-        filter = gtk.FileFilter()
-        filter.set_name("XML Files")
-        filter.add_pattern("*.xml")
-        dialog.add_filter(filter)
-        
-        filter = gtk.FileFilter()
-        filter.set_name("Weka Files")
-        filter.add_pattern("*.arff")
-        dialog.add_filter(filter)
-
+        dialog = self.open_dialog(["xml","wekadata"])
         response = dialog.run()
 
         if response == gtk.RESPONSE_OK:
@@ -218,16 +258,7 @@ class AttributesInterface:
         
     def on_open_model_clicked(self, widget):
 
-        dialog = gtk.FileChooserDialog("Please choose a file", self.window,
-            gtk.FILE_CHOOSER_ACTION_OPEN,
-            (gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL,
-             gtk.STOCK_OPEN, gtk.RESPONSE_OK))
-        
-        filter = gtk.FileFilter()
-        filter.set_name("Python Files")
-        filter.add_pattern("*.py")
-        dialog.add_filter(filter)
-
+        dialog = self.open_dialog(["py"])
         response = dialog.run()
         
         if response == gtk.RESPONSE_OK:
@@ -336,16 +367,8 @@ class AttributesInterface:
                 self.liststoreAttributes.append([key,str(value)])
                     
     def on_open_rules_clicked(self, widget):
-        dialog = gtk.FileChooserDialog("Please choose a file", self.window,
-            gtk.FILE_CHOOSER_ACTION_OPEN,
-            (gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL,
-             gtk.STOCK_OPEN, gtk.RESPONSE_OK))
         
-        filter = gtk.FileFilter()
-        filter.set_name("Weka Rules")
-        filter.add_pattern("*.rules")
-        dialog.add_filter(filter)
-
+        dialog = self.open_dialog(["rules"])
         response = dialog.run()
         
         if response == gtk.RESPONSE_OK:
@@ -361,7 +384,7 @@ class AttributesInterface:
             self.saveAsPyBtn.set_sensitive(True)
         except Exception, Argument:
             # Display error
-            self.errorDialog("Error", "Could not convert Weka rules to Python",str(Argument))
+            self.error_dialog("Error", "Could not convert Weka rules to Python",str(Argument))
         
     def on_save_as_py_clicked(self, widget):
         chooser = gtk.FileChooserDialog(title=None,action=gtk.FILE_CHOOSER_ACTION_SAVE,
@@ -398,7 +421,7 @@ class AttributesInterface:
                 self.textViewModelOutput.get_buffer().set_text(str('\n'.join(map(str, self.evaluationResults))))
                 self.saveAsModelEvaluationBtn.set_sensitive(True)
         except Exception, Argument:
-            self.errorDialog("Error", "Could not load model",str(Argument))
+            self.error_dialog("Error", "Could not load model",str(Argument))
         
     def on_save_as_evaluate_clicked(self, widget):
         
@@ -435,7 +458,35 @@ class AttributesInterface:
         treeView.append_column(column)
         rendererText.connect("edited", self.text_edited)
         
-    def errorDialog(self, title, message,secondary_message):
+    def open_dialog(self,extensions):
+        
+        dialog = gtk.FileChooserDialog("Please choose a file", self.window,
+            gtk.FILE_CHOOSER_ACTION_OPEN,
+            (gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL,
+             gtk.STOCK_OPEN, gtk.RESPONSE_OK))
+        
+        for ext in extensions:
+            if ext == "py":
+                name = "Python Files"
+                pattern = "*.py"
+            elif ext == "xml":
+                name = "XML Files"
+                pattern = "*.xml"
+            elif ext == "rules":
+                name = "Weka Rules"
+                pattern = "*.rules"
+            elif ext == "wekadata":
+                name = "Weka Files"
+                pattern = "*.arff"
+                    
+            filter = gtk.FileFilter()
+            filter.set_name(name)
+            filter.add_pattern(pattern)
+            dialog.add_filter(filter)
+    
+        return dialog
+        
+    def error_dialog(self, title, message,secondary_message):
             # Display error
             warningDialog = gtk.MessageDialog(self.window, 0, gtk.MESSAGE_ERROR, gtk.BUTTONS_NONE, message)
             warningDialog.set_title(title)
