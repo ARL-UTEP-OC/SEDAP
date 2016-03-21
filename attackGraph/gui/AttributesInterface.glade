@@ -44,7 +44,7 @@
                           <object class="GtkLabel" id="label7a">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="label" translatable="yes">Core Xml Flows</property>
+                            <property name="label" translatable="yes">CORE Xml Routes</property>
                           </object>
                           <packing>
                             <property name="expand">False</property>
@@ -53,9 +53,17 @@
                           </packing>
                         </child>
                         <child>
-                          <object class="GtkTextView" id="textview1a">
+                          <object class="GtkScrolledWindow" id="scrolledwindow5d23">
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
+                            <property name="hscrollbar_policy">automatic</property>
+                            <property name="vscrollbar_policy">automatic</property>
+                            <child>
+                              <object class="GtkTextView" id="textViewRoutes">
+                                <property name="visible">True</property>
+                                <property name="can_focus">True</property>
+                              </object>
+                            </child>
                           </object>
                           <packing>
                             <property name="expand">True</property>
@@ -67,7 +75,7 @@
                           <object class="GtkLabel" id="label8a">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="label" translatable="yes">Standard Format  Flow Attributes</property>
+                            <property name="label" translatable="yes"> Flow Attributes</property>
                           </object>
                           <packing>
                             <property name="expand">False</property>
@@ -76,9 +84,17 @@
                           </packing>
                         </child>
                         <child>
-                          <object class="GtkTextView" id="textview2a">
+                          <object class="GtkScrolledWindow" id="scrolledwindow52dfg3">
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
+                            <property name="hscrollbar_policy">automatic</property>
+                            <property name="vscrollbar_policy">automatic</property>
+                            <child>
+                              <object class="GtkTextView" id="textViewConvertedRoutes">
+                                <property name="visible">True</property>
+                                <property name="can_focus">True</property>
+                              </object>
+                            </child>
                           </object>
                           <packing>
                             <property name="expand">True</property>
@@ -92,7 +108,7 @@
                             <property name="can_focus">False</property>
                             <property name="layout_style">center</property>
                             <child>
-                              <object class="GtkButton" id="button1a">
+                              <object class="GtkButton" id="openRoutesBtn">
                                 <property name="label" translatable="yes">Open</property>
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
@@ -105,9 +121,10 @@
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkButton" id="button2a">
+                              <object class="GtkButton" id="convertRoutesBtn">
                                 <property name="label" translatable="yes">Convert</property>
                                 <property name="visible">True</property>
+                                <property name="sensitive">False</property>
                                 <property name="can_focus">True</property>
                                 <property name="receives_default">True</property>
                               </object>
@@ -118,9 +135,10 @@
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkButton" id="button3">
+                              <object class="GtkButton" id="saveAsConvertedRoutesBtn">
                                 <property name="label" translatable="yes">Save As</property>
                                 <property name="visible">True</property>
+                                <property name="sensitive">False</property>
                                 <property name="can_focus">True</property>
                                 <property name="receives_default">True</property>
                               </object>
@@ -154,7 +172,7 @@
           <object class="GtkLabel" id="tablabel0">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
-            <property name="label" translatable="yes">Core Flows</property>
+            <property name="label" translatable="yes">Routes</property>
           </object>
           <packing>
             <property name="tab_fill">False</property>
