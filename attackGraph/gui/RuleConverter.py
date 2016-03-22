@@ -3,19 +3,15 @@ Created on Mar 18, 2016
 
 @author: epadilla2
 '''
+from Converter import Converter
 
-class Rules(object):
+class RuleConverter(Converter):
     '''
     classdocs
     '''
     
-    def __init__(self, params):
+    def __init__(self):
         pass
-    
-    def readRules(self, filePath):
-        self.filePath = filePath
-        file = open(filePath)
-        return file.read()
      
     def convert(self):
         
@@ -49,24 +45,17 @@ class Rules(object):
             else:
                 convRules =convRules+ ":\n"+indent+" return "+ ans +"\n"
         
-        outputString = """
-        #This file was auto-generated with rulesToPy.py
-        class Model(object):   
-         def __init__(self):
-          pass
-          
-         def evaluate(self, att):
-        """
+        self.outputStr = """
+#This file was auto-generated with rulesToPy.py
+class Model(object):   
+ def __init__(self):
+  pass
+  
+ def evaluate(self, att):
+"""
         
-        outputString = outputString + convRules +"""
-          return False
-        """
-        
-        self.pyRules = outputString
-        return self.pyRules
-    
-    def writePy(self, text,fileName):
-        text_file = open(fileName, "w")
-        text_file.write(text)
-        text_file.close()
+        self.outputStr = self.outputStr + convRules +"""
+  return False
+"""
+        return self.outputStr
     

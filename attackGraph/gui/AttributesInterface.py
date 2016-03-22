@@ -8,9 +8,11 @@ Created on Dec 18, 2015
 #!/usr/bin/env python
 
 import sys
-from Attributes import Attributes
-from Rules import Rules
-from Routes import Routes
+from AttributeConverter import AttributeConverter
+from RuleConverter import RuleConverter
+from RouteConverter import RouteConverter
+from ModelEvaluator import ModelEvaluator
+
 try:
     import pygtk
     pygtk.require("2.0")
@@ -123,13 +125,15 @@ class AttributesInterface:
         self.textViewModelOutput  = self.builder.get_object("textViewModelOutput")
         self.textViewWekaRules  = self.builder.get_object("textViewWekaRules")
         self.textViewPyRules  = self.builder.get_object("textViewPyRules")
-        #attributes
-        self.attr = Attributes(self)
+        #data converter
+        self.routes = RouteConverter()
+        
+        self.attr = AttributeConverter()
         self.new()
+
+        self.rules = RuleConverter()
         
-        self.rules = Rules(self)
-        
-        self.routes = Routes(self)
+        self.model = ModelEvaluator()
 
     def on_open_routes_clicked(self, widget):
         dialog = self.open_dialog(["xml"])
@@ -167,7 +171,7 @@ class AttributesInterface:
             path = chooser.get_filename()
         
         if path != "None":
-            self.routes.writeRoute(self.routes.convert(), path)
+            self.routes.writeOutput(path)# self.routes.convert(), 
 
         chooser.destroy()
 
@@ -255,37 +259,7 @@ class AttributesInterface:
             self.saveBtn.set_sensitive(True)
         #update status label
         self.update_status_label()
-        
-    def on_open_model_clicked(self, widget):
-
-        dialog = self.open_dialog(["py"])
-        response = dialog.run()
-        
-        if response == gtk.RESPONSE_OK:
-            print("Open clicked")
-            self.modelPath = dialog.get_filename()
-            dialog.destroy()
-            # Display warning before overriding model 
-            warningDialog = gtk.MessageDialog(self.window, 0, gtk.MESSAGE_WARNING, gtk.BUTTONS_NONE, "Do you want to continue?")
-            warningDialog.set_title("Warning")
-            warningDialog.add_buttons(gtk.STOCK_OK, gtk.RESPONSE_OK,gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL)
-            warningDialog.set_default_response(gtk.RESPONSE_OK)
-            warningDialog.set_resizable(False)
-            warningDialog.format_secondary_text("Current Model.py will be overridden by: \n\n"+ self.modelPath)
-            #warningDialog.set_property("secondary-text",("All unsaved changes will be lost."))
-            result = warningDialog.run ()
-            warningDialog.destroy()
-
-            #check if they are OK to continue after warning
-            if  result == gtk.RESPONSE_OK:
-                file = open(self.modelPath, 'r')
-                modelStr = file.read()
-                self.textViewModel.get_buffer().set_text(modelStr)
-                #write to file
-                text_file = open("Model.py", "w")
-                text_file.write(modelStr)
-                self.evaluateBtn.set_sensitive(True)
-    
+          
     def on_save_as_clicked(self, widget):
         chooser = gtk.FileChooserDialog(title=None,action=gtk.FILE_CHOOSER_ACTION_SAVE,
                                   buttons=(gtk.STOCK_OK,gtk.RESPONSE_OK,gtk.STOCK_CANCEL,gtk.RESPONSE_CANCEL))
@@ -365,6 +339,7 @@ class AttributesInterface:
         self.liststoreAttributes.clear()
         for key, value in self.flowAttributesList[self.currentFlowAttrIndex].iteritems():
                 self.liststoreAttributes.append([key,str(value)])
+ 
                     
     def on_open_rules_clicked(self, widget):
         
@@ -373,7 +348,7 @@ class AttributesInterface:
         
         if response == gtk.RESPONSE_OK:
             filename = dialog.get_filename()
-            self.textViewWekaRules.get_buffer().set_text(self.rules.readRules(filename))
+            self.textViewWekaRules.get_buffer().set_text(self.rules.readFromFile(filename))
             self.convertToPyBtn.set_sensitive(True)
             #rules.convert(rulesStr)
         dialog.destroy()
@@ -403,25 +378,42 @@ class AttributesInterface:
             path = chooser.get_filename()
         
         if path != "None":
-            self.rules.writePy(self.rules.pyRules, path)
+            self.rules.writeOutput(path) # self.rules.outputStr,
 
         chooser.destroy()
         
+    def on_open_model_clicked(self, widget):
+
+        dialog = self.open_dialog(["py"])
+        response = dialog.run()
+        
+        if response == gtk.RESPONSE_OK:
+            print("Open clicked")
+            filePath = dialog.get_filename()
+            dialog.destroy()
+            self.textViewModel.get_buffer().set_text(self.model.readFromFile(filePath))
+            self.evaluateBtn.set_sensitive(True)   
+        
     def on_evaluate_clicked(self, widget):
         
-        try: 
-            mod = __import__('Model', fromlist=['Model'])
-            ModelClass = getattr(mod, 'Model')
-            instance = ModelClass()
-        
-            self.evaluationResults = list()
-            for flowAttributes in self.flowAttributesList:
-                results = instance.evaluate(flowAttributes)
-                self.evaluationResults.append(results)
-                self.textViewModelOutput.get_buffer().set_text(str('\n'.join(map(str, self.evaluationResults))))
+        #try: 
+            # Display warning before overriding model 
+            warningDialog = gtk.MessageDialog(self.window, 0, gtk.MESSAGE_WARNING, gtk.BUTTONS_NONE, "Do you want to continue?")
+            warningDialog.set_title("Warning")
+            warningDialog.add_buttons(gtk.STOCK_OK, gtk.RESPONSE_OK,gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL)
+            warningDialog.set_default_response(gtk.RESPONSE_OK)
+            warningDialog.set_resizable(False)
+            warningDialog.format_secondary_text("Current Model.py will be overridden by: \n\n"+ self.model.filePath)
+            #warningDialog.set_property("secondary-text",("All unsaved changes will be lost."))
+            result = warningDialog.run ()
+            warningDialog.destroy()
+
+            #check if they are OK to continue after warning
+            if  result == gtk.RESPONSE_OK:
+                self.textViewModelOutput.get_buffer().set_text(str('\n'.join(map(str, self.model.evaluate(self.flowAttributesList)))))
                 self.saveAsModelEvaluationBtn.set_sensitive(True)
-        except Exception, Argument:
-            self.error_dialog("Error", "Could not load model",str(Argument))
+        #except Exception, Argument:
+        #    self.error_dialog("Error", "Could not load model",str(Argument))
         
     def on_save_as_evaluate_clicked(self, widget):
         

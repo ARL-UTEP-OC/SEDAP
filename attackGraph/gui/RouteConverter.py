@@ -8,12 +8,13 @@ import xml.etree.ElementTree as ET
 from lxml import etree
 from netaddr import *
 import logging
+from Converter import Converter
 
-class Routes(object):
+class RouteConverter(Converter):
     '''
     classdocs
     '''
-    def __init__(self, params):
+    def __init__(self):
         '''
         Constructor
         '''
@@ -477,10 +478,5 @@ class Routes(object):
             
         for edge in self.G:
             hacls.write("gateway('"+str(edge)+"').\n")
-        
-        return etree.tostring(self.attributesXML,pretty_print='true')
-    
-    def writeRoute(self, text,fileName):
-        text_file = open(fileName, "w")
-        text_file.write(text)
-        text_file.close()
+        self.outputStr = etree.tostring(self.attributesXML,pretty_print='true')
+        return self.outputStr

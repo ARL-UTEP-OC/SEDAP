@@ -6,10 +6,11 @@ Created on Dec 20, 2015
 import xml.etree.ElementTree as ET
 from xml.etree.ElementTree import Element, SubElement, Comment, tostring
 from xml.dom import minidom
+from Converter import Converter
 
-class Attributes(object):
+class AttributeConverter(Converter):
 
-    def __init__(self, params):
+    def __init__(self):
         '''
         Constructor
         '''
@@ -20,15 +21,15 @@ class Attributes(object):
         root = self.tree.getroot()
         
         #declaring list 
-        attributes = list()
+        self.attributes = list()
         # declaring dictionary
         for flowAttribute in root.findall('FlowDescriptionAttributes'):
             flowAttributes = dict()
             for attribute in flowAttribute.findall('Attribute'):
                 flowAttributes[attribute.find('Name').text] = str(attribute.find('Value').text)
-            attributes.append(flowAttributes)
+            self.attributes.append(flowAttributes)
         
-        return attributes
+        return self.attributes
     
     def readARFF(self, filePath):
         print "reading arff"
@@ -74,21 +75,7 @@ class Attributes(object):
         file.close()
                 
         return attributes
-    
-    def writeXML(self,fileName,attributes):
-        prettyXml = self.toXMLString(attributes)
-        # print prettyXml
-        text_file = open(fileName, "w")
-        text_file.write(prettyXml)
-        text_file.close()
-    
-    def writeModelEvaluationXML(self,filePath,attributes,results):
-        copyAttributes = list(attributes)
-        # print results
-        for index, flowAttributes in enumerate(copyAttributes):
-            flowAttributes["modelEvaluation"]=str(results[index])
-        self.writeXML(filePath,copyAttributes)
-        
+              
     def toXMLString(self, attributes):
         root = ET.Element('Attributes')
         #comment = ET.Comment('Generated for GUI')
@@ -102,9 +89,3 @@ class Attributes(object):
             
         self.tree = ET.ElementTree(root)
         return self.prettify(root)
-    
-    def prettify(self,root):
-        rough_string = ET.tostring(root, 'utf-8',method="xml")
-        reparsed = minidom.parseString(rough_string) # comment to stop prettyfy
-        return reparsed.toprettyxml() # comment to stop prettyfy
-        ##return rough_string # uncoment for ugly xml
