@@ -8,6 +8,7 @@ from AttributeConverter import AttributeConverter
 from RuleConverter import RuleConverter
 from RouteConverter import RouteConverter
 from ModelEvaluator import ModelEvaluator
+from PConverter import PConverter
 
 class Workflow(object):
     '''
@@ -33,16 +34,33 @@ if __name__ == "__main__":
     routes.readRoutes(routesPath)
     routes.convert()
     routes.writeOutput("standardAttributes.xml")
-    
+    print "Converted CORE routes to standard format"
+    print "Generated HACL topology"
+        
     attr = AttributeConverter()
     attr.readXML("standardAttributes.xml")
+    print "Loaded attribute flow"
         
     rules = RuleConverter()
     rules.readFromFile(wekaRules)
     rules.convert()
     rules.writeOutput("Model.py")
+    print "Converted Weka rules to Python Model"
         
     model = ModelEvaluator()
     model.readFromFile("Model.py")
-    print model.evaluate(attr.attributes)
+    model.evaluate(attr.attributes)
+    model.writeModelEvaluationXML("EvaluatedFlow.xml",attr.attributes,model.evaluationResults)
+    print "Evaluated Python Model"
+    
+    p = PConverter()
+    p.readHacl("hacls.txt")
+    p.readEvaluatedFlow("EvaluatedFlow.xml")
+    p.convert()
+    p.writeOutput("mulvalInput.P")
+    print "Generated P file for Mulval given HACL and Model"
+    
+    
+    
+    
     

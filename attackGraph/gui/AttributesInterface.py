@@ -12,6 +12,7 @@ from AttributeConverter import AttributeConverter
 from RuleConverter import RuleConverter
 from RouteConverter import RouteConverter
 from ModelEvaluator import ModelEvaluator
+from PConverter import PConverter
 
 try:
     import pygtk
@@ -102,7 +103,7 @@ class AttributesInterface:
         self.evaluateBtn.set_sensitive(False)
         # save as model result
         self.saveAsModelEvaluationBtn = self.builder.get_object("saveAsModelEvaluationBtn")
-        self.saveAsModelEvaluationBtn.connect("clicked", self.on_save_as_evaluate_clicked)
+        self.saveAsModelEvaluationBtn.connect("clicked", self.on_save_as_flow_evaluated_clicked)
         self.saveAsModelEvaluationBtn.set_sensitive(False)
         # open weka rules
         self.openRulesBtn = self.builder.get_object("openRulesBtn")
@@ -113,6 +114,20 @@ class AttributesInterface:
         # save as python model
         self.saveAsPyBtn = self.builder.get_object("saveAsPyBtn")
         self.saveAsPyBtn.connect("clicked", self.on_save_as_py_clicked)
+        ## convert to P
+        self.openHaclBtn = self.builder.get_object("openHaclBtn")
+        self.openHaclBtn.connect("clicked", self.on_open_hacl_clicked)
+        
+        self.openEvaluatedFlowBtn = self.builder.get_object("openEvaluatedFlowBtn")
+        self.openEvaluatedFlowBtn.connect("clicked", self.on_open_evaluated_flow_clicked)
+        
+        self.convertToPBtn = self.builder.get_object("convertToPBtn")
+        self.convertToPBtn.connect("clicked", self.on_convert_to_P_clicked)
+        self.convertToPBtn.set_sensitive(False)
+        
+        self.saveAsPBtn = self.builder.get_object("saveAsPBtn")
+        self.saveAsPBtn.connect("clicked", self.on_save_as_P_clicked)
+        self.saveAsPBtn.set_sensitive(False)
                
         #list store & tree
         self.liststoreAttributes = gtk.ListStore(str,str)
@@ -125,15 +140,16 @@ class AttributesInterface:
         self.textViewModelOutput  = self.builder.get_object("textViewModelOutput")
         self.textViewWekaRules  = self.builder.get_object("textViewWekaRules")
         self.textViewPyRules  = self.builder.get_object("textViewPyRules")
+        self.textViewHacl  = self.builder.get_object("textViewHacl")
+        self.textViewEvaluatedFlowAttributes  = self.builder.get_object("textViewEvaluatedFlowAttributes")
+        self.textViewP  = self.builder.get_object("textViewP")
         #data converter
         self.routes = RouteConverter()
-        
         self.attr = AttributeConverter()
         self.new()
-
         self.rules = RuleConverter()
-        
         self.model = ModelEvaluator()
+        self.pConverter = PConverter()
 
     def on_open_routes_clicked(self, widget):
         dialog = self.open_dialog(["xml"])
@@ -155,14 +171,7 @@ class AttributesInterface:
             self.error_dialog("Error", "Could not convert Routes",str(Argument))
             
     def on_save_as_conv_routes_clicked(self, widget):
-        chooser = gtk.FileChooserDialog(title=None,action=gtk.FILE_CHOOSER_ACTION_SAVE,
-                                  buttons=(gtk.STOCK_OK,gtk.RESPONSE_OK,gtk.STOCK_CANCEL,gtk.RESPONSE_CANCEL))
-        filter = gtk.FileFilter()
-        filter.set_name("XML Files")
-        filter.add_pattern("*.xml")
-        chooser.add_filter(filter)
-        chooser.set_default_response(gtk.RESPONSE_OK)
-        
+        chooser = self.save_dialog("xml")
         response = chooser.run()
         
         path = "None"
@@ -261,16 +270,7 @@ class AttributesInterface:
         self.update_status_label()
           
     def on_save_as_clicked(self, widget):
-        chooser = gtk.FileChooserDialog(title=None,action=gtk.FILE_CHOOSER_ACTION_SAVE,
-                                  buttons=(gtk.STOCK_OK,gtk.RESPONSE_OK,gtk.STOCK_CANCEL,gtk.RESPONSE_CANCEL))
-        
-        filter = gtk.FileFilter()
-        filter.set_name("XML Files")
-        filter.add_pattern("*.xml")
-        chooser.add_filter(filter)
-
-        chooser.set_default_response(gtk.RESPONSE_OK)
-        
+        chooser = self.save_dialog("xml")
         response = chooser.run()
         
         path = "None"
@@ -338,9 +338,8 @@ class AttributesInterface:
     def load_flow(self):
         self.liststoreAttributes.clear()
         for key, value in self.flowAttributesList[self.currentFlowAttrIndex].iteritems():
-                self.liststoreAttributes.append([key,str(value)])
- 
-                    
+                self.liststoreAttributes.append([key,str(value)])   
+                         
     def on_open_rules_clicked(self, widget):
         
         dialog = self.open_dialog(["rules"])
@@ -362,14 +361,7 @@ class AttributesInterface:
             self.error_dialog("Error", "Could not convert Weka rules to Python",str(Argument))
         
     def on_save_as_py_clicked(self, widget):
-        chooser = gtk.FileChooserDialog(title=None,action=gtk.FILE_CHOOSER_ACTION_SAVE,
-                                  buttons=(gtk.STOCK_OK,gtk.RESPONSE_OK,gtk.STOCK_CANCEL,gtk.RESPONSE_CANCEL))
-        filter = gtk.FileFilter()
-        filter.set_name("Python Files")
-        filter.add_pattern("*.py")
-        chooser.add_filter(filter)
-        chooser.set_default_response(gtk.RESPONSE_OK)
-        
+        chooser = self.save_dialog("py")
         response = chooser.run()
         
         path = "None"
@@ -383,7 +375,6 @@ class AttributesInterface:
         chooser.destroy()
         
     def on_open_model_clicked(self, widget):
-
         dialog = self.open_dialog(["py"])
         response = dialog.run()
         
@@ -396,7 +387,7 @@ class AttributesInterface:
         
     def on_evaluate_clicked(self, widget):
         
-        #try: 
+        try: 
             # Display warning before overriding model 
             warningDialog = gtk.MessageDialog(self.window, 0, gtk.MESSAGE_WARNING, gtk.BUTTONS_NONE, "Do you want to continue?")
             warningDialog.set_title("Warning")
@@ -412,19 +403,11 @@ class AttributesInterface:
             if  result == gtk.RESPONSE_OK:
                 self.textViewModelOutput.get_buffer().set_text(str('\n'.join(map(str, self.model.evaluate(self.flowAttributesList)))))
                 self.saveAsModelEvaluationBtn.set_sensitive(True)
-        #except Exception, Argument:
-        #    self.error_dialog("Error", "Could not load model",str(Argument))
-        
-    def on_save_as_evaluate_clicked(self, widget):
-        
-        chooser = gtk.FileChooserDialog(title=None,action=gtk.FILE_CHOOSER_ACTION_SAVE,
-                                  buttons=(gtk.STOCK_CANCEL,gtk.RESPONSE_CANCEL,gtk.STOCK_OPEN,gtk.RESPONSE_OK))
-        filter = gtk.FileFilter()
-        filter.set_name("XML Files")
-        filter.add_pattern("*.xml")
-        chooser.add_filter(filter)
-        chooser.set_default_response(gtk.RESPONSE_OK)
-        
+        except Exception, Argument:
+            self.error_dialog("Error", "Could not load model",str(Argument))
+            
+    def on_save_as_flow_evaluated_clicked(self, widget):
+        chooser = self.save_dialog("xml")
         response = chooser.run()
         
         path = "None"
@@ -433,8 +416,57 @@ class AttributesInterface:
             path = chooser.get_filename()
         
         if path != "None":
-                 self.attr.writeModelEvaluationXML(path,self.flowAttributesList,self.evaluationResults)
-
+                 self.model.writeModelEvaluationXML(path,self.flowAttributesList,self.model.evaluationResults)
+        chooser.destroy()
+    
+    def on_open_hacl_clicked(self, widget):
+               
+        dialog = self.open_dialog(["txt"])
+        response = dialog.run()
+        
+        if response == gtk.RESPONSE_OK:
+            filename = dialog.get_filename()
+            self.textViewHacl.get_buffer().set_text(self.pConverter.readHacl(filename))
+            
+            if self.textViewEvaluatedFlowAttributes.get_buffer().get_char_count()>0:
+                self.convertToPBtn.set_sensitive(True)
+                
+        dialog.destroy()
+        
+    def on_open_evaluated_flow_clicked(self, widget):
+              
+        dialog = self.open_dialog(["xml"])
+        response = dialog.run()
+        
+        if response == gtk.RESPONSE_OK:
+            filename = dialog.get_filename()
+            self.textViewEvaluatedFlowAttributes.get_buffer().set_text(self.pConverter.readEvaluatedFlow(filename))
+                      
+            if self.textViewHacl.get_buffer().get_char_count()>0:
+                self.convertToPBtn.set_sensitive(True)
+        
+        dialog.destroy()    
+        
+    def on_convert_to_P_clicked(self, widget):
+        # textViewP
+        try: 
+            self.textViewP.get_buffer().set_text(self.pConverter.convert())
+            self.saveAsPBtn.set_sensitive(True)
+        except Exception, Argument:
+            self.error_dialog("Error", "Could convert to P format",str(Argument))
+        
+    def on_save_as_P_clicked(self, widget):  
+        chooser = self.save_dialog("p")
+        response = chooser.run()
+        
+        path = "None"
+        if response == gtk.RESPONSE_OK:
+            print("Save as clicked")
+            path = chooser.get_filename()
+        
+        if path != "None":
+            self.pConverter.writeOutput(path)
+                 
         chooser.destroy()
              
     def create_columns(self, treeView):
@@ -470,6 +502,12 @@ class AttributesInterface:
             elif ext == "wekadata":
                 name = "Weka Files"
                 pattern = "*.arff"
+            elif ext == "txt":
+                name = "Text Files"
+                pattern = "*.txt"
+            elif ext == "p":
+                name = "P Files"
+                pattern = "*.P"
                     
             filter = gtk.FileFilter()
             filter.set_name(name)
@@ -477,6 +515,39 @@ class AttributesInterface:
             dialog.add_filter(filter)
     
         return dialog
+    
+    def save_dialog(self,extensions):
+        
+        chooser = gtk.FileChooserDialog(title=None,action=gtk.FILE_CHOOSER_ACTION_SAVE,
+                                  buttons=(gtk.STOCK_CANCEL,gtk.RESPONSE_CANCEL,gtk.STOCK_OK,gtk.RESPONSE_OK))
+        
+        for ext in extensions:
+            if ext == "py":
+                name = "Python Files"
+                pattern = "*.py"
+            elif ext == "xml":
+                name = "XML Files"
+                pattern = "*.xml"
+            elif ext == "rules":
+                name = "Weka Rules"
+                pattern = "*.rules"
+            elif ext == "wekadata":
+                name = "Weka Files"
+                pattern = "*.arff"
+            elif ext == "txt":
+                name = "Text Files"
+                pattern = "*.txt"
+            elif ext == "p":
+                name = "P Files"
+                pattern = "*.P"
+                    
+            filter = gtk.FileFilter()
+            filter.set_name(name)
+            filter.add_pattern(pattern)
+            chooser.add_filter(filter)
+            chooser.set_default_response(gtk.RESPONSE_OK)
+    
+        return chooser
         
     def error_dialog(self, title, message,secondary_message):
             # Display error

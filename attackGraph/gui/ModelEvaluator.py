@@ -18,7 +18,7 @@ class ModelEvaluator(Converter):
         copyAttributes = list(attributes)
         # print results
         for index, flowAttributes in enumerate(copyAttributes):
-            flowAttributes["modelEvaluation"]=str(results[index])
+            flowAttributes["duringLinkLost"]=str(results[index])
         self.writeXML(filePath,copyAttributes)
     
     def evaluate(self, flowAttributesList):

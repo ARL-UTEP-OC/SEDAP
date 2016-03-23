@@ -75,17 +75,3 @@ class AttributeConverter(Converter):
         file.close()
                 
         return attributes
-              
-    def toXMLString(self, attributes):
-        root = ET.Element('Attributes')
-        #comment = ET.Comment('Generated for GUI')
-        #document.append(comment)
-        for flowAttributes in attributes:
-            flowAttribute = ET.SubElement(root , 'FlowDescriptionAttributes')
-            for key, value in flowAttributes.iteritems():
-                attribute = ET.SubElement(flowAttribute , 'Attribute')
-                ET.SubElement(attribute, 'Name').text = key
-                ET.SubElement(attribute, 'Value').text = value
-            
-        self.tree = ET.ElementTree(root)
-        return self.prettify(root)
