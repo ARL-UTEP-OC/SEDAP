@@ -1,3 +1,4 @@
+#!/usr/bin/python
 '''
 Created on Mar 22, 2016
 
@@ -23,9 +24,15 @@ class Workflow(object):
         
 if __name__ == "__main__":
     
-    
     if len(sys.argv) != 3:
-        print "Error: Please enter the location of thw files"
+       print """
+usage: 
+python Workflow.py <input1> <input2>
+input files are: 
+1. route information (typically ../AttributesGenerator/sampleInput.xml)
+2. weka rules (typically ../ModelConverter/OLSR_Spoofing.REPTree.rules)	
+"""
+       exit()
         
     routesPath = sys.argv[1]
     wekaRules = sys.argv[2]

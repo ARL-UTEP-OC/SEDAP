@@ -11,9 +11,8 @@ instance = ""
 #globals
 
 #input files are: 
-#1. mulVAL input files (typically sampleInput_IPs.P)
-#2. topology  		   (typically sampleInput_hacls.txt)
-#3. hijacking results  (typically sampleInput_model.xml)
+#1. topology  		   (typically sampleInput_hacls.txt)
+#2. hijacking results  (typically sampleInput_model.xml)	
 
 if len(sys.argv) != 3:
 	print """
