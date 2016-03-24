@@ -5,7 +5,11 @@ Created on Mar 22, 2016
 @author: epadilla2
 '''
 import sys
-from gui import AttributeConverter, RuleConverter, RouteConverter, ModelEvaluator, PConverter
+from gui.AttributeConverter import AttributeConverter
+from gui.RuleConverter import RuleConverter
+from gui.RouteConverter import RouteConverter
+from gui.ModelEvaluator import ModelEvaluator
+from gui.PConverter import PConverter
 
 class Workflow(object):
     '''
