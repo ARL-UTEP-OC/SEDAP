@@ -11,6 +11,8 @@ import logging
 from Converter import Converter
 
 class RouteConverter(Converter):
+    haclsStr = 'Not yet extracted!!'
+    attrStr = 'Not yet extracted!!'
     '''
     classdocs
     '''
@@ -59,7 +61,6 @@ class RouteConverter(Converter):
         self.flowDescriptionAttributes["isSrcBetweenSpoofedAndDst"]=''
         self.flowDescriptionAttributes["isSrcBetweenSpoofedAndDstgw"]=''
         self.flowDescriptionAttributes["altPathWithoutAttacker"]=''
-
 
     def extractLinksfromRoutes(self, nodeIP, routes):
     
@@ -471,12 +472,16 @@ class RouteConverter(Converter):
         
         self.generateParametersFromTrafficProfile()
         
-        hacls = open("hacls.txt", "w")
-        hacls.write("/* edges in graph represent connections among nodes as well as gateways */\n")
+        self.haclStr = "/* edges in graph represent connections among nodes as well as gateways */\n"
         for edge in self.G.edges():
-            hacls.write("hacl('"+str(edge[0])+"', '"+str(edge[1])+"',_proto,_port).\n")
+            self.haclStr += "hacl('"+str(edge[0])+"', '"+str(edge[1])+"',_proto,_port).\n"
             
         for edge in self.G:
-            hacls.write("gateway('"+str(edge)+"').\n")
-        self.outputStr = etree.tostring(self.attributesXML,pretty_print='true')
-        return self.outputStr
+            self.haclStr += "gateway('"+str(edge)+"').\n"
+        self.attrStr = etree.tostring(self.attributesXML,pretty_print='true')
+		
+    def getAttributes(self):
+        self.outputStr = self.attrStr
+		
+    def getHacl(self):
+        self.outputStr = self.haclStr

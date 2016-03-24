@@ -24,46 +24,52 @@ class Workflow(object):
         
 if __name__ == "__main__":
     
-    if len(sys.argv) != 3:
+    if len(sys.argv) != 4:
        print """
 usage: 
-python Workflow.py <input1> <input2>
+python Workflow.py <input1> <input2> <input3>
 input files are: 
 1. route information (typically ./AttributesGenerator/sampleInput.xml)
-2. weka rules (typically ./ModelConverter/OLSR_Spoofing.REPTree.rules)	
+2. weka rules (typically ./ModelConverter/OLSR_Forwarding.REPTree.rules)	
+3. output folder (typically ./outputFiles)
 """
        exit()
         
     routesPath = sys.argv[1]
     wekaRules = sys.argv[2]
+    outputPath = sys.argv[3] +"/"
+    
     
     routes = RouteConverter()
     routes.readRoutes(routesPath)
     routes.convert()
-    routes.writeOutput("standardAttributes.xml")
-    print "Converted CORE routes to standard format"
+    routes.getAttributes()
+    routes.writeOutput(outputPath+"standardAttributes.xml")
+    print "Converted node routes to attributes"
+    routes.getHacl()
+    routes.writeOutput(outputPath+"hacl.txt")
     print "Generated HACL topology"
         
     attr = AttributeConverter()
-    attr.readXML("standardAttributes.xml")
+    attr.readXML(outputPath+"standardAttributes.xml")
     print "Loaded attribute flow"
         
     rules = RuleConverter()
     rules.readFromFile(wekaRules)
     rules.convert()
-    rules.writeOutput("Model.py")
+    rules.writeOutput(outputPath+"Model.py")
     print "Converted Weka rules to Python Model"
         
     model = ModelEvaluator()
-    model.readFromFile("Model.py")
+    model.readFromFile(outputPath+"Model.py")
     model.evaluate(attr.attributes)
-    model.writeModelEvaluationXML("EvaluatedFlow.xml",attr.attributes,model.evaluationResults)
+    model.writeModelEvaluationXML(outputPath+"EvaluatedFlow.xml",attr.attributes,model.evaluationResults)
     print "Evaluated Python Model"
     
     p = PConverter()
-    p.readHacl("hacls.txt")
-    p.readEvaluatedFlow("EvaluatedFlow.xml")
+    p.readHacl(outputPath+"hacl.txt")
+    p.readEvaluatedFlow(outputPath+"EvaluatedFlow.xml")
     p.convert()
-    p.writeOutput("mulvalInput.P")
+    p.writeOutput(outputPath+"mulvalInput.P")
     print "Generated P file for Mulval given HACL and Model"
     

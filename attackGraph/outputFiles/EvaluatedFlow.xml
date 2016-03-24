@@ -133,7 +133,7 @@
 		</Attribute>
 		<Attribute>
 			<Name>duringLinkLost</Name>
-			<Value>False</Value>
+			<Value>True</Value>
 		</Attribute>
 		<Attribute>
 			<Name>toHop</Name>
