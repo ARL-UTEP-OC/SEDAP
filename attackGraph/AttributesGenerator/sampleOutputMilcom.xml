@@ -2,7 +2,7 @@
   <FlowDescriptionAttributes>
     <Attribute>
       <Name>hopsToSpoofed</Name>
-      <Value>3</Value>
+      <Value>1</Value>
     </Attribute>
     <Attribute>
       <Name>passthrough</Name>
@@ -10,7 +10,7 @@
     </Attribute>
     <Attribute>
       <Name>isDstBetweenSpoofedAndAttacker</Name>
-      <Value>True</Value>
+      <Value>False</Value>
     </Attribute>
     <Attribute>
       <Name>isSrcBetweenSpoofedAndDst</Name>
@@ -18,7 +18,7 @@
     </Attribute>
     <Attribute>
       <Name>victim</Name>
-      <Value>'10.0.0.5/32'</Value>
+      <Value>'10.0.0.3/32'</Value>
     </Attribute>
     <Attribute>
       <Name>isAttackerBetweenSpoofedAndDst</Name>
@@ -34,7 +34,7 @@
     </Attribute>
     <Attribute>
       <Name>isDstBetweenSpoofedAndAttackergw</Name>
-      <Value>False</Value>
+      <Value>True</Value>
     </Attribute>
     <Attribute>
       <Name>routingProtocol</Name>
@@ -58,7 +58,7 @@
     </Attribute>
     <Attribute>
       <Name>spoofedBetweenAttacker</Name>
-      <Value>False</Value>
+      <Value>True</Value>
     </Attribute>
     <Attribute>
       <Name>spoofedBetweenAttackergw</Name>
@@ -86,7 +86,7 @@
     </Attribute>
     <Attribute>
       <Name>destSpoofed</Name>
-      <Value>True</Value>
+      <Value>False</Value>
     </Attribute>
     <Attribute>
       <Name>isSrcBetweenSpoofedAndDstgw</Name>
@@ -94,7 +94,8 @@
     </Attribute>
     <Attribute>
       <Name>hopsFromSpoofedToDest</Name>
-      <Value>-1</Value>
+      <Value>2</Value>
     </Attribute>
   </FlowDescriptionAttributes>
 </Attributes>
+

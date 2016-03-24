@@ -90,7 +90,7 @@ class RouteConverter(Converter):
             path.append(dst)
             return path
         if (src, dst) not in self.gateways:
-            return None
+            return ()
         #get next hop
         curr = self.gateways[(src,dst)]
         while curr != None:
@@ -102,7 +102,7 @@ class RouteConverter(Converter):
                 #somethings wrong...
                 print curr,"not found in nodes list!"
                 curr = None
-                return None
+                return ()
             curr = self.nodes[curr]
             path.append(curr)
             if (curr,dst) in self.directLinks:
@@ -115,7 +115,7 @@ class RouteConverter(Converter):
             else:
                 print curr,"no path found!"
                 curr = None
-                return None            
+                return ()            
         return path
     
     def getSubPath(self,param1, param2):
@@ -246,7 +246,7 @@ class RouteConverter(Converter):
                 self.flowDescriptionAttributes["hopsFromSpoofedToDest"]='-1'
             logging.debug("hopsFromSpoofedToDest %s",self.flowDescriptionAttributes["hopsFromSpoofedToDest"]    )
             
-            logging.debug("checking spoofedBetweenAttacker. Is: %s between (or equal to either) %s to %s",self.victim,src,self.attackNode)
+            logging.debug("checking spoofedBetweenAttacker. Is: %s between %s to %s",self.victim,src,self.attackNode)
             if self.victim == src:
                 self.flowDescriptionAttributes["spoofedBetweenAttacker"]="True"
             elif self.victim in self.getPathThroughGW(src,self.attackNode):
@@ -255,10 +255,11 @@ class RouteConverter(Converter):
                 self.flowDescriptionAttributes["spoofedBetweenAttacker"]="False"
             logging.debug("spoofedBetweenAttacker %s",self.flowDescriptionAttributes["spoofedBetweenAttacker"])
             
-            logging.debug("checking isDstBetweenSpoofedAndAttacker. Is: %s between (or equal to either) %s to %s",dst,self.victim,self.attackNode)
-            if dst == self.victim:
+            #This attribute is a misnomer and should be isSpoofedBetweenDstAndAttacker
+            logging.debug("checking isDstBetweenSpoofedAndAttacker. Is: %s between %s to %s",self.victim,dst,self.attackNode)
+            if self.victim == dst:
                 self.flowDescriptionAttributes["isDstBetweenSpoofedAndAttacker"]="True"
-            elif dst in self.getPathThroughGW(self.victim,self.attackNode):
+            elif self.victim in self.getPathThroughGW(dst,self.attackNode):
                 self.flowDescriptionAttributes["isDstBetweenSpoofedAndAttacker"]="True"
             else:
                 self.flowDescriptionAttributes["isDstBetweenSpoofedAndAttacker"]="False"
@@ -266,7 +267,7 @@ class RouteConverter(Converter):
             
     #######
             #algorithm used to check: if path(src,dst) startswith(path(src,att)-1) true; else false
-            logging.debug("checking spoofedBetweenAttackergw. Is %s between or is a gateway (or equal to either) %s to %s:",self.victim,src,self.attackNode)
+            logging.debug("checking spoofedBetweenAttackergw. Is %s between or is a gateway %s to %s:",self.victim,src,self.attackNode)
             subPath = []
             if self.victim == src:
                 self.flowDescriptionAttributes["spoofedBetweenAttackergw"]="True"
@@ -291,7 +292,8 @@ class RouteConverter(Converter):
             logging.debug("spoofedBetweenAttackergw %s",self.flowDescriptionAttributes["spoofedBetweenAttackergw"])
     
     #######
-            logging.debug("checking isDstBetweenSpoofedAndAttackergw Is: %s between or is a gateway (or equal to either) %s to %s",self.victim,dst,self.attackNode)
+            #This attribute is a misnomer and should be isSpoofedBetweenDstAndAttackergw
+            logging.debug("checking isDstBetweenSpoofedAndAttackergw Is: %s between or is a gateway %s to %s",self.victim,dst,self.attackNode)
             subPath = []
             if self.victim == dst:
                 self.flowDescriptionAttributes["isDstBetweenSpoofedAndAttackergw"]="True"
@@ -316,7 +318,7 @@ class RouteConverter(Converter):
             logging.debug("isDstBetweenSpoofedAndAttackergw %s",self.flowDescriptionAttributes["isDstBetweenSpoofedAndAttackergw"])
     
     #######
-            logging.debug("checking isAttackerBetweenSpoofedAndDst. Is: %s between (or equal to either) %s to %s",self.attackNode,self.victim,dst)
+            logging.debug("checking isAttackerBetweenSpoofedAndDst. Is: %s between %s to %s",self.attackNode,self.victim,dst)
             if self.attackNode == self.victim:
                 self.flowDescriptionAttributes["isAttackerBetweenSpoofedAndDst"]="True"
             elif self.attackNode in self.getPathThroughGW(self.victim,dst):
@@ -327,7 +329,7 @@ class RouteConverter(Converter):
     
     #######
     
-            logging.debug("checking isAttackerBetweenSpoofedAndDstgw Is: %s between or is a gateway (or equal to either) %s to %s",self.attackNode,self.victim,dst)
+            logging.debug("checking isAttackerBetweenSpoofedAndDstgw Is: %s between or is a gateway %s to %s",self.attackNode,self.victim,dst)
             subPath = []
             if self.attackNode == self.victim:
                 self.flowDescriptionAttributes["isAttackerBetweenSpoofedAndDstgw"]="True"
@@ -355,7 +357,7 @@ class RouteConverter(Converter):
     #######
     #21. isSrcBetweenSpoofedAndDst    -- src between vic and dst
     #######
-            logging.debug("checking isSrcBetweenSpoofedAndDst. Is: %s between (or equal to either) %s to %s",src,self.victim,dst)
+            logging.debug("checking isSrcBetweenSpoofedAndDst. Is: %s between %s to %s",src,self.victim,dst)
             if src == self.victim:
                 self.flowDescriptionAttributes["isSrcBetweenSpoofedAndDst"]="True"
             elif src in self.getPathThroughGW(self.victim,dst):
@@ -368,7 +370,7 @@ class RouteConverter(Converter):
     #######    
     #22. self.flowDescriptionAttributes["isSrcBetweenSpoofedAndDstgw"]    -- src a gw of any node between vic and dst
     
-            logging.debug("checking isSrcBetweenSpoofedAndDstgw Is: %s between or is a gateway (or equal to either) %s to %s",src,self.victim,dst)
+            logging.debug("checking isSrcBetweenSpoofedAndDstgw Is: %s between or is a gateway %s to %s",src,self.victim,dst)
             subPath = []
             if src == self.victim:
                 self.flowDescriptionAttributes["isSrcBetweenSpoofedAndDstgw"]="True"
