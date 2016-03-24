@@ -416,7 +416,7 @@ class AttributesInterface:
             path = chooser.get_filename()
         
         if path != "None":
-                 self.model.writeModelEvaluationXML(path,self.flowAttributesList,self.model.evaluationResults)
+                self.model.writeModelEvaluationXML(path,self.flowAttributesList,self.model.evaluationResults)
         chooser.destroy()
     
     def on_open_hacl_clicked(self, widget):
