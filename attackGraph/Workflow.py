@@ -5,11 +5,7 @@ Created on Mar 22, 2016
 @author: epadilla2
 '''
 import sys
-from AttributeConverter import AttributeConverter
-from RuleConverter import RuleConverter
-from RouteConverter import RouteConverter
-from ModelEvaluator import ModelEvaluator
-from PConverter import PConverter
+from gui import AttributeConverter, RuleConverter, RouteConverter, ModelEvaluator, PConverter
 
 class Workflow(object):
     '''
@@ -29,8 +25,8 @@ if __name__ == "__main__":
 usage: 
 python Workflow.py <input1> <input2>
 input files are: 
-1. route information (typically ../AttributesGenerator/sampleInput.xml)
-2. weka rules (typically ../ModelConverter/OLSR_Spoofing.REPTree.rules)	
+1. route information (typically ./AttributesGenerator/sampleInput.xml)
+2. weka rules (typically ./ModelConverter/OLSR_Spoofing.REPTree.rules)	
 """
        exit()
         
@@ -66,8 +62,4 @@ input files are:
     p.convert()
     p.writeOutput("mulvalInput.P")
     print "Generated P file for Mulval given HACL and Model"
-    
-    
-    
-    
     
