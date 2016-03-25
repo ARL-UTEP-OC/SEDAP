@@ -1,0 +1,29 @@
+1,"execCode('10.0.0.5/32',flow1Account)","OR",0
+2,"RULE 0 (When a principal is compromised any machine he has an account on will also be compromised)","AND",0
+3,"canAccessHost('10.0.0.5/32')","OR",0
+4,"RULE 10 (Access a host through a log-in service)","AND",0
+5,"netAccess('10.0.0.5/32','TCP',_)","OR",0
+6,"RULE 6 (multi-hop access by gateway)","AND",0
+7,"hacl('10.0.0.4/32','10.0.0.5/32','TCP',_)","LEAF",1
+8,"netAccess('10.0.0.4/32','TCP',_)","OR",0
+9,"RULE 6 (multi-hop access by gateway)","AND",0
+10,"hacl('10.0.0.3/32','10.0.0.4/32','TCP',_)","LEAF",1
+11,"netAccess('10.0.0.3/32','TCP',_)","OR",0
+12,"RULE 6 (multi-hop access by gateway)","AND",0
+13,"hacl('10.0.0.6/32','10.0.0.3/32','TCP',_)","LEAF",1
+14,"netAccess('10.0.0.6/32','TCP',_)","OR",0
+15,"RULE 8 (direct on-host access)","AND",0
+16,"attackerLocated('10.0.0.6/32')","LEAF",1
+17,"gateway('10.0.0.6/32')","LEAF",1
+18,"RULE 7 (direct network access)","AND",0
+19,"gateway('10.0.0.3/32')","LEAF",1
+20,"gateway('10.0.0.4/32')","LEAF",1
+21,"logInService('10.0.0.5/32','TCP',_)","OR",0
+22,"RULE 19 (log in for ftpd)","AND",0
+23,"networkServiceInfo('10.0.0.5/32',ftpd,'TCP',_,flow1Account)","LEAF",1
+24,"hasAccount(flow1Principal,'10.0.0.5/32',flow1Account)","LEAF",1
+25,"principalCompromised(flow1Principal)","OR",0
+26,"RULE 15 (password sniffing through route hijack)","AND",0
+27,"flowExists('10.0.0.1/32','10.0.0.5/32','TCP',_,flow1Account)","LEAF",1
+28,"vulExists('10.0.0.1/32',nrlolsrVul,nrlolsr,remoteExploit,nrlolsrHijack)","LEAF",1
+29,"networkServiceInfo('10.0.0.1/32',nrlolsr,olsr,_,_)","LEAF",1

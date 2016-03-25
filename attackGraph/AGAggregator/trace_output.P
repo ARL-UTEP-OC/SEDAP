@@ -17,7 +17,6 @@ primitive(bugHyp,4).
 primitive(vulExists,5).
 primitive(canAccessFile,4).
 primitive(isWebServer,1).
-primitive(gateway,1).
 primitive(flowExists,5).
 derived(execCode,2).
 derived(netAccess,3).
@@ -30,56 +29,4 @@ derived(logInService,3).
 meta(cvss,2).
 meta(attackGoal,1).
 meta(advances,2).
-
-attack(execCode('10.0.0.8/32',flow2Account)).
-
-possible_duplicate_trace_step(because(19,rule_desc('log in for ftpd',1),logInService('10.0.0.8/32','UDP',_h4894),[networkServiceInfo('10.0.0.8/32',ftpd,'UDP',_h4894,flow2Account)])).
-
-possible_duplicate_trace_step(because(15,rule_desc('password sniffing through route hijack',0.800000000000000044),principalCompromised(flow2Principal),[flowExists('10.0.0.3/32','10.0.0.8/32','UDP',_h4894,flow2Account),logInService('10.0.0.8/32','UDP',_h4894),vulExists('10.0.0.3/32',nrlolsrVul,nrlolsr,remoteExploit,nrlolsrHijack),networkServiceInfo('10.0.0.3/32',nrlolsr,olsr,_h4875,_h4876),hasAccount(flow2Principal,'10.0.0.8/32',flow2Account)])).
-
-possible_duplicate_trace_step(because(7,rule_desc('direct network access',1.0),netAccess('10.0.0.6/32','UDP',_h4901),[hacl('10.0.0.7/32','10.0.0.6/32','UDP',_h4901),attackerLocated('10.0.0.7/32')])).
-
-possible_duplicate_trace_step(because(6,rule_desc('multi-hop access by gateway',0.5),netAccess('10.0.0.5/32','UDP',_h4901),[hacl('10.0.0.6/32','10.0.0.5/32','UDP',_h4901),netAccess('10.0.0.6/32','UDP',_h4901),advances('10.0.0.6/32','10.0.0.5/32'),gateway('10.0.0.6/32')])).
-
-possible_duplicate_trace_step(because(8,rule_desc('direct on-host access',1.0),netAccess('10.0.0.7/32','UDP',_h4901),[attackerLocated('10.0.0.7/32')])).
-
-possible_duplicate_trace_step(because(6,rule_desc('multi-hop access by gateway',0.5),netAccess('10.0.0.6/32','UDP',_h4901),[hacl('10.0.0.7/32','10.0.0.6/32','UDP',_h4901),netAccess('10.0.0.7/32','UDP',_h4901),advances('10.0.0.7/32','10.0.0.6/32'),gateway('10.0.0.7/32')])).
-
-possible_duplicate_trace_step(because(6,rule_desc('multi-hop access by gateway',0.5),netAccess('10.0.0.8/32','UDP',_h4901),[hacl('10.0.0.7/32','10.0.0.8/32','UDP',_h4901),netAccess('10.0.0.7/32','UDP',_h4901),advances('10.0.0.7/32','10.0.0.8/32'),gateway('10.0.0.7/32')])).
-
-possible_duplicate_trace_step(because(7,rule_desc('direct network access',1.0),netAccess('10.0.0.8/32','UDP',_h4901),[hacl('10.0.0.7/32','10.0.0.8/32','UDP',_h4901),attackerLocated('10.0.0.7/32')])).
-
-possible_duplicate_trace_step(because(6,rule_desc('multi-hop access by gateway',0.5),netAccess('10.0.0.5/32','UDP',_h4901),[hacl('10.0.0.6/32','10.0.0.5/32','UDP',_h4901),netAccess('10.0.0.6/32','UDP',_h4901),advances('10.0.0.6/32','10.0.0.5/32'),gateway('10.0.0.6/32')])).
-
-possible_duplicate_trace_step(because(10,rule_desc('Access a host through a log-in service',1.0),canAccessHost('10.0.0.8/32'),[netAccess('10.0.0.8/32','UDP',_h4901),logInService('10.0.0.8/32','UDP',_h4901)])).
-
-possible_duplicate_trace_step(because(10,rule_desc('Access a host through a log-in service',1.0),canAccessHost('10.0.0.8/32'),[netAccess('10.0.0.8/32','UDP',_h4901),logInService('10.0.0.8/32','UDP',_h4901)])).
-
-possible_duplicate_trace_step(because(0,rule_desc('When a principal is compromised any machine he has an account on will also be compromised',0.5),execCode('10.0.0.8/32',flow2Account),[canAccessHost('10.0.0.8/32'),hasAccount(flow2Principal,'10.0.0.8/32',flow2Account),principalCompromised(flow2Principal)])).
-
-possible_duplicate_trace_step(because(13,rule_desc('password sniffing',0.800000000000000044),principalCompromised(flow2Principal),[execCode('10.0.0.8/32',flow2Account),hasAccount(flow2Principal,'10.0.0.8/32',flow2Account)])).
-
-possible_duplicate_trace_step(because(0,rule_desc('When a principal is compromised any machine he has an account on will also be compromised',0.5),execCode('10.0.0.8/32',flow2Account),[canAccessHost('10.0.0.8/32'),hasAccount(flow2Principal,'10.0.0.8/32',flow2Account),principalCompromised(flow2Principal)])).
-
-possible_duplicate_trace_step(because(0,rule_desc('When a principal is compromised any machine he has an account on will also be compromised',0.5),execCode('10.0.0.8/32',flow2Account),[canAccessHost('10.0.0.8/32'),hasAccount(flow2Principal,'10.0.0.8/32',flow2Account),principalCompromised(flow2Principal)])).
-
-possible_duplicate_trace_step(because(0,rule_desc('When a principal is compromised any machine he has an account on will also be compromised',0.5),execCode('10.0.0.8/32',flow2Account),[canAccessHost('10.0.0.8/32'),hasAccount(flow2Principal,'10.0.0.8/32',flow2Account),principalCompromised(flow2Principal)])).
-
-possible_duplicate_trace_step(because(0,rule_desc('When a principal is compromised any machine he has an account on will also be compromised',0.5),execCode('10.0.0.8/32',flow2Account),[canAccessHost('10.0.0.8/32'),hasAccount(flow2Principal,'10.0.0.8/32',flow2Account),principalCompromised(flow2Principal)])).
-
-possible_duplicate_trace_step(because(0,rule_desc('When a principal is compromised any machine he has an account on will also be compromised',0.5),execCode('10.0.0.8/32',flow2Account),[canAccessHost('10.0.0.8/32'),hasAccount(flow2Principal,'10.0.0.8/32',flow2Account),principalCompromised(flow2Principal)])).
-
-possible_duplicate_trace_step(because(9,rule_desc('Access a host through executing code on the machine',1.0),canAccessHost('10.0.0.8/32'),[execCode('10.0.0.8/32',flow2Account)])).
-
-possible_duplicate_trace_step(because(0,rule_desc('When a principal is compromised any machine he has an account on will also be compromised',0.5),execCode('10.0.0.8/32',flow2Account),[canAccessHost('10.0.0.8/32'),hasAccount(flow2Principal,'10.0.0.8/32',flow2Account),principalCompromised(flow2Principal)])).
-
-possible_duplicate_trace_step(because(0,rule_desc('When a principal is compromised any machine he has an account on will also be compromised',0.5),execCode('10.0.0.8/32',flow2Account),[canAccessHost('10.0.0.8/32'),hasAccount(flow2Principal,'10.0.0.8/32',flow2Account),principalCompromised(flow2Principal)])).
-
-possible_duplicate_trace_step(because(0,rule_desc('When a principal is compromised any machine he has an account on will also be compromised',0.5),execCode('10.0.0.8/32',flow2Account),[canAccessHost('10.0.0.8/32'),hasAccount(flow2Principal,'10.0.0.8/32',flow2Account),principalCompromised(flow2Principal)])).
-
-possible_duplicate_trace_step(because(0,rule_desc('When a principal is compromised any machine he has an account on will also be compromised',0.5),execCode('10.0.0.8/32',flow2Account),[canAccessHost('10.0.0.8/32'),hasAccount(flow2Principal,'10.0.0.8/32',flow2Account),principalCompromised(flow2Principal)])).
-
-possible_duplicate_trace_step(because(0,rule_desc('When a principal is compromised any machine he has an account on will also be compromised',0.5),execCode('10.0.0.8/32',flow2Account),[canAccessHost('10.0.0.8/32'),hasAccount(flow2Principal,'10.0.0.8/32',flow2Account),principalCompromised(flow2Principal)])).
-
-possible_duplicate_trace_step(because(0,rule_desc('When a principal is compromised any machine he has an account on will also be compromised',0.5),execCode('10.0.0.8/32',flow2Account),[canAccessHost('10.0.0.8/32'),hasAccount(flow2Principal,'10.0.0.8/32',flow2Account),principalCompromised(flow2Principal)])).
 

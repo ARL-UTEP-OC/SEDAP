@@ -7,18 +7,18 @@ XSB Version 3.5.0 (Maotai) of July 6, 2013
 [Patch date: 2014-07-03 17:24:44 -0400 (Thu, 03 Jul 2014)]
 
 | ?- [Compiling ./run]
-[run compiled, cpu time used: 0.0040 seconds]
+[run compiled, cpu time used: 0.0080 seconds]
 [run loaded]
 [libmulval loaded]
 [translate loaded]
 [attack_trace loaded]
 [auxiliary loaded]
-[/root/gitIntelAttacker/impactpredictionmodels/attackGraph/AGAggregator/running_rules.P dynamically loaded, cpu time used: 0.0040 seconds]
-[/root/gitIntelAttacker/impactpredictionmodels/attackGraph/AGAggregator/tmp.p dynamically loaded, cpu time used: 0.0000 seconds]
+[/root/gitIntelAttacker/impactpredictionmodels/attackGraph/simpleScenario/output/ProducedAttackGraph/running_rules.P dynamically loaded, cpu time used: 0.0000 seconds]
+[/root/gitIntelAttacker/impactpredictionmodels/attackGraph/simpleScenario/output/mulvalInput.P dynamically loaded, cpu time used: 0.0000 seconds]
 [/root/install/mulval/src/analyzer/advances_notrim.P dynamically loaded, cpu time used: 0.0000 seconds]
 @@@@@@@@@@@@@@Done transforming in mode dynamic_decl
 
-[/root/gitIntelAttacker/impactpredictionmodels/attackGraph/AGAggregator/dynamic_decl.gen dynamically loaded, cpu time used: 0.0000 seconds]
+[/root/gitIntelAttacker/impactpredictionmodels/attackGraph/simpleScenario/output/ProducedAttackGraph/dynamic_decl.gen dynamically loaded, cpu time used: 0.0000 seconds]
 @@@@@@@@@@@@@@Done transforming in mode completeTrace2
 
 @@@@@@@@@@@@@@Done transforming in mode completeTrace2

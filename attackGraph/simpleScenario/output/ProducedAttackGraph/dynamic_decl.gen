@@ -36,6 +36,8 @@
 
 :-(dynamic(isWebServer(_h3147))).
 
+:-(dynamic(gateway(_h3147))).
+
 :-(dynamic(flowExists(_h3147,_h3148,_h3149,_h3150,_h3151))).
 
 :-(dynamic(trace_step(_h3082,_h3083))).

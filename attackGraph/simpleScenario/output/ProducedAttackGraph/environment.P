@@ -7,7 +7,7 @@
 
 :-load_dyn('running_rules.P').
 
-:-load_dyn('tmp.p').
+:-load_dyn('../mulvalInput.P').
 
 :-assert(traceMode(completeTrace2)).
 

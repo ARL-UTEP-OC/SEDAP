@@ -1,11 +1,16 @@
 /******File auto-generated from AGAggregator.py**********/
 /* Network Topology Definitions:*/
-/* edges in graph represent connections among nodes as well as gateways */
+/* assuming connections are bi-directional */
 hacl('10.0.0.2/32', '10.0.0.1/32',_proto,_port).
+hacl('10.0.0.1/32', '10.0.0.2/32',_proto,_port).
 hacl('10.0.0.2/32', '10.0.0.3/32',_proto,_port).
+hacl('10.0.0.3/32', '10.0.0.2/32',_proto,_port).
 hacl('10.0.0.4/32', '10.0.0.3/32',_proto,_port).
+hacl('10.0.0.3/32', '10.0.0.4/32',_proto,_port).
 hacl('10.0.0.4/32', '10.0.0.5/32',_proto,_port).
+hacl('10.0.0.5/32', '10.0.0.4/32',_proto,_port).
 hacl('10.0.0.6/32', '10.0.0.3/32',_proto,_port).
+hacl('10.0.0.3/32', '10.0.0.6/32',_proto,_port).
 gateway('10.0.0.2/32').
 gateway('10.0.0.4/32').
 gateway('10.0.0.6/32').

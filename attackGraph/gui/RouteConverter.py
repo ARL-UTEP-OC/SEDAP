@@ -475,8 +475,10 @@ class RouteConverter(Converter):
         self.generateParametersFromTrafficProfile()
         
         self.haclStr = "/* edges in graph represent connections among nodes as well as gateways */\n"
+        self.haclStr = "/* assuming connections are bi-directional */\n"
         for edge in self.G.edges():
             self.haclStr += "hacl('"+str(edge[0])+"', '"+str(edge[1])+"',_proto,_port).\n"
+            self.haclStr += "hacl('"+str(edge[1])+"', '"+str(edge[0])+"',_proto,_port).\n"
             
         for edge in self.G:
             self.haclStr += "gateway('"+str(edge)+"').\n"
