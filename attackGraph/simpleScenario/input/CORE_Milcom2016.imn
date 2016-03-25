@@ -1,0 +1,183 @@
+node n1 {
+    type router
+    model mdr
+    network-config {
+	hostname n1
+	!
+	interface eth0
+	 ip address 10.0.0.1/32
+	 ipv6 address 2001:0::1/128
+	!
+    }
+    canvas c1
+    iconcoords {90.0 134.0}
+    labelcoords {90.0 166.0}
+    interface-peer {eth0 n7}
+    services {OLSR IPForward}
+}
+
+node n2 {
+    type router
+    model mdr
+    network-config {
+	hostname n2
+	!
+	interface eth0
+	 ip address 10.0.0.2/32
+	!
+    }
+    canvas c1
+    iconcoords {215.0 134.0}
+    labelcoords {215.0 166.0}
+    interface-peer {eth0 n7}
+    services {OLSR IPForward}
+}
+
+node n3 {
+    type router
+    model mdr
+    network-config {
+	hostname n3
+	!
+	interface eth0
+	 ip address 10.0.0.3/32
+	!
+    }
+    canvas c1
+    iconcoords {266.0 235.0}
+    labelcoords {266.0 267.0}
+    interface-peer {eth0 n7}
+    services {OLSR IPForward}
+}
+
+node n4 {
+    type router
+    model mdr
+    network-config {
+	hostname n4
+	!
+	interface eth0
+	 ip address 10.0.0.4/32
+	!
+    }
+    canvas c1
+    iconcoords {379.0 235.0}
+    labelcoords {379.0 267.0}
+    interface-peer {eth0 n7}
+    services {OLSR IPForward}
+}
+
+node n5 {
+    type router
+    model mdr
+    network-config {
+	hostname n5
+	!
+	interface eth0
+	 ip address 10.0.0.5/32
+	!
+    }
+    canvas c1
+    iconcoords {445.0 168.0}
+    labelcoords {445.0 200.0}
+    interface-peer {eth0 n7}
+    services {OLSR IPForward}
+}
+
+node n6 {
+    type router
+    model mdr
+    network-config {
+	hostname n6
+	!
+	interface eth0
+	 ip address 10.0.0.6/32
+	!
+    }
+    canvas c1
+    iconcoords {210.0 327.0}
+    labelcoords {210.0 359.0}
+    interface-peer {eth0 n7}
+    services {OLSR IPForward}
+}
+
+node n7 {
+    type wlan
+    network-config {
+	hostname wlan7
+	!
+	interface wireless
+	 ip address 10.0.0.0/32
+	 ipv6 address 2001:0::0/128
+	!
+	mobmodel
+	coreapi
+	basic_range
+	!
+    }
+    custom-config {
+	custom-config-id basic_range
+	custom-command {3 3 9 9 9}
+	config {
+	range=132.3529411764706
+	bandwidth=54000000
+	jitter=0
+	delay=20000
+	error=0
+	}
+    }
+    canvas c1
+    iconcoords {33.0 34.0}
+    labelcoords {33.0 66.0}
+    interface-peer {e0 n1}
+    interface-peer {e1 n2}
+    interface-peer {e2 n3}
+    interface-peer {e3 n4}
+    interface-peer {e4 n5}
+    interface-peer {e5 n6}
+}
+
+link l1 {
+    nodes {n7 n1}
+}
+
+link l2 {
+    nodes {n7 n2}
+}
+
+link l3 {
+    nodes {n7 n3}
+}
+
+link l4 {
+    nodes {n7 n4}
+}
+
+link l5 {
+    nodes {n7 n5}
+}
+
+link l6 {
+    nodes {n7 n6}
+}
+
+canvas c1 {
+    name {Canvas1}
+}
+
+option global {
+    interface_names no
+    ip_addresses yes
+    ipv6_addresses yes
+    node_labels yes
+    link_labels yes
+    show_api no
+    background_images no
+    annotations yes
+    grid yes
+    traffic_start 0
+}
+
+option session {
+}
+
