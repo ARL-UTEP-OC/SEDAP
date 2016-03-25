@@ -12,7 +12,7 @@ class RuleConverter(Converter):
     
     def __init__(self):
         pass
-     
+
     def convert(self):
         
         convRules =''
@@ -30,7 +30,9 @@ class RuleConverter(Converter):
                 logicalOperator = '=='
             varName = elements[0].strip()
             cmpVal = elements[2].strip()
-            if (cmpVal.replace('.','').replace('-','').isdigit() == False):
+            isNumber = cmpVal.replace('.','').replace('-','').isdigit()
+            
+            if isNumber == False:
                 cmpVal = "'" + cmpVal + "'"
             if len(elements) > 3:
                 ans = elements[4]
@@ -38,8 +40,11 @@ class RuleConverter(Converter):
             indent = ''
             for i in range(0,numTabs+1):
                 indent = indent + ' '
-            
-            convRules =convRules+indent + "if att['"+varName+"'] "+logicalOperator+" "+cmpVal
+            if isNumber == True:
+                convRules =convRules+indent + "if float(att['"+varName+"']) "+logicalOperator+" "+cmpVal
+            else:
+				convRules =convRules+indent + "if att['"+varName+"'] "+logicalOperator+" "+cmpVal
+				
             if ans == '':
                 convRules =convRules+ ":\n"
             else:

@@ -1,0 +1,271 @@
+=== Run information ===
+
+Scheme:weka.classifiers.trees.J48 -C 0.25 -M 2
+Relation:     manet-weka.filters.unsupervised.attribute.Remove-R1-3,9-20,25-35
+Instances:    15655
+Attributes:   10
+              fromHop
+              toHop
+              type
+              distance
+              passthrough
+              srcSpoofed
+              destSpoofed
+              hopsToSpoofed
+              duringLinkLost
+              altPathWithoutAttacker
+Test mode:10-fold cross-validation
+
+=== Classifier model (full training set) ===
+
+J48 pruned tree
+------------------
+
+destSpoofed = true
+|   altPathWithoutAttacker = true
+|   |   fromHop = 1: true (155.0/21.0)
+|   |   fromHop = 2
+|   |   |   toHop = 1: false (140.0/39.0)
+|   |   |   toHop = 2: false (86.0/12.0)
+|   |   |   toHop = 3: true (58.0)
+|   |   |   toHop = 4: false (0.0)
+|   |   |   toHop = 5: false (0.0)
+|   |   |   toHop = 6: false (0.0)
+|   |   |   toHop = 7: false (0.0)
+|   |   |   toHop = 8: false (0.0)
+|   |   |   toHop = 9: false (0.0)
+|   |   |   toHop = 10: false (0.0)
+|   |   fromHop = 3
+|   |   |   toHop = 1: false (0.0)
+|   |   |   toHop = 2: false (73.0/8.0)
+|   |   |   toHop = 3: true (2.0)
+|   |   |   toHop = 4: true (44.0)
+|   |   |   toHop = 5: false (0.0)
+|   |   |   toHop = 6: false (0.0)
+|   |   |   toHop = 7: false (0.0)
+|   |   |   toHop = 8: false (0.0)
+|   |   |   toHop = 9: false (0.0)
+|   |   |   toHop = 10: false (0.0)
+|   |   fromHop = 4
+|   |   |   toHop = 1: false (0.0)
+|   |   |   toHop = 2: false (0.0)
+|   |   |   toHop = 3: false (48.0)
+|   |   |   toHop = 4: false (0.0)
+|   |   |   toHop = 5: true (27.0)
+|   |   |   toHop = 6: false (0.0)
+|   |   |   toHop = 7: false (0.0)
+|   |   |   toHop = 8: false (0.0)
+|   |   |   toHop = 9: false (0.0)
+|   |   |   toHop = 10: false (0.0)
+|   |   fromHop = 5
+|   |   |   toHop = 1: false (0.0)
+|   |   |   toHop = 2: false (0.0)
+|   |   |   toHop = 3: false (0.0)
+|   |   |   toHop = 4: false (28.0/8.0)
+|   |   |   toHop = 5: false (0.0)
+|   |   |   toHop = 6: true (6.0)
+|   |   |   toHop = 7: false (0.0)
+|   |   |   toHop = 8: false (0.0)
+|   |   |   toHop = 9: false (0.0)
+|   |   |   toHop = 10: false (0.0)
+|   |   fromHop = 6
+|   |   |   toHop = 1: false (0.0)
+|   |   |   toHop = 2: false (0.0)
+|   |   |   toHop = 3: false (0.0)
+|   |   |   toHop = 4: false (0.0)
+|   |   |   toHop = 5: false (8.0)
+|   |   |   toHop = 6: false (0.0)
+|   |   |   toHop = 7: true (4.0)
+|   |   |   toHop = 8: false (0.0)
+|   |   |   toHop = 9: false (0.0)
+|   |   |   toHop = 10: false (0.0)
+|   |   fromHop = 7
+|   |   |   toHop = 1: false (0.0)
+|   |   |   toHop = 2: false (0.0)
+|   |   |   toHop = 3: false (0.0)
+|   |   |   toHop = 4: false (0.0)
+|   |   |   toHop = 5: false (0.0)
+|   |   |   toHop = 6: false (6.0)
+|   |   |   toHop = 7: false (0.0)
+|   |   |   toHop = 8: true (2.0)
+|   |   |   toHop = 9: false (0.0)
+|   |   |   toHop = 10: false (0.0)
+|   |   fromHop = 8: false (5.0/1.0)
+|   |   fromHop = 9: false (2.0)
+|   |   fromHop = 10: false (0.0)
+|   altPathWithoutAttacker = false
+|   |   fromHop = 1: true (143.0)
+|   |   fromHop = 2: true (148.0/34.0)
+|   |   fromHop = 3: true (108.0/1.0)
+|   |   fromHop = 4
+|   |   |   toHop = 1: true (10.0)
+|   |   |   toHop = 2: false (35.0/6.0)
+|   |   |   toHop = 3: true (5.0)
+|   |   |   toHop = 4: true (30.0)
+|   |   |   toHop = 5: true (4.0)
+|   |   |   toHop = 6: true (4.0)
+|   |   |   toHop = 7: true (0.0)
+|   |   |   toHop = 8: true (0.0)
+|   |   |   toHop = 9: true (0.0)
+|   |   |   toHop = 10: true (0.0)
+|   |   fromHop = 5: true (40.0/13.0)
+|   |   fromHop = 6
+|   |   |   toHop = 1: true (0.0)
+|   |   |   toHop = 2: true (1.0)
+|   |   |   toHop = 3: true (1.0)
+|   |   |   toHop = 4: false (4.0)
+|   |   |   toHop = 5: true (0.0)
+|   |   |   toHop = 6: true (0.0)
+|   |   |   toHop = 7: true (0.0)
+|   |   |   toHop = 8: true (2.0)
+|   |   |   toHop = 9: true (0.0)
+|   |   |   toHop = 10: true (0.0)
+|   |   fromHop = 7: false (5.0/2.0)
+|   |   fromHop = 8: false (2.0)
+|   |   fromHop = 9: true (2.0/1.0)
+|   |   fromHop = 10: true (0.0)
+destSpoofed = false
+|   srcSpoofed = true
+|   |   type = TCP
+|   |   |   distance = 1
+|   |   |   |   toHop = 1: true (86.0/6.0)
+|   |   |   |   toHop = 2
+|   |   |   |   |   fromHop = 1: false (65.0/20.0)
+|   |   |   |   |   fromHop = 2: false (46.0/7.0)
+|   |   |   |   |   fromHop = 3: true (38.0)
+|   |   |   |   |   fromHop = 4: false (0.0)
+|   |   |   |   |   fromHop = 5: false (0.0)
+|   |   |   |   |   fromHop = 6: false (0.0)
+|   |   |   |   |   fromHop = 7: false (0.0)
+|   |   |   |   |   fromHop = 8: false (0.0)
+|   |   |   |   |   fromHop = 9: false (0.0)
+|   |   |   |   |   fromHop = 10: false (0.0)
+|   |   |   |   toHop = 3
+|   |   |   |   |   fromHop = 1: false (0.0)
+|   |   |   |   |   fromHop = 2: false (39.0/6.0)
+|   |   |   |   |   fromHop = 3: true (1.0)
+|   |   |   |   |   fromHop = 4: true (23.0)
+|   |   |   |   |   fromHop = 5: false (0.0)
+|   |   |   |   |   fromHop = 6: false (0.0)
+|   |   |   |   |   fromHop = 7: false (0.0)
+|   |   |   |   |   fromHop = 8: false (0.0)
+|   |   |   |   |   fromHop = 9: false (0.0)
+|   |   |   |   |   fromHop = 10: false (0.0)
+|   |   |   |   toHop = 4
+|   |   |   |   |   fromHop = 1: false (0.0)
+|   |   |   |   |   fromHop = 2: false (0.0)
+|   |   |   |   |   fromHop = 3: false (23.0)
+|   |   |   |   |   fromHop = 4: false (0.0)
+|   |   |   |   |   fromHop = 5: true (15.0)
+|   |   |   |   |   fromHop = 6: false (0.0)
+|   |   |   |   |   fromHop = 7: false (0.0)
+|   |   |   |   |   fromHop = 8: false (0.0)
+|   |   |   |   |   fromHop = 9: false (0.0)
+|   |   |   |   |   fromHop = 10: false (0.0)
+|   |   |   |   toHop = 5: true (18.0/7.0)
+|   |   |   |   toHop = 6
+|   |   |   |   |   fromHop = 1: false (0.0)
+|   |   |   |   |   fromHop = 2: false (0.0)
+|   |   |   |   |   fromHop = 3: false (0.0)
+|   |   |   |   |   fromHop = 4: false (0.0)
+|   |   |   |   |   fromHop = 5: false (4.0)
+|   |   |   |   |   fromHop = 6: false (0.0)
+|   |   |   |   |   fromHop = 7: true (3.0)
+|   |   |   |   |   fromHop = 8: false (0.0)
+|   |   |   |   |   fromHop = 9: false (0.0)
+|   |   |   |   |   fromHop = 10: false (0.0)
+|   |   |   |   toHop = 7
+|   |   |   |   |   fromHop = 1: false (0.0)
+|   |   |   |   |   fromHop = 2: false (0.0)
+|   |   |   |   |   fromHop = 3: false (0.0)
+|   |   |   |   |   fromHop = 4: false (0.0)
+|   |   |   |   |   fromHop = 5: false (0.0)
+|   |   |   |   |   fromHop = 6: false (3.0)
+|   |   |   |   |   fromHop = 7: false (0.0)
+|   |   |   |   |   fromHop = 8: true (2.0)
+|   |   |   |   |   fromHop = 9: false (0.0)
+|   |   |   |   |   fromHop = 10: false (0.0)
+|   |   |   |   toHop = 8: false (3.0/1.0)
+|   |   |   |   toHop = 9: false (1.0)
+|   |   |   |   toHop = 10: true (0.0)
+|   |   |   distance = 2: true (104.0/2.0)
+|   |   |   distance = 3: true (48.0)
+|   |   |   distance = 4: true (16.0)
+|   |   |   distance = 5: true (8.0)
+|   |   |   distance = 6: true (0.0)
+|   |   |   distance = 7: true (0.0)
+|   |   |   distance = 8: true (0.0)
+|   |   |   distance = 9: true (7.0)
+|   |   |   distance = 10: true (0.0)
+|   |   type = UDP
+|   |   |   passthrough = true: true (133.0/37.0)
+|   |   |   passthrough = false: false (917.0/6.0)
+|   srcSpoofed = false
+|   |   passthrough = true
+|   |   |   hopsToSpoofed = 0: false (175.0)
+|   |   |   hopsToSpoofed = 1
+|   |   |   |   distance = 1: false (0.0)
+|   |   |   |   distance = 2: false (141.0)
+|   |   |   |   distance = 3: false (76.0/11.0)
+|   |   |   |   distance = 4
+|   |   |   |   |   fromHop = 1
+|   |   |   |   |   |   altPathWithoutAttacker = true: false (12.0)
+|   |   |   |   |   |   altPathWithoutAttacker = false: true (10.0/3.0)
+|   |   |   |   |   fromHop = 2: true (21.0/8.0)
+|   |   |   |   |   fromHop = 3: false (24.0/8.0)
+|   |   |   |   |   fromHop = 4: false (0.0)
+|   |   |   |   |   fromHop = 5: false (0.0)
+|   |   |   |   |   fromHop = 6: false (0.0)
+|   |   |   |   |   fromHop = 7: false (0.0)
+|   |   |   |   |   fromHop = 8: false (0.0)
+|   |   |   |   |   fromHop = 9: false (0.0)
+|   |   |   |   |   fromHop = 10: false (0.0)
+|   |   |   |   distance = 5: true (33.0/12.0)
+|   |   |   |   distance = 6: false (0.0)
+|   |   |   |   distance = 7: false (0.0)
+|   |   |   |   distance = 8: true (24.0)
+|   |   |   |   distance = 9: true (28.0)
+|   |   |   |   distance = 10: false (0.0)
+|   |   |   hopsToSpoofed = 2: false (375.0/1.0)
+|   |   |   hopsToSpoofed = 3: false (281.0/1.0)
+|   |   |   hopsToSpoofed = 4: false (109.0)
+|   |   |   hopsToSpoofed = 5: false (40.0)
+|   |   |   hopsToSpoofed = 6: false (20.0)
+|   |   |   hopsToSpoofed = 7: false (8.0)
+|   |   |   hopsToSpoofed = 8: false (4.0)
+|   |   |   hopsToSpoofed = 9: false (0.0)
+|   |   |   hopsToSpoofed = 10: false (0.0)
+|   |   passthrough = false: false (11433.0/58.0)
+
+Number of Leaves  : 	189
+
+Size of the tree : 	216
+
+
+Time taken to build model: 0.1 seconds
+
+=== Stratified cross-validation ===
+=== Summary ===
+
+Correctly Classified Instances       15274               97.5663 %
+Incorrectly Classified Instances       381                2.4337 %
+Kappa statistic                          0.853 
+Mean absolute error                      0.0364
+Root mean squared error                  0.138 
+Relative absolute error                 21.4778 %
+Root relative squared error             47.3976 %
+Total Number of Instances            15655     
+
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.844     0.011      0.89      0.844     0.866      0.967    true
+                 0.989     0.156      0.984     0.989     0.987      0.967    false
+Weighted Avg.    0.976     0.143      0.975     0.976     0.975      0.967
+
+=== Confusion Matrix ===
+
+     a     b   <-- classified as
+  1235   229 |     a = true
+   152 14039 |     b = false
+

@@ -17,12 +17,15 @@ gateway('10.0.0.1/32').
 /* Flow #1 :*/
 flowExists('10.0.0.1/32','10.0.0.5/32', 'TCP', _port, flow1Account).
 hasAccount(flow1Principal,'10.0.0.5/32', flow1Account).
+networkServiceInfo('10.0.0.1/32','nrlolsr', 'olsr', _NA_port_layer3, _NA_perm_layer3).
+vulExists('10.0.0.1/32','nrlolsrVul', 'nrlolsr', remoteExploit, nrlolsrHijack).
 
 /******Attacker Located:**********/
 attackerLocated('10.0.0.6/32').
 
 /******Semi-Auto definitions (please modify if needed):**********/
-/* No routing vulnerabilities were found!!*/
+attackGoal(execCode('10.0.0.5/32', _)).
 
 /******Manual definitions should go here:**********/
 /** Temporary for testing (we're assuming there is a login service for each dst in each flow)**/
+networkServiceInfo('10.0.0.5/32' , ftpd, 'TCP' , _port, flow1Account).

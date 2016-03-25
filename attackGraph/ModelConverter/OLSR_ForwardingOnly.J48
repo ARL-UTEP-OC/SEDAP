@@ -1,0 +1,58 @@
+=== Run information ===
+
+Scheme:weka.classifiers.trees.J48 -C 0.25 -M 2
+Relation:     manet-weka.filters.unsupervised.attribute.Remove-R1-3,9-20,25-35
+Instances:    1596
+Attributes:   10
+              fromHop
+              toHop
+              type
+              distance
+              passthrough
+              srcSpoofed
+              destSpoofed
+              hopsToSpoofed
+              duringLinkLost
+              altPathWithoutAttacker
+Test mode:10-fold cross-validation
+
+=== Classifier model (full training set) ===
+
+J48 pruned tree
+------------------
+
+passthrough = true: true (148.0)
+passthrough = false: false (1448.0/3.0)
+
+Number of Leaves  : 	2
+
+Size of the tree : 	3
+
+
+Time taken to build model: 0.02 seconds
+
+=== Stratified cross-validation ===
+=== Summary ===
+
+Correctly Classified Instances        1593               99.812  %
+Incorrectly Classified Instances         3                0.188  %
+Kappa statistic                          0.9889
+Mean absolute error                      0.0038
+Root mean squared error                  0.0433
+Relative absolute error                  2.1847 %
+Root relative squared error             14.8063 %
+Total Number of Instances             1596     
+
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.98      0          1         0.98      0.99       0.983    true
+                 1         0.02       0.998     1         0.999      0.983    false
+Weighted Avg.    0.998     0.018      0.998     0.998     0.998      0.983
+
+=== Confusion Matrix ===
+
+    a    b   <-- classified as
+  148    3 |    a = true
+    0 1445 |    b = false
+
