@@ -5,11 +5,11 @@ Created on Mar 22, 2016
 @author: epadilla2
 '''
 import sys
-from gui.AttributeConverter import AttributeConverter
-from gui.RuleConverter import RuleConverter
-from gui.RouteConverter import RouteConverter
-from gui.ModelEvaluator import ModelEvaluator
-from gui.PConverter import PConverter
+from DataProcessors.AttributeConverter import AttributeConverter
+from DataProcessors.ModelConverter.ModelConverter import ModelConverter
+from DataProcessors.AttributesExtractor.AttributesExtractor import AttributesExtractor
+from DataProcessors.ModelEvaluator.ModelEvaluator import ModelEvaluator
+from DataProcessors.AGInputGenerator.AGInputGenerator import AGInputGenerator
 
 class Workflow(object):
     '''
@@ -40,7 +40,7 @@ input files are:
     outputPath = sys.argv[3] +"/"
     
     
-    routes = RouteConverter()
+    routes = AttributesExtractor()
     routes.readRoutes(routesPath)
     routes.convert()
     routes.getAttributes()
@@ -54,7 +54,7 @@ input files are:
     attr.readXML(outputPath+"standardAttributes.xml")
     print "Loaded attribute flow"
         
-    rules = RuleConverter()
+    rules = ModelConverter()
     rules.readFromFile(wekaRules)
     rules.convert()
     rules.writeOutput(outputPath+"Model.py")
@@ -66,7 +66,7 @@ input files are:
     model.writeModelEvaluationXML(outputPath+"EvaluatedFlow.xml",attr.attributes,model.evaluationResults)
     print "Evaluated Python Model"
     
-    p = PConverter()
+    p = AGInputGenerator()
     p.readHacl(outputPath+"hacl.txt")
     p.readEvaluatedFlow(outputPath+"EvaluatedFlow.xml")
     p.convert()
