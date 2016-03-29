@@ -29,9 +29,9 @@ if __name__ == "__main__":
 usage: 
 python Workflow.py <input1> <input2> <input3>
 input files are: 
-1. route information (typically ./AttributesGenerator/sampleInput.xml)
-2. weka rules (typically ./ModelConverter/OLSR_Forwarding.REPTree.rules)	
-3. output folder (typically ./outputFiles)
+1. route information (typically ./simpleScenario/input/sampleInputMilcom.xml)
+2. weka rules (typically ./simpleScenario/input/OLSR_Spoofing.REPTree)	
+3. output folder (typically ./simpleScenario/output/)
 """
        exit()
         
