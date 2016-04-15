@@ -33,25 +33,21 @@ meta(advances,2).
 
 attack(execCode(ftpServerHost,victimAccount)).
 
-possible_duplicate_trace_step(because(19,rule_desc('log in for ftpd',1),logInService(ftpServerHost,tcp,21),[networkServiceInfo(ftpServerHost,ftpd,tcp,21,userLevel)])).
+possible_duplicate_trace_step(because(29,rule_desc('log in for ftpd',1),logInService(ftpServerHost,tcp,21),[networkServiceInfo(ftpServerHost,ftpd,tcp,21,userLevel)])).
 
-possible_duplicate_trace_step(because(14,rule_desc('password sniffing through spoof',0.800000000000000044),principalCompromised(victim),[flowExists(ftpClientHost,ftpServerHost,tcp,21,victimAccount),logInService(ftpServerHost,tcp,21),vulExists(ftpClientHost,arpSpoofVuln,arpd,remoteExploit,arpSpoof),networkServiceInfo(ftpClientHost,arpd,_h4448,_h4448,_h4448),hacl(subnet1,ftpClientHost,_h4440,_h4441),attackerLocated(subnet1),hasAccount(victim,ftpServerHost,victimAccount)])).
+possible_duplicate_trace_step(because(26,rule_desc('password sniffing through spoof',0.800000000000000044),principalCompromised(victim),[flowExists(ftpClientHost,ftpServerHost,tcp,21,victimAccount),logInService(ftpServerHost,tcp,21),vulExists(ftpClientHost,arpSpoofVuln,arpd,remoteExploit,arpSpoof),networkServiceInfo(ftpClientHost,arpd,_h4448,_h4448,_h4448),hacl(subnet1,ftpClientHost,_h4440,_h4441),attackerLocated(subnet1),hasAccount(victim,ftpServerHost,victimAccount)])).
 
-possible_duplicate_trace_step(because(7,rule_desc('direct network access',1.0),netAccess(router1,tcp,21),[hacl(subnet1,router1,tcp,21),attackerLocated(subnet1)])).
+possible_duplicate_trace_step(because(6,rule_desc('direct network access',1.0),netAccess(router1,tcp,21),[hacl(subnet1,router1,tcp,21),attackerLocated(subnet1)])).
 
-possible_duplicate_trace_step(because(6,rule_desc('multi-hop access by gateway',0.5),netAccess(router2,tcp,21),[hacl(router1,router2,tcp,21),netAccess(router1,tcp,21),advances(router1,router2),gateway(router1)])).
+possible_duplicate_trace_step(because(25,rule_desc('multi-hop access by gateway',0.5),netAccess(router2,tcp,21),[hacl(router1,router2,tcp,21),netAccess(router1,tcp,21),advances(router1,router2),gateway(router1)])).
 
-possible_duplicate_trace_step(because(6,rule_desc('multi-hop access by gateway',0.5),netAccess(ftpServerHost,tcp,21),[hacl(router2,ftpServerHost,tcp,21),netAccess(router2,tcp,21),advances(router2,ftpServerHost),gateway(router2)])).
+possible_duplicate_trace_step(because(25,rule_desc('multi-hop access by gateway',0.5),netAccess(ftpServerHost,tcp,21),[hacl(router2,ftpServerHost,tcp,21),netAccess(router2,tcp,21),advances(router2,ftpServerHost),gateway(router2)])).
 
-possible_duplicate_trace_step(because(10,rule_desc('Access a host through a log-in service',1.0),canAccessHost(ftpServerHost),[netAccess(ftpServerHost,tcp,21),logInService(ftpServerHost,tcp,21)])).
-
-possible_duplicate_trace_step(because(0,rule_desc('When a principal is compromised any machine he has an account on will also be compromised',0.5),execCode(ftpServerHost,victimAccount),[canAccessHost(ftpServerHost),hasAccount(victim,ftpServerHost,victimAccount),principalCompromised(victim)])).
-
-possible_duplicate_trace_step(because(13,rule_desc('password sniffing',0.800000000000000044),principalCompromised(victim),[execCode(ftpServerHost,victimAccount),hasAccount(victim,ftpServerHost,victimAccount)])).
+possible_duplicate_trace_step(because(9,rule_desc('Access a host through a log-in service',1.0),canAccessHost(ftpServerHost),[netAccess(ftpServerHost,tcp,21),logInService(ftpServerHost,tcp,21)])).
 
 possible_duplicate_trace_step(because(0,rule_desc('When a principal is compromised any machine he has an account on will also be compromised',0.5),execCode(ftpServerHost,victimAccount),[canAccessHost(ftpServerHost),hasAccount(victim,ftpServerHost,victimAccount),principalCompromised(victim)])).
 
-possible_duplicate_trace_step(because(0,rule_desc('When a principal is compromised any machine he has an account on will also be compromised',0.5),execCode(ftpServerHost,victimAccount),[canAccessHost(ftpServerHost),hasAccount(victim,ftpServerHost,victimAccount),principalCompromised(victim)])).
+possible_duplicate_trace_step(because(12,rule_desc('password sniffing',0.800000000000000044),principalCompromised(victim),[execCode(ftpServerHost,victimAccount),hasAccount(victim,ftpServerHost,victimAccount)])).
 
 possible_duplicate_trace_step(because(0,rule_desc('When a principal is compromised any machine he has an account on will also be compromised',0.5),execCode(ftpServerHost,victimAccount),[canAccessHost(ftpServerHost),hasAccount(victim,ftpServerHost,victimAccount),principalCompromised(victim)])).
 
@@ -59,7 +55,11 @@ possible_duplicate_trace_step(because(0,rule_desc('When a principal is compromis
 
 possible_duplicate_trace_step(because(0,rule_desc('When a principal is compromised any machine he has an account on will also be compromised',0.5),execCode(ftpServerHost,victimAccount),[canAccessHost(ftpServerHost),hasAccount(victim,ftpServerHost,victimAccount),principalCompromised(victim)])).
 
-possible_duplicate_trace_step(because(9,rule_desc('Access a host through executing code on the machine',1.0),canAccessHost(ftpServerHost),[execCode(ftpServerHost,victimAccount)])).
+possible_duplicate_trace_step(because(0,rule_desc('When a principal is compromised any machine he has an account on will also be compromised',0.5),execCode(ftpServerHost,victimAccount),[canAccessHost(ftpServerHost),hasAccount(victim,ftpServerHost,victimAccount),principalCompromised(victim)])).
+
+possible_duplicate_trace_step(because(0,rule_desc('When a principal is compromised any machine he has an account on will also be compromised',0.5),execCode(ftpServerHost,victimAccount),[canAccessHost(ftpServerHost),hasAccount(victim,ftpServerHost,victimAccount),principalCompromised(victim)])).
+
+possible_duplicate_trace_step(because(8,rule_desc('Access a host through executing code on the machine',1.0),canAccessHost(ftpServerHost),[execCode(ftpServerHost,victimAccount)])).
 
 possible_duplicate_trace_step(because(0,rule_desc('When a principal is compromised any machine he has an account on will also be compromised',0.5),execCode(ftpServerHost,victimAccount),[canAccessHost(ftpServerHost),hasAccount(victim,ftpServerHost,victimAccount),principalCompromised(victim)])).
 

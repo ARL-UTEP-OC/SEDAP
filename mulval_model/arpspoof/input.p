@@ -34,9 +34,10 @@ networkServiceInfo(router1 , arpd, _NA_layer2 , _NA_layer2 , _NA_layer2).
 networkServiceInfo(router2 , arpd, _NA_layer2 , _NA_layer2 , _NA_layer2). 
 
 /* ftp server */
-networkServiceInfo(ftpServerHost , ftpd, tcp , 21, userLevel).  /* manually */
+networkServiceInfo(ftpServerHost , ftpd, tcp , 21, userLevel).
 hasAccount(victim, ftpServerHost, victimAccount).
 networkServiceInfo(ftpServerHost, arpd, _NA_layer2 , _NA_layer2 , _NA_layer2). 
 
 /* comms */
 flowExists(ftpClientHost, ftpServerHost, tcp, 21, victimAccount).
+

@@ -94,10 +94,11 @@ class AGInputGenerator(Converter):
             output += "hasAccount(flow"+str(numFlows)+"Principal,"+dst+", flow"+str(numFlows)+"Account).\n"
             if duringLinkLost == 'True':
                 routingProgramVul = routingProgram[:-1] +"Vul'"
+                routingProgramHijack = routingProgram[:-1] +"Hijack'"
                 #the routing protocol used
                 output += "networkServiceInfo("+str(src)+","+str(routingProgram)+", "+routingProtocol+", "+"_NA_port_layer3, "+"_NA_perm_layer3"+").\n"
                 #if duringLinkLost is true, then we add the vulnerability associated with the routing protocol used
-                output += "vulExists("+str(src)+","+str(routingProgramVul)+", "+str(routingProgram)+", remoteExploit, "+"nrlolsrHijack"+").\n"
+                output += "vulExists("+str(src)+","+str(routingProgramVul)+", "+str(routingProgram)+", remoteExploit, "+routingProgramHijack+").\n"
         
                 attackVictimAttributes["victim"].append(attributeValues["victim"])
                 attackVictimAttributes["src"].append(attributeValues["src"])

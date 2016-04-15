@@ -134,7 +134,7 @@
 </vertex>
 <vertex>
 <id>4</id>
-<fact>RULE 10 (Access a host through a log-in service)</fact>
+<fact>RULE 9 (Access a host through a log-in service)</fact>
 <metric>0</metric>
 <type>AND</type>
 </vertex>
@@ -146,7 +146,7 @@
 </vertex>
 <vertex>
 <id>6</id>
-<fact>RULE 6 (multi-hop access by gateway)</fact>
+<fact>RULE 25 (multi-hop access by gateway)</fact>
 <metric>0</metric>
 <type>AND</type>
 </vertex>
@@ -164,7 +164,7 @@
 </vertex>
 <vertex>
 <id>9</id>
-<fact>RULE 6 (multi-hop access by gateway)</fact>
+<fact>RULE 25 (multi-hop access by gateway)</fact>
 <metric>0</metric>
 <type>AND</type>
 </vertex>
@@ -182,7 +182,7 @@
 </vertex>
 <vertex>
 <id>12</id>
-<fact>RULE 7 (direct network access)</fact>
+<fact>RULE 6 (direct network access)</fact>
 <metric>0</metric>
 <type>AND</type>
 </vertex>
@@ -218,7 +218,7 @@
 </vertex>
 <vertex>
 <id>18</id>
-<fact>RULE 19 (log in for ftpd)</fact>
+<fact>RULE 29 (log in for ftpd)</fact>
 <metric>0</metric>
 <type>AND</type>
 </vertex>
@@ -242,7 +242,7 @@
 </vertex>
 <vertex>
 <id>22</id>
-<fact>RULE 14 (password sniffing through spoof)</fact>
+<fact>RULE 26 (password sniffing through spoof)</fact>
 <metric>0</metric>
 <type>AND</type>
 </vertex>

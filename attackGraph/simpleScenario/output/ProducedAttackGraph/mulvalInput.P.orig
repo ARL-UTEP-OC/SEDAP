@@ -1,0 +1,36 @@
+/******File auto-generated from AGAggregator.py**********/
+/* Network Topology Definitions:*/
+/* assuming connections are bi-directional */
+hacl('10.0.0.2/32', '10.0.0.1/32',_proto,_port).
+hacl('10.0.0.1/32', '10.0.0.2/32',_proto,_port).
+hacl('10.0.0.2/32', '10.0.0.3/32',_proto,_port).
+hacl('10.0.0.3/32', '10.0.0.2/32',_proto,_port).
+hacl('10.0.0.4/32', '10.0.0.3/32',_proto,_port).
+hacl('10.0.0.3/32', '10.0.0.4/32',_proto,_port).
+hacl('10.0.0.4/32', '10.0.0.5/32',_proto,_port).
+hacl('10.0.0.5/32', '10.0.0.4/32',_proto,_port).
+hacl('10.0.0.6/32', '10.0.0.3/32',_proto,_port).
+hacl('10.0.0.3/32', '10.0.0.6/32',_proto,_port).
+gateway('10.0.0.2/32').
+gateway('10.0.0.4/32').
+gateway('10.0.0.6/32').
+gateway('10.0.0.5/32').
+gateway('10.0.0.3/32').
+gateway('10.0.0.1/32').
+
+/* Flow Definitions: */
+/* Flow #1 :*/
+flowExists('10.0.0.1/32','10.0.0.5/32', 'TCP', _port, flow1Account).
+hasAccount(flow1Principal,'10.0.0.5/32', flow1Account).
+networkServiceInfo('10.0.0.1/32','nrlolsr', 'olsr', _NA_port_layer3, _NA_perm_layer3).
+vulExists('10.0.0.1/32','nrlolsrVul', 'nrlolsr', remoteExploit, nrlolsrHijack).
+
+/******Attacker Located:**********/
+attackerLocated('10.0.0.6/32').
+
+/******Semi-Auto definitions (please modify if needed):**********/
+attackGoal(execCode('10.0.0.5/32', _)).
+
+/******Manual definitions should go here:**********/
+/** Temporary for testing (we're assuming there is a login service for each dst in each flow)**/
+networkServiceInfo('10.0.0.5/32' , ftpd, 'TCP' , _port, flow1Account).

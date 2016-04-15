@@ -1,0 +1,51 @@
+[xsb_configuration loaded]
+[sysinitrc loaded]
+[xsbbrat loaded]
+
+XSB Version 3.5.0 (Maotai) of July 6, 2013
+[x86_64-unknown-linux-gnu 64 bits; mode: optimal; engine: slg-wam; scheduling: local]
+[Patch date: 2014-07-03 17:24:44 -0400 (Thu, 03 Jul 2014)]
+
+| ?- [Compiling ./run]
+[run compiled, cpu time used: 0.0040 seconds]
+[run loaded]
+[libmulval loaded]
+[translate loaded]
+[attack_trace loaded]
+[auxiliary loaded]
+[/root/git/impactpredictionmodels/attackGraph/caseStudyScenario/output/ProducedAttackGraph/running_rules.P dynamically loaded, cpu time used: 0.0000 seconds]
+[/root/git/impactpredictionmodels/attackGraph/caseStudyScenario/output/mulvalInput.P dynamically loaded, cpu time used: 0.0000 seconds]
+[/root/install/mulval/src/analyzer/advances_notrim.P dynamically loaded, cpu time used: 0.0000 seconds]
+@@@@@@@@@@@@@@Done transforming in mode dynamic_decl
+
+[/root/git/impactpredictionmodels/attackGraph/caseStudyScenario/output/ProducedAttackGraph/dynamic_decl.gen dynamically loaded, cpu time used: 0.0000 seconds]
+@@@@@@@@@@@@@@Done transforming in mode completeTrace2
+
+@@@@@@@@@@@@@@Done transforming in mode completeTrace2
+
+@@@@@@@@@@@@@@Done transforming in mode stripExplanation
+
+Running attack simulation...
+++Error[XSB/Runtime/P]: [Existence (No procedure usermod : attackGoal / 1 exists)] []
+Forward Continuation...
+... machine:xsb_backtrace/1  From /root/install/XSB/syslib/machine.xwam
+... loader:load_pred1/1  From /root/install/XSB/syslib/loader.xwam
+... loader:load_pred0/1  From /root/install/XSB/syslib/loader.xwam
+... loader:load_pred/1  From /root/install/XSB/syslib/loader.xwam
+... attackGoal/1  From 0
+... standard:call/1  From /root/install/XSB/syslib/standard.xwam
+... setof:findall/3  From /root/install/XSB/syslib/setof.xwam
+... attack_simulation_trace/1  From /root/install/mulval/src/analyzer/attack_trace.xwam
+... mulval_run/0  From /root/install/mulval/lib/libmulval.xwam
+... consult:co_code_call/3  From /root/install/XSB/syslib/consult.xwam
+... consult:reconsult0/3  From /root/install/XSB/syslib/consult.xwam
+... x_interp:_$call/1  From /root/install/XSB/syslib/x_interp.xwam
+... x_interp:call_query/1  From /root/install/XSB/syslib/x_interp.xwam
+... standard:call/1  From /root/install/XSB/syslib/standard.xwam
+... standard:catch/3  From /root/install/XSB/syslib/standard.xwam
+... x_interp:interpreter/0  From /root/install/XSB/syslib/x_interp.xwam
+... loader:ll_code_call/3  From /root/install/XSB/syslib/loader.xwam
+... standard:call/1  From /root/install/XSB/syslib/standard.xwam
+... standard:catch/3  From /root/install/XSB/syslib/standard.xwam
+| ?- 
+End XSB (cputime 0.02 secs, elapsetime 0.02 secs)

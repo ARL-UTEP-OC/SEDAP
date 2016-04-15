@@ -1,17 +1,17 @@
 1,"execCode(ftpServerHost,victimAccount)","OR",0
 2,"RULE 0 (When a principal is compromised any machine he has an account on will also be compromised)","AND",0
 3,"canAccessHost(ftpServerHost)","OR",0
-4,"RULE 10 (Access a host through a log-in service)","AND",0
+4,"RULE 9 (Access a host through a log-in service)","AND",0
 5,"netAccess(ftpServerHost,tcp,21)","OR",0
-6,"RULE 6 (multi-hop access by gateway)","AND",0
+6,"RULE 25 (multi-hop access by gateway)","AND",0
 7,"hacl(router2,ftpServerHost,tcp,21)","LEAF",1
 6,7,-1
 8,"netAccess(router2,tcp,21)","OR",0
-9,"RULE 6 (multi-hop access by gateway)","AND",0
+9,"RULE 25 (multi-hop access by gateway)","AND",0
 10,"hacl(router1,router2,tcp,21)","LEAF",1
 9,10,-1
 11,"netAccess(router1,tcp,21)","OR",0
-12,"RULE 7 (direct network access)","AND",0
+12,"RULE 6 (direct network access)","AND",0
 13,"hacl(subnet1,router1,tcp,21)","LEAF",1
 12,13,-1
 14,"attackerLocated(subnet1)","LEAF",1
@@ -27,7 +27,7 @@
 5,6,-1
 4,5,-1
 17,"logInService(ftpServerHost,tcp,21)","OR",0
-18,"RULE 19 (log in for ftpd)","AND",0
+18,"RULE 29 (log in for ftpd)","AND",0
 19,"networkServiceInfo(ftpServerHost,ftpd,tcp,21,userLevel)","LEAF",1
 18,19,-1
 17,18,-1
@@ -37,7 +37,7 @@
 20,"hasAccount(victim,ftpServerHost,victimAccount)","LEAF",1
 2,20,-1
 21,"principalCompromised(victim)","OR",0
-22,"RULE 14 (password sniffing through spoof)","AND",0
+22,"RULE 26 (password sniffing through spoof)","AND",0
 23,"flowExists(ftpClientHost,ftpServerHost,tcp,21,victimAccount)","LEAF",1
 22,23,-1
 22,17,-1
