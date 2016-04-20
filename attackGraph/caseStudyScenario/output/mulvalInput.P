@@ -52,14 +52,17 @@ gateway('10.0.0.1/32').
 
 /* Flow Definitions: */
 /* Flow #1 :*/
-flowExists('10.0.0.4/32','10.0.0.12/32', 'TCP', _port, flow1Account).
-hasAccount(flow1Principal,'10.0.0.12/32', flow1Account).
+flowExists('10.0.0.4/32','10.0.0.10/32', 'TCP', _port, flow1Account).
+hasAccount(flow1Principal,'10.0.0.10/32', flow1Account).
+networkServiceInfo('10.0.0.4/32','quagga_ospf_mdr3', 'ospf_mdr', _NA_port_layer3, _NA_perm_layer3).
+vulExists('10.0.0.4/32','quagga_ospf_mdr3Vul', 'quagga_ospf_mdr3', remoteExploit, 'quagga_ospf_mdr3Hijack').
 
 /******Attacker Located:**********/
-attackerLocated('10.0.0.10/32').
+attackerLocated('10.0.0.9/32').
 
 /******Semi-Auto definitions (please modify if needed):**********/
-/* No routing vulnerabilities were found!!*/
+attackGoal(execCode('10.0.0.10/32', _)).
 
 /******Manual definitions should go here:**********/
 /** Temporary for testing (we're assuming there is a login service for each dst in each flow)**/
+networkServiceInfo('10.0.0.10/32' , ftpd, 'TCP' , _port, flow1Account).

@@ -6,7 +6,7 @@
     </Attribute>
     <Attribute>
       <Name>passthrough</Name>
-      <Value>False</Value>
+      <Value>True</Value>
     </Attribute>
     <Attribute>
       <Name>isDstBetweenSpoofedAndAttacker</Name>
@@ -18,7 +18,7 @@
     </Attribute>
     <Attribute>
       <Name>victim</Name>
-      <Value>'10.0.0.7/32'</Value>
+      <Value>'10.0.0.10/32'</Value>
     </Attribute>
     <Attribute>
       <Name>isAttackerBetweenSpoofedAndDst</Name>
@@ -30,7 +30,7 @@
     </Attribute>
     <Attribute>
       <Name>toHop</Name>
-      <Value>4</Value>
+      <Value>3</Value>
     </Attribute>
     <Attribute>
       <Name>isDstBetweenSpoofedAndAttackergw</Name>
@@ -42,11 +42,11 @@
     </Attribute>
     <Attribute>
       <Name>dst</Name>
-      <Value>'10.0.0.12/32'</Value>
+      <Value>'10.0.0.10/32'</Value>
     </Attribute>
     <Attribute>
       <Name>distance</Name>
-      <Value>6</Value>
+      <Value>5</Value>
     </Attribute>
     <Attribute>
       <Name>altPathWithoutAttacker</Name>
@@ -62,7 +62,7 @@
     </Attribute>
     <Attribute>
       <Name>spoofedBetweenAttackergw</Name>
-      <Value>True</Value>
+      <Value>False</Value>
     </Attribute>
     <Attribute>
       <Name>src</Name>
@@ -70,7 +70,7 @@
     </Attribute>
     <Attribute>
       <Name>attackNode</Name>
-      <Value>'10.0.0.10/32'</Value>
+      <Value>'10.0.0.9/32'</Value>
     </Attribute>
     <Attribute>
       <Name>isAttackerBetweenSpoofedAndDstgw</Name>
@@ -82,11 +82,11 @@
     </Attribute>
     <Attribute>
       <Name>fromHop</Name>
-      <Value>5</Value>
+      <Value>3</Value>
     </Attribute>
     <Attribute>
       <Name>destSpoofed</Name>
-      <Value>False</Value>
+      <Value>True</Value>
     </Attribute>
     <Attribute>
       <Name>isSrcBetweenSpoofedAndDstgw</Name>
@@ -94,7 +94,7 @@
     </Attribute>
     <Attribute>
       <Name>hopsFromSpoofedToDest</Name>
-      <Value>2</Value>
+      <Value>-1</Value>
     </Attribute>
   </FlowDescriptionAttributes>
 </Attributes>

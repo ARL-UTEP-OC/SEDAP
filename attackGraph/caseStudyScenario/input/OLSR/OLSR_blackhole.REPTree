@@ -1,0 +1,14 @@
+passthrough = true
+|   distance = 1 : false (0/0) [0/0]
+|   distance = 2
+|   |   duringLinkLost = true : false (151/63) [87/45]
+|   |   duringLinkLost = false : true (10/2) [6/2]
+|   distance = 3 : true (155/60) [93/34]
+|   distance = 4 : false (101/18) [33/2]
+|   distance = 5 : false (43/0) [19/0]
+|   distance = 6 : false (0/0) [0/0]
+|   distance = 7 : false (38/0) [30/0]
+|   distance = 8 : false (35/0) [17/0]
+|   distance = 9 : false (18/0) [10/0]
+|   distance = 10 : false (0/0) [0/0]
+passthrough = false : true (3851/33) [1907/15]

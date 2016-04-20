@@ -1,96 +1,94 @@
-1,"execCode('10.0.0.12/32',flow1Account)","OR",0
+1,"execCode('10.0.0.10/32',flow1Account)","OR",0
 2,"RULE 0 (When a principal is compromised any machine he has an account on will also be compromised)","AND",0
-3,"canAccessHost('10.0.0.12/32')","OR",0
+3,"canAccessHost('10.0.0.10/32')","OR",0
 4,"RULE 9 (Access a host through a log-in service)","AND",0
-5,"netAccess('10.0.0.12/32','TCP',_)","OR",0
+5,"netAccess('10.0.0.10/32','TCP',_)","OR",0
 6,"RULE 25 (multi-hop access by gateway)","AND",0
-7,"hacl('10.0.0.7/32','10.0.0.12/32','TCP',_)","LEAF",1
-8,"netAccess('10.0.0.7/32','TCP',_)","OR",0
+7,"hacl('10.0.0.2/32','10.0.0.10/32','TCP',_)","LEAF",1
+8,"netAccess('10.0.0.2/32','TCP',_)","OR",0
 9,"RULE 25 (multi-hop access by gateway)","AND",0
-10,"hacl('10.0.0.2/32','10.0.0.7/32','TCP',_)","LEAF",1
-11,"netAccess('10.0.0.2/32','TCP',_)","OR",0
+10,"hacl('10.0.0.3/32','10.0.0.2/32','TCP',_)","LEAF",1
+11,"netAccess('10.0.0.3/32','TCP',_)","OR",0
 12,"RULE 25 (multi-hop access by gateway)","AND",0
-13,"hacl('10.0.0.10/32','10.0.0.2/32','TCP',_)","LEAF",1
-14,"netAccess('10.0.0.10/32','TCP',_)","OR",0
+13,"hacl('10.0.0.1/32','10.0.0.3/32','TCP',_)","LEAF",1
+14,"netAccess('10.0.0.1/32','TCP',_)","OR",0
 15,"RULE 25 (multi-hop access by gateway)","AND",0
-16,"hacl('10.0.0.2/32','10.0.0.10/32','TCP',_)","LEAF",1
-17,"gateway('10.0.0.2/32')","LEAF",1
+16,"hacl('10.0.0.3/32','10.0.0.1/32','TCP',_)","LEAF",1
+17,"gateway('10.0.0.3/32')","LEAF",1
 18,"RULE 25 (multi-hop access by gateway)","AND",0
-19,"hacl('10.0.0.3/32','10.0.0.10/32','TCP',_)","LEAF",1
-20,"netAccess('10.0.0.3/32','TCP',_)","OR",0
+19,"hacl('10.0.0.9/32','10.0.0.1/32','TCP',_)","LEAF",1
+20,"netAccess('10.0.0.9/32','TCP',_)","OR",0
 21,"RULE 25 (multi-hop access by gateway)","AND",0
-22,"hacl('10.0.0.1/32','10.0.0.3/32','TCP',_)","LEAF",1
-23,"netAccess('10.0.0.1/32','TCP',_)","OR",0
+22,"hacl('10.0.0.1/32','10.0.0.9/32','TCP',_)","LEAF",1
+23,"gateway('10.0.0.1/32')","LEAF",1
 24,"RULE 25 (multi-hop access by gateway)","AND",0
-25,"hacl('10.0.0.3/32','10.0.0.1/32','TCP',_)","LEAF",1
-26,"gateway('10.0.0.3/32')","LEAF",1
+25,"hacl('10.0.0.2/32','10.0.0.9/32','TCP',_)","LEAF",1
+26,"gateway('10.0.0.2/32')","LEAF",1
 27,"RULE 25 (multi-hop access by gateway)","AND",0
-28,"hacl('10.0.0.9/32','10.0.0.1/32','TCP',_)","LEAF",1
-29,"netAccess('10.0.0.9/32','TCP',_)","OR",0
-30,"RULE 25 (multi-hop access by gateway)","AND",0
-31,"hacl('10.0.0.1/32','10.0.0.9/32','TCP',_)","LEAF",1
-32,"gateway('10.0.0.1/32')","LEAF",1
-33,"RULE 25 (multi-hop access by gateway)","AND",0
-34,"hacl('10.0.0.2/32','10.0.0.9/32','TCP',_)","LEAF",1
+28,"hacl('10.0.0.3/32','10.0.0.9/32','TCP',_)","LEAF",1
+29,"RULE 25 (multi-hop access by gateway)","AND",0
+30,"hacl('10.0.0.5/32','10.0.0.9/32','TCP',_)","LEAF",1
+31,"netAccess('10.0.0.5/32','TCP',_)","OR",0
+32,"RULE 25 (multi-hop access by gateway)","AND",0
+33,"hacl('10.0.0.6/32','10.0.0.5/32','TCP',_)","LEAF",1
+34,"netAccess('10.0.0.6/32','TCP',_)","OR",0
 35,"RULE 25 (multi-hop access by gateway)","AND",0
-36,"hacl('10.0.0.3/32','10.0.0.9/32','TCP',_)","LEAF",1
-37,"RULE 25 (multi-hop access by gateway)","AND",0
-38,"hacl('10.0.0.5/32','10.0.0.9/32','TCP',_)","LEAF",1
-39,"netAccess('10.0.0.5/32','TCP',_)","OR",0
-40,"RULE 25 (multi-hop access by gateway)","AND",0
-41,"hacl('10.0.0.6/32','10.0.0.5/32','TCP',_)","LEAF",1
-42,"netAccess('10.0.0.6/32','TCP',_)","OR",0
+36,"hacl('10.0.0.5/32','10.0.0.6/32','TCP',_)","LEAF",1
+37,"gateway('10.0.0.5/32')","LEAF",1
+38,"RULE 25 (multi-hop access by gateway)","AND",0
+39,"hacl('10.0.0.8/32','10.0.0.6/32','TCP',_)","LEAF",1
+40,"netAccess('10.0.0.8/32','TCP',_)","OR",0
+41,"RULE 25 (multi-hop access by gateway)","AND",0
+42,"hacl('10.0.0.2/32','10.0.0.8/32','TCP',_)","LEAF",1
 43,"RULE 25 (multi-hop access by gateway)","AND",0
-44,"hacl('10.0.0.5/32','10.0.0.6/32','TCP',_)","LEAF",1
-45,"gateway('10.0.0.5/32')","LEAF",1
+44,"hacl('10.0.0.6/32','10.0.0.8/32','TCP',_)","LEAF",1
+45,"gateway('10.0.0.6/32')","LEAF",1
 46,"RULE 25 (multi-hop access by gateway)","AND",0
-47,"hacl('10.0.0.8/32','10.0.0.6/32','TCP',_)","LEAF",1
-48,"netAccess('10.0.0.8/32','TCP',_)","OR",0
+47,"hacl('10.0.0.7/32','10.0.0.8/32','TCP',_)","LEAF",1
+48,"netAccess('10.0.0.7/32','TCP',_)","OR",0
 49,"RULE 25 (multi-hop access by gateway)","AND",0
-50,"hacl('10.0.0.2/32','10.0.0.8/32','TCP',_)","LEAF",1
+50,"hacl('10.0.0.2/32','10.0.0.7/32','TCP',_)","LEAF",1
 51,"RULE 25 (multi-hop access by gateway)","AND",0
-52,"hacl('10.0.0.6/32','10.0.0.8/32','TCP',_)","LEAF",1
-53,"gateway('10.0.0.6/32')","LEAF",1
-54,"RULE 25 (multi-hop access by gateway)","AND",0
-55,"hacl('10.0.0.9/32','10.0.0.8/32','TCP',_)","LEAF",1
-56,"gateway('10.0.0.9/32')","LEAF",1
-57,"RULE 7 (direct on-host access)","AND",0
-58,"attackerLocated('10.0.0.8/32')","LEAF",1
-59,"gateway('10.0.0.8/32')","LEAF",1
+52,"hacl('10.0.0.8/32','10.0.0.7/32','TCP',_)","LEAF",1
+53,"gateway('10.0.0.8/32')","LEAF",1
+54,"gateway('10.0.0.7/32')","LEAF",1
+55,"RULE 25 (multi-hop access by gateway)","AND",0
+56,"hacl('10.0.0.9/32','10.0.0.8/32','TCP',_)","LEAF",1
+57,"gateway('10.0.0.9/32')","LEAF",1
+58,"RULE 6 (direct network access)","AND",0
+59,"attackerLocated('10.0.0.9/32')","LEAF",1
 60,"RULE 25 (multi-hop access by gateway)","AND",0
 61,"hacl('10.0.0.9/32','10.0.0.6/32','TCP',_)","LEAF",1
 62,"RULE 6 (direct network access)","AND",0
 63,"RULE 25 (multi-hop access by gateway)","AND",0
 64,"hacl('10.0.0.9/32','10.0.0.5/32','TCP',_)","LEAF",1
-65,"RULE 25 (multi-hop access by gateway)","AND",0
-66,"hacl('10.0.0.6/32','10.0.0.9/32','TCP',_)","LEAF",1
-67,"RULE 25 (multi-hop access by gateway)","AND",0
-68,"hacl('10.0.0.8/32','10.0.0.9/32','TCP',_)","LEAF",1
-69,"RULE 6 (direct network access)","AND",0
-70,"RULE 25 (multi-hop access by gateway)","AND",0
-71,"hacl('10.0.0.10/32','10.0.0.3/32','TCP',_)","LEAF",1
-72,"gateway('10.0.0.10/32')","LEAF",1
-73,"RULE 25 (multi-hop access by gateway)","AND",0
-74,"hacl('10.0.0.2/32','10.0.0.3/32','TCP',_)","LEAF",1
-75,"RULE 25 (multi-hop access by gateway)","AND",0
-76,"hacl('10.0.0.9/32','10.0.0.3/32','TCP',_)","LEAF",1
+65,"RULE 6 (direct network access)","AND",0
+66,"RULE 25 (multi-hop access by gateway)","AND",0
+67,"hacl('10.0.0.6/32','10.0.0.9/32','TCP',_)","LEAF",1
+68,"RULE 25 (multi-hop access by gateway)","AND",0
+69,"hacl('10.0.0.8/32','10.0.0.9/32','TCP',_)","LEAF",1
+70,"RULE 7 (direct on-host access)","AND",0
+71,"RULE 6 (direct network access)","AND",0
+72,"RULE 25 (multi-hop access by gateway)","AND",0
+73,"hacl('10.0.0.2/32','10.0.0.3/32','TCP',_)","LEAF",1
+74,"RULE 25 (multi-hop access by gateway)","AND",0
+75,"hacl('10.0.0.9/32','10.0.0.3/32','TCP',_)","LEAF",1
+76,"RULE 6 (direct network access)","AND",0
 77,"RULE 25 (multi-hop access by gateway)","AND",0
-78,"hacl('10.0.0.3/32','10.0.0.2/32','TCP',_)","LEAF",1
+78,"hacl('10.0.0.7/32','10.0.0.2/32','TCP',_)","LEAF",1
 79,"RULE 25 (multi-hop access by gateway)","AND",0
 80,"hacl('10.0.0.8/32','10.0.0.2/32','TCP',_)","LEAF",1
 81,"RULE 25 (multi-hop access by gateway)","AND",0
 82,"hacl('10.0.0.9/32','10.0.0.2/32','TCP',_)","LEAF",1
 83,"RULE 6 (direct network access)","AND",0
 84,"RULE 25 (multi-hop access by gateway)","AND",0
-85,"hacl('10.0.0.8/32','10.0.0.7/32','TCP',_)","LEAF",1
-86,"RULE 6 (direct network access)","AND",0
-87,"gateway('10.0.0.7/32')","LEAF",1
-88,"logInService('10.0.0.12/32','TCP',_)","OR",0
-89,"RULE 29 (log in for ftpd)","AND",0
-90,"networkServiceInfo('10.0.0.12/32',ftpd,'TCP',_,flow1Account)","LEAF",1
-91,"hasAccount(flow1Principal,'10.0.0.12/32',flow1Account)","LEAF",1
-92,"principalCompromised(flow1Principal)","OR",0
-93,"RULE 28 (password sniffing through route hijack)","AND",0
-94,"flowExists('10.0.0.4/32','10.0.0.12/32','TCP',_,flow1Account)","LEAF",1
-95,"vulExists('10.0.0.4/32',quagga_ospf_mdr3Vul,quagga_ospf_mdr3,remoteExploit,quagga_ospf_mdr3Hijack)","LEAF",1
-96,"networkServiceInfo('10.0.0.4/32',quagga_ospf_mdr3,ospf_mdr,_,_)","LEAF",1
+85,"hacl('10.0.0.3/32','10.0.0.10/32','TCP',_)","LEAF",1
+86,"logInService('10.0.0.10/32','TCP',_)","OR",0
+87,"RULE 29 (log in for ftpd)","AND",0
+88,"networkServiceInfo('10.0.0.10/32',ftpd,'TCP',_,flow1Account)","LEAF",1
+89,"hasAccount(flow1Principal,'10.0.0.10/32',flow1Account)","LEAF",1
+90,"principalCompromised(flow1Principal)","OR",0
+91,"RULE 28 (password sniffing through route hijack)","AND",0
+92,"flowExists('10.0.0.4/32','10.0.0.10/32','TCP',_,flow1Account)","LEAF",1
+93,"vulExists('10.0.0.4/32',quagga_ospf_mdr3Vul,quagga_ospf_mdr3,remoteExploit,quagga_ospf_mdr3Hijack)","LEAF",1
+94,"networkServiceInfo('10.0.0.4/32',quagga_ospf_mdr3,ospf_mdr,_,_)","LEAF",1
