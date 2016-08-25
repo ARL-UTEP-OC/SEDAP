@@ -9,12 +9,14 @@ duration = sys.argv[2]
 numNodes = int(sys.argv[3])
 attackNodeNumber = sys.argv[4]
 attackScriptPath = sys.argv[5]
+spoofNode = ""
 attackScriptInputs = []
 #the script path contains inputs for the string separated by '.'
 attackScriptPathInputsSplit = attackScriptPath.split("spoofingAttack.sh")
 if len(attackScriptPathInputsSplit) > 1:
     attackScriptPath = "spoofingAttack.sh"
     attackScriptInputs.append(attackScriptPathInputsSplit[1])
+    spoofNode = attackScriptPathInputsSplit[1]
 
 if attackScriptPath == "blackholeAttack.sh":
     attackScriptInputs.append(attackNodeNumber)
@@ -27,6 +29,10 @@ coordFile = sys.argv[8]
 
 def insertAttack():
 	global myStr 
+	global duration
+	global attackScriptPath
+	global attackScriptInputs
+	global spoofNode
 	myStr+="""
     custom-post-config-commands {
 route add default dev eth0
@@ -41,9 +47,7 @@ else SCRIPTDIR=/root/
 fi
 cd $SCRIPTDIR
 """
-	logPath = attackNodeNumber+"_"+startTime+"_"+duration+"_"+attackScriptPath
-	for attackScriptInput in attackScriptInputs:
-		logPath+="_"+attackScriptInput
+	logPath = attackNodeNumber+"_"+startTime+"_"+duration+"_"+attackScriptPath+spoofNode
 	logPath+="_"+mobility+"_"+routingProtocol+"_"+coordFile
 	logPath = logPath.replace(".","_")
 	logPath = logPath.replace("/","_")
@@ -60,9 +64,9 @@ if [ `hostname` = n"""+attackNodeNumber+""" -o """ + attackNodeNumber + """ = 0 
 then
 
 #start logging
-tshark -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | /root/IntelAttacker/netCollect.py $myIP > $HN.capture &    
+tshark -a duration:175 -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | /root/install/sedap/IntelAttacker/netCollect.py /root/""" + logPath + """ $myIP > $HN.capture &    
 
-mgen flush input /root/IntelAttacker/flowGenerator/flows/flow`hostname`.mgn output /dev/null &
+mgen flush input /root/install/sedap/IntelAttacker/flowGenerator/flows/flow`hostname`.mgn output /dev/null &
 
 (
 cat << 'EOF'
@@ -73,16 +77,16 @@ EOF
 
 chmod 755 attack.sh
 
-./attack.sh """ + startTime +" " + duration + " "
+./attack.sh """ + startTime +" " + duration
 	for attackScriptInput in attackScriptInputs:
 		myStr+=" "+attackScriptInput
-	myStr+=" " 
+	myStr+=" /root/" + logPath + " " 
 	serviceString = routingProtocol
 
 	myStr+="""
 else
-	echo `hostname` >> /tmp/check.txt
-	mgen flush input /root/IntelAttacker/flowGenerator/flows/flow`hostname`.mgn | /root/IntelAttacker/mgenCollect.py > `hostname`.mgencapture &
+	echo `hostname` >> /root/""" + logPath +"""/check.txt
+	mgen flush input /root/install/sedap/IntelAttacker/flowGenerator/flows/flow`hostname`.mgn | /root/install/sedap/IntelAttacker/mgenCollect.py /root/""" + logPath + """ > `hostname`.mgencapture &
 fi
     }"""
 	if "OSPF" in routingProtocol or "RIP" in routingProtocol:
@@ -92,7 +96,7 @@ fi
     """
 
 #Read file and get 1 line at a time here
-coordLines = open("/root/IntelAttacker/staticScenarios/"+coordFile)
+coordLines = open("/root/install/sedap/IntelAttacker/staticScenarios/"+coordFile)
 myStr = ""
 for i in range(1,numNodes+1):
     myStr += """
@@ -132,7 +136,7 @@ node n"""+str(numNodes+1)+""" {
 	 ipv6 address a:1::0/64
 	!
 	scriptfile
-	/root/IntelAttacker/staticScenarios/"""+mobility+"""
+	/root/install/sedap/IntelAttacker/staticScenarios/"""+mobility+"""
 	!
 	mobmodel
 	coreapi
@@ -162,7 +166,7 @@ myStr +="""
 	custom-config-id ns2script
 	custom-command {10 3 11 10 10 10 10 10}
 	config {
-	file=/root/IntelAttacker/staticScenarios/"""+mobility+"""
+	file=/root/install/sedap/IntelAttacker/staticScenarios/"""+mobility+"""
 	refresh_ms=50
 	loop=0
 	autostart=1.0

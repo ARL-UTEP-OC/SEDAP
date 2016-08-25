@@ -2,14 +2,14 @@
 
 startTime=$1
 duration=$2
+logPath=$3
 
-echo "none" > /tmp/attack.txt
+echo "none" > $logPath/attack.txt
 sleep $startTime
-echo "forwarding" > /tmp/attack.txt
+echo "forwarding" > $logPath/attack.txt
 /sbin/sysctl -w net.ipv4.conf.all.forwarding=0
 /sbin/sysctl -w net.ipv6.conf.all.forwarding=0
 sleep $duration
 
 /sbin/sysctl -w net.ipv4.conf.all.forwarding=1
 /sbin/sysctl -w net.ipv6.conf.all.forwarding=1
-rm /tmp/attack.txt

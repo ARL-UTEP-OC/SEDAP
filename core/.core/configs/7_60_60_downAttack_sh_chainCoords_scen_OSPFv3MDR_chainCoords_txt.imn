@@ -40,7 +40,7 @@ if [ `hostname` = n7 -o 7 = 0 ]
 then
 
 #start logging
-tshark -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | /root/IntelAttacker/netCollect.py $myIP > $HN.capture &    
+tshark -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | /root/IntelAttacker/netCollect.py /root/7_60_60_downAttack_sh_chainCoords_scen_OSPFv3MDR_chainCoords_txt $myIP > $HN.capture &    
 
 mgen flush input /root/IntelAttacker/flowGenerator/flows/flow`hostname`.mgn output /dev/null &
 
@@ -50,25 +50,26 @@ cat << 'EOF'
 
 startTime=$1
 duration=$2
+logPath=$3
 
-echo "none" > /tmp/attack.txt
+echo "none" > $logPath/attack.txt
 sleep $startTime
-echo "down" > /tmp/attack.txt
+echo "down" > $logPath/attack.txt
 ifconfig eth0 down
 sleep $duration
 
 ifconfig eth0 up
-rm /tmp/attack.txt
+rm $logPath/attack.txt
 
 EOF
 ) > attack.sh
 
 chmod 755 attack.sh
 
-./attack.sh 60 60  
+./attack.sh 60 60 /root/7_60_60_downAttack_sh_chainCoords_scen_OSPFv3MDR_chainCoords_txt 
 else
-	echo `hostname` >> /tmp/check.txt
-	mgen flush input /root/IntelAttacker/flowGenerator/flows/flow`hostname`.mgn | /root/IntelAttacker/mgenCollect.py > `hostname`.mgencapture &
+	echo `hostname` >> /root/7_60_60_downAttack_sh_chainCoords_scen_OSPFv3MDR_chainCoords_txt/check.txt
+	mgen flush input /root/IntelAttacker/flowGenerator/flows/flow`hostname`.mgn | /root/IntelAttacker/mgenCollect.py /root/7_60_60_downAttack_sh_chainCoords_scen_OSPFv3MDR_chainCoords_txt > `hostname`.mgencapture &
 fi
     }
     services {OSPFv3MDR zebra vtysh  IPForward}
@@ -116,7 +117,7 @@ if [ `hostname` = n7 -o 7 = 0 ]
 then
 
 #start logging
-tshark -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | /root/IntelAttacker/netCollect.py $myIP > $HN.capture &    
+tshark -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | /root/IntelAttacker/netCollect.py /root/7_60_60_downAttack_sh_chainCoords_scen_OSPFv3MDR_chainCoords_txt $myIP > $HN.capture &    
 
 mgen flush input /root/IntelAttacker/flowGenerator/flows/flow`hostname`.mgn output /dev/null &
 
@@ -126,25 +127,26 @@ cat << 'EOF'
 
 startTime=$1
 duration=$2
+logPath=$3
 
-echo "none" > /tmp/attack.txt
+echo "none" > $logPath/attack.txt
 sleep $startTime
-echo "down" > /tmp/attack.txt
+echo "down" > $logPath/attack.txt
 ifconfig eth0 down
 sleep $duration
 
 ifconfig eth0 up
-rm /tmp/attack.txt
+rm $logPath/attack.txt
 
 EOF
 ) > attack.sh
 
 chmod 755 attack.sh
 
-./attack.sh 60 60  
+./attack.sh 60 60 /root/7_60_60_downAttack_sh_chainCoords_scen_OSPFv3MDR_chainCoords_txt 
 else
-	echo `hostname` >> /tmp/check.txt
-	mgen flush input /root/IntelAttacker/flowGenerator/flows/flow`hostname`.mgn | /root/IntelAttacker/mgenCollect.py > `hostname`.mgencapture &
+	echo `hostname` >> /root/7_60_60_downAttack_sh_chainCoords_scen_OSPFv3MDR_chainCoords_txt/check.txt
+	mgen flush input /root/IntelAttacker/flowGenerator/flows/flow`hostname`.mgn | /root/IntelAttacker/mgenCollect.py /root/7_60_60_downAttack_sh_chainCoords_scen_OSPFv3MDR_chainCoords_txt > `hostname`.mgencapture &
 fi
     }
     services {OSPFv3MDR zebra vtysh  IPForward}
@@ -192,7 +194,7 @@ if [ `hostname` = n7 -o 7 = 0 ]
 then
 
 #start logging
-tshark -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | /root/IntelAttacker/netCollect.py $myIP > $HN.capture &    
+tshark -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | /root/IntelAttacker/netCollect.py /root/7_60_60_downAttack_sh_chainCoords_scen_OSPFv3MDR_chainCoords_txt $myIP > $HN.capture &    
 
 mgen flush input /root/IntelAttacker/flowGenerator/flows/flow`hostname`.mgn output /dev/null &
 
@@ -202,25 +204,26 @@ cat << 'EOF'
 
 startTime=$1
 duration=$2
+logPath=$3
 
-echo "none" > /tmp/attack.txt
+echo "none" > $logPath/attack.txt
 sleep $startTime
-echo "down" > /tmp/attack.txt
+echo "down" > $logPath/attack.txt
 ifconfig eth0 down
 sleep $duration
 
 ifconfig eth0 up
-rm /tmp/attack.txt
+rm $logPath/attack.txt
 
 EOF
 ) > attack.sh
 
 chmod 755 attack.sh
 
-./attack.sh 60 60  
+./attack.sh 60 60 /root/7_60_60_downAttack_sh_chainCoords_scen_OSPFv3MDR_chainCoords_txt 
 else
-	echo `hostname` >> /tmp/check.txt
-	mgen flush input /root/IntelAttacker/flowGenerator/flows/flow`hostname`.mgn | /root/IntelAttacker/mgenCollect.py > `hostname`.mgencapture &
+	echo `hostname` >> /root/7_60_60_downAttack_sh_chainCoords_scen_OSPFv3MDR_chainCoords_txt/check.txt
+	mgen flush input /root/IntelAttacker/flowGenerator/flows/flow`hostname`.mgn | /root/IntelAttacker/mgenCollect.py /root/7_60_60_downAttack_sh_chainCoords_scen_OSPFv3MDR_chainCoords_txt > `hostname`.mgencapture &
 fi
     }
     services {OSPFv3MDR zebra vtysh  IPForward}
@@ -268,7 +271,7 @@ if [ `hostname` = n7 -o 7 = 0 ]
 then
 
 #start logging
-tshark -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | /root/IntelAttacker/netCollect.py $myIP > $HN.capture &    
+tshark -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | /root/IntelAttacker/netCollect.py /root/7_60_60_downAttack_sh_chainCoords_scen_OSPFv3MDR_chainCoords_txt $myIP > $HN.capture &    
 
 mgen flush input /root/IntelAttacker/flowGenerator/flows/flow`hostname`.mgn output /dev/null &
 
@@ -278,25 +281,26 @@ cat << 'EOF'
 
 startTime=$1
 duration=$2
+logPath=$3
 
-echo "none" > /tmp/attack.txt
+echo "none" > $logPath/attack.txt
 sleep $startTime
-echo "down" > /tmp/attack.txt
+echo "down" > $logPath/attack.txt
 ifconfig eth0 down
 sleep $duration
 
 ifconfig eth0 up
-rm /tmp/attack.txt
+rm $logPath/attack.txt
 
 EOF
 ) > attack.sh
 
 chmod 755 attack.sh
 
-./attack.sh 60 60  
+./attack.sh 60 60 /root/7_60_60_downAttack_sh_chainCoords_scen_OSPFv3MDR_chainCoords_txt 
 else
-	echo `hostname` >> /tmp/check.txt
-	mgen flush input /root/IntelAttacker/flowGenerator/flows/flow`hostname`.mgn | /root/IntelAttacker/mgenCollect.py > `hostname`.mgencapture &
+	echo `hostname` >> /root/7_60_60_downAttack_sh_chainCoords_scen_OSPFv3MDR_chainCoords_txt/check.txt
+	mgen flush input /root/IntelAttacker/flowGenerator/flows/flow`hostname`.mgn | /root/IntelAttacker/mgenCollect.py /root/7_60_60_downAttack_sh_chainCoords_scen_OSPFv3MDR_chainCoords_txt > `hostname`.mgencapture &
 fi
     }
     services {OSPFv3MDR zebra vtysh  IPForward}
@@ -344,7 +348,7 @@ if [ `hostname` = n7 -o 7 = 0 ]
 then
 
 #start logging
-tshark -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | /root/IntelAttacker/netCollect.py $myIP > $HN.capture &    
+tshark -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | /root/IntelAttacker/netCollect.py /root/7_60_60_downAttack_sh_chainCoords_scen_OSPFv3MDR_chainCoords_txt $myIP > $HN.capture &    
 
 mgen flush input /root/IntelAttacker/flowGenerator/flows/flow`hostname`.mgn output /dev/null &
 
@@ -354,25 +358,26 @@ cat << 'EOF'
 
 startTime=$1
 duration=$2
+logPath=$3
 
-echo "none" > /tmp/attack.txt
+echo "none" > $logPath/attack.txt
 sleep $startTime
-echo "down" > /tmp/attack.txt
+echo "down" > $logPath/attack.txt
 ifconfig eth0 down
 sleep $duration
 
 ifconfig eth0 up
-rm /tmp/attack.txt
+rm $logPath/attack.txt
 
 EOF
 ) > attack.sh
 
 chmod 755 attack.sh
 
-./attack.sh 60 60  
+./attack.sh 60 60 /root/7_60_60_downAttack_sh_chainCoords_scen_OSPFv3MDR_chainCoords_txt 
 else
-	echo `hostname` >> /tmp/check.txt
-	mgen flush input /root/IntelAttacker/flowGenerator/flows/flow`hostname`.mgn | /root/IntelAttacker/mgenCollect.py > `hostname`.mgencapture &
+	echo `hostname` >> /root/7_60_60_downAttack_sh_chainCoords_scen_OSPFv3MDR_chainCoords_txt/check.txt
+	mgen flush input /root/IntelAttacker/flowGenerator/flows/flow`hostname`.mgn | /root/IntelAttacker/mgenCollect.py /root/7_60_60_downAttack_sh_chainCoords_scen_OSPFv3MDR_chainCoords_txt > `hostname`.mgencapture &
 fi
     }
     services {OSPFv3MDR zebra vtysh  IPForward}
@@ -420,7 +425,7 @@ if [ `hostname` = n7 -o 7 = 0 ]
 then
 
 #start logging
-tshark -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | /root/IntelAttacker/netCollect.py $myIP > $HN.capture &    
+tshark -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | /root/IntelAttacker/netCollect.py /root/7_60_60_downAttack_sh_chainCoords_scen_OSPFv3MDR_chainCoords_txt $myIP > $HN.capture &    
 
 mgen flush input /root/IntelAttacker/flowGenerator/flows/flow`hostname`.mgn output /dev/null &
 
@@ -430,25 +435,26 @@ cat << 'EOF'
 
 startTime=$1
 duration=$2
+logPath=$3
 
-echo "none" > /tmp/attack.txt
+echo "none" > $logPath/attack.txt
 sleep $startTime
-echo "down" > /tmp/attack.txt
+echo "down" > $logPath/attack.txt
 ifconfig eth0 down
 sleep $duration
 
 ifconfig eth0 up
-rm /tmp/attack.txt
+rm $logPath/attack.txt
 
 EOF
 ) > attack.sh
 
 chmod 755 attack.sh
 
-./attack.sh 60 60  
+./attack.sh 60 60 /root/7_60_60_downAttack_sh_chainCoords_scen_OSPFv3MDR_chainCoords_txt 
 else
-	echo `hostname` >> /tmp/check.txt
-	mgen flush input /root/IntelAttacker/flowGenerator/flows/flow`hostname`.mgn | /root/IntelAttacker/mgenCollect.py > `hostname`.mgencapture &
+	echo `hostname` >> /root/7_60_60_downAttack_sh_chainCoords_scen_OSPFv3MDR_chainCoords_txt/check.txt
+	mgen flush input /root/IntelAttacker/flowGenerator/flows/flow`hostname`.mgn | /root/IntelAttacker/mgenCollect.py /root/7_60_60_downAttack_sh_chainCoords_scen_OSPFv3MDR_chainCoords_txt > `hostname`.mgencapture &
 fi
     }
     services {OSPFv3MDR zebra vtysh  IPForward}
@@ -496,7 +502,7 @@ if [ `hostname` = n7 -o 7 = 0 ]
 then
 
 #start logging
-tshark -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | /root/IntelAttacker/netCollect.py $myIP > $HN.capture &    
+tshark -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | /root/IntelAttacker/netCollect.py /root/7_60_60_downAttack_sh_chainCoords_scen_OSPFv3MDR_chainCoords_txt $myIP > $HN.capture &    
 
 mgen flush input /root/IntelAttacker/flowGenerator/flows/flow`hostname`.mgn output /dev/null &
 
@@ -506,25 +512,26 @@ cat << 'EOF'
 
 startTime=$1
 duration=$2
+logPath=$3
 
-echo "none" > /tmp/attack.txt
+echo "none" > $logPath/attack.txt
 sleep $startTime
-echo "down" > /tmp/attack.txt
+echo "down" > $logPath/attack.txt
 ifconfig eth0 down
 sleep $duration
 
 ifconfig eth0 up
-rm /tmp/attack.txt
+rm $logPath/attack.txt
 
 EOF
 ) > attack.sh
 
 chmod 755 attack.sh
 
-./attack.sh 60 60  
+./attack.sh 60 60 /root/7_60_60_downAttack_sh_chainCoords_scen_OSPFv3MDR_chainCoords_txt 
 else
-	echo `hostname` >> /tmp/check.txt
-	mgen flush input /root/IntelAttacker/flowGenerator/flows/flow`hostname`.mgn | /root/IntelAttacker/mgenCollect.py > `hostname`.mgencapture &
+	echo `hostname` >> /root/7_60_60_downAttack_sh_chainCoords_scen_OSPFv3MDR_chainCoords_txt/check.txt
+	mgen flush input /root/IntelAttacker/flowGenerator/flows/flow`hostname`.mgn | /root/IntelAttacker/mgenCollect.py /root/7_60_60_downAttack_sh_chainCoords_scen_OSPFv3MDR_chainCoords_txt > `hostname`.mgencapture &
 fi
     }
     services {OSPFv3MDR zebra vtysh  IPForward}
@@ -572,7 +579,7 @@ if [ `hostname` = n7 -o 7 = 0 ]
 then
 
 #start logging
-tshark -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | /root/IntelAttacker/netCollect.py $myIP > $HN.capture &    
+tshark -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | /root/IntelAttacker/netCollect.py /root/7_60_60_downAttack_sh_chainCoords_scen_OSPFv3MDR_chainCoords_txt $myIP > $HN.capture &    
 
 mgen flush input /root/IntelAttacker/flowGenerator/flows/flow`hostname`.mgn output /dev/null &
 
@@ -582,25 +589,26 @@ cat << 'EOF'
 
 startTime=$1
 duration=$2
+logPath=$3
 
-echo "none" > /tmp/attack.txt
+echo "none" > $logPath/attack.txt
 sleep $startTime
-echo "down" > /tmp/attack.txt
+echo "down" > $logPath/attack.txt
 ifconfig eth0 down
 sleep $duration
 
 ifconfig eth0 up
-rm /tmp/attack.txt
+rm $logPath/attack.txt
 
 EOF
 ) > attack.sh
 
 chmod 755 attack.sh
 
-./attack.sh 60 60  
+./attack.sh 60 60 /root/7_60_60_downAttack_sh_chainCoords_scen_OSPFv3MDR_chainCoords_txt 
 else
-	echo `hostname` >> /tmp/check.txt
-	mgen flush input /root/IntelAttacker/flowGenerator/flows/flow`hostname`.mgn | /root/IntelAttacker/mgenCollect.py > `hostname`.mgencapture &
+	echo `hostname` >> /root/7_60_60_downAttack_sh_chainCoords_scen_OSPFv3MDR_chainCoords_txt/check.txt
+	mgen flush input /root/IntelAttacker/flowGenerator/flows/flow`hostname`.mgn | /root/IntelAttacker/mgenCollect.py /root/7_60_60_downAttack_sh_chainCoords_scen_OSPFv3MDR_chainCoords_txt > `hostname`.mgencapture &
 fi
     }
     services {OSPFv3MDR zebra vtysh  IPForward}
@@ -648,7 +656,7 @@ if [ `hostname` = n7 -o 7 = 0 ]
 then
 
 #start logging
-tshark -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | /root/IntelAttacker/netCollect.py $myIP > $HN.capture &    
+tshark -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | /root/IntelAttacker/netCollect.py /root/7_60_60_downAttack_sh_chainCoords_scen_OSPFv3MDR_chainCoords_txt $myIP > $HN.capture &    
 
 mgen flush input /root/IntelAttacker/flowGenerator/flows/flow`hostname`.mgn output /dev/null &
 
@@ -658,25 +666,26 @@ cat << 'EOF'
 
 startTime=$1
 duration=$2
+logPath=$3
 
-echo "none" > /tmp/attack.txt
+echo "none" > $logPath/attack.txt
 sleep $startTime
-echo "down" > /tmp/attack.txt
+echo "down" > $logPath/attack.txt
 ifconfig eth0 down
 sleep $duration
 
 ifconfig eth0 up
-rm /tmp/attack.txt
+rm $logPath/attack.txt
 
 EOF
 ) > attack.sh
 
 chmod 755 attack.sh
 
-./attack.sh 60 60  
+./attack.sh 60 60 /root/7_60_60_downAttack_sh_chainCoords_scen_OSPFv3MDR_chainCoords_txt 
 else
-	echo `hostname` >> /tmp/check.txt
-	mgen flush input /root/IntelAttacker/flowGenerator/flows/flow`hostname`.mgn | /root/IntelAttacker/mgenCollect.py > `hostname`.mgencapture &
+	echo `hostname` >> /root/7_60_60_downAttack_sh_chainCoords_scen_OSPFv3MDR_chainCoords_txt/check.txt
+	mgen flush input /root/IntelAttacker/flowGenerator/flows/flow`hostname`.mgn | /root/IntelAttacker/mgenCollect.py /root/7_60_60_downAttack_sh_chainCoords_scen_OSPFv3MDR_chainCoords_txt > `hostname`.mgencapture &
 fi
     }
     services {OSPFv3MDR zebra vtysh  IPForward}
@@ -724,7 +733,7 @@ if [ `hostname` = n7 -o 7 = 0 ]
 then
 
 #start logging
-tshark -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | /root/IntelAttacker/netCollect.py $myIP > $HN.capture &    
+tshark -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | /root/IntelAttacker/netCollect.py /root/7_60_60_downAttack_sh_chainCoords_scen_OSPFv3MDR_chainCoords_txt $myIP > $HN.capture &    
 
 mgen flush input /root/IntelAttacker/flowGenerator/flows/flow`hostname`.mgn output /dev/null &
 
@@ -734,25 +743,26 @@ cat << 'EOF'
 
 startTime=$1
 duration=$2
+logPath=$3
 
-echo "none" > /tmp/attack.txt
+echo "none" > $logPath/attack.txt
 sleep $startTime
-echo "down" > /tmp/attack.txt
+echo "down" > $logPath/attack.txt
 ifconfig eth0 down
 sleep $duration
 
 ifconfig eth0 up
-rm /tmp/attack.txt
+rm $logPath/attack.txt
 
 EOF
 ) > attack.sh
 
 chmod 755 attack.sh
 
-./attack.sh 60 60  
+./attack.sh 60 60 /root/7_60_60_downAttack_sh_chainCoords_scen_OSPFv3MDR_chainCoords_txt 
 else
-	echo `hostname` >> /tmp/check.txt
-	mgen flush input /root/IntelAttacker/flowGenerator/flows/flow`hostname`.mgn | /root/IntelAttacker/mgenCollect.py > `hostname`.mgencapture &
+	echo `hostname` >> /root/7_60_60_downAttack_sh_chainCoords_scen_OSPFv3MDR_chainCoords_txt/check.txt
+	mgen flush input /root/IntelAttacker/flowGenerator/flows/flow`hostname`.mgn | /root/IntelAttacker/mgenCollect.py /root/7_60_60_downAttack_sh_chainCoords_scen_OSPFv3MDR_chainCoords_txt > `hostname`.mgencapture &
 fi
     }
     services {OSPFv3MDR zebra vtysh  IPForward}

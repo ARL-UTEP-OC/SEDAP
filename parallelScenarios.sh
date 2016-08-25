@@ -7,6 +7,7 @@ startTime=60
 #remove old logs for new run
 rm /root/coreParallelLogs.txt
 
+
 while IFS='' read -r imnString || [[ -n "$imnString" ]];
 do 
 		
@@ -31,6 +32,7 @@ do
 		path=core/.core/configs/"$imnName".imn
 		core-gui --start $path &
 		sleep 1
+
 	fi
 	
 	
@@ -38,11 +40,13 @@ do
 	
 	if [[ $currentProcs -ge $maxProcs ]]
 	then
+
 	    ./checkProcesses.sh
 		newestJob=`pgrep -n wish`
 		wait $newestJob
 		rm /tmp/wireshark*
 		rm /tmp/maxn*	
+		
 	fi
 					
 done < "$imnFile"

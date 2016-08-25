@@ -6,30 +6,6 @@ import commands
 import ast
 import networkx as nx
 
-#input:
-
-#output: 
-#1. fromHop
-#2. toHop
-#3. type
-#4. distance
-#5. passthrough
-#10. srcSpoofed
-#11. destSpoofed
-#12. hopsToSpoofed
-#14. hopsFromSpoofedToDest
-#15. spoofedBetweenAttacker
-#16. isDstBetweenSpoofedAndAttacker
-#17. spoofedBetweenAttackergw
-#18. isDstBetweenSpoofedAndAttackergw
-#19. isAttackerBetweenSpoofedAndDst
-#20. isAttackerBetweenSpoofedAndDstgw
-#21. isSrcBetweenSpoofedAndDst
-#22. isSrcBetweenSpoofedAndDstgw
-#23. altPathWithoutAttacker
-#24. duringLinkLost
-
-
 nBeforeAttack = sys.argv[1]
 mAfterAttack = sys.argv[2]
 attackNodeNum = sys.argv[3]
@@ -63,6 +39,13 @@ gateways = {}
 #passThroughsAfter = {}
 
 attackNodeIP = ""
+
+#fromHop, toHop,#hopsDataTravels, traffType, PacketsSeenBeforeAttack
+#attack, numPackets deviation during attack, passthrough, deviationAfterAttack 
+#---pending---:
+#recoverTime
+#iDstSpoofed, isSrcAttacker, secondsUntilHit
+
 
 def getAttackerPerspective():
     global attackerPathsSeen
@@ -467,7 +450,7 @@ def bBetweenAandC(a,b,c):
     global gateways
     done = "false"
     mysrc = a
-	#print a,b,c,"hop to ",mysrc,",",c
+#    print a,b,c,"hop to ",mysrc,",",c
     if mysrc == b:
         return "true"
     while "true":
@@ -475,7 +458,6 @@ def bBetweenAandC(a,b,c):
             mysrc = gateways[(mysrc,c)]
 #            print "hop to ",mysrc,",",c
             if mysrc == "0.0.0.0":
-				#false because I didn't encounter b and I've reached the destination
                 return "false"
             if mysrc == b:
                 return "true"
