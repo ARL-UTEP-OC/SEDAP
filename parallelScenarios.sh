@@ -31,6 +31,7 @@ do
 		path=core/.core/configs/"$imnName".imn
 		core-gui --start $path &
 		sleep 1
+
 	fi
 	
 	
@@ -38,11 +39,13 @@ do
 	
 	if [[ $currentProcs -ge $maxProcs ]]
 	then
+
 	    ./checkProcesses.sh
 		newestJob=`pgrep -n wish`
 		wait $newestJob
 		rm /tmp/wireshark*
 		rm /tmp/maxn*	
+
 	fi
 					
 done < "$imnFile"
