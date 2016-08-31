@@ -4,7 +4,7 @@ import thread
 import sys
 import commands
 
-myIPs = sys.argv[1:]
+logPath = sys.argv[1]
 startTimeSec=-1
 prevTimeSec=-1
 
@@ -116,7 +116,7 @@ def getTraffTypeCounts():
     
 def getAttackRunning():
     global attackRunning
-    attackRunning = commands.getoutput("cat /tmp/attack.txt")
+    attackRunning = commands.getoutput("cat " + logPath + "/attack.txt")
     if "No such file or directory" in attackRunning:
         attackRunning = "none"
 
