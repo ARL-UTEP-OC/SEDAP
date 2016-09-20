@@ -40,7 +40,7 @@ if [ `hostname` = n1 -o 1 = 0 ]
 then
 
 #start logging
-tshark -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | /root/install/sedap/IntelAttacker/netCollect.py /root/1_60_60_downAttack_sh_chainCoords_scen_OLSR_chainCoords_txt $myIP > $HN.capture &    
+tshark -a duration:175 -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | /root/install/sedap/IntelAttacker/netCollect.py /root/1_60_60_downAttack_sh_chainCoords_scen_OLSR_chainCoords_txt $myIP > $HN.capture &    
 
 mgen flush input /root/install/sedap/IntelAttacker/flowGenerator/flows/flow`hostname`.mgn output /dev/null &
 
@@ -59,8 +59,6 @@ ifconfig eth0 down
 sleep $duration
 
 ifconfig eth0 up
-rm $logPath/attack.txt
-
 EOF
 ) > attack.sh
 
@@ -117,7 +115,7 @@ if [ `hostname` = n1 -o 1 = 0 ]
 then
 
 #start logging
-tshark -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | /root/install/sedap/IntelAttacker/netCollect.py /root/1_60_60_downAttack_sh_chainCoords_scen_OLSR_chainCoords_txt $myIP > $HN.capture &    
+tshark -a duration:175 -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | /root/install/sedap/IntelAttacker/netCollect.py /root/1_60_60_downAttack_sh_chainCoords_scen_OLSR_chainCoords_txt $myIP > $HN.capture &    
 
 mgen flush input /root/install/sedap/IntelAttacker/flowGenerator/flows/flow`hostname`.mgn output /dev/null &
 
@@ -136,8 +134,6 @@ ifconfig eth0 down
 sleep $duration
 
 ifconfig eth0 up
-rm $logPath/attack.txt
-
 EOF
 ) > attack.sh
 
@@ -194,7 +190,7 @@ if [ `hostname` = n1 -o 1 = 0 ]
 then
 
 #start logging
-tshark -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | /root/install/sedap/IntelAttacker/netCollect.py /root/1_60_60_downAttack_sh_chainCoords_scen_OLSR_chainCoords_txt $myIP > $HN.capture &    
+tshark -a duration:175 -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | /root/install/sedap/IntelAttacker/netCollect.py /root/1_60_60_downAttack_sh_chainCoords_scen_OLSR_chainCoords_txt $myIP > $HN.capture &    
 
 mgen flush input /root/install/sedap/IntelAttacker/flowGenerator/flows/flow`hostname`.mgn output /dev/null &
 
@@ -213,8 +209,6 @@ ifconfig eth0 down
 sleep $duration
 
 ifconfig eth0 up
-rm $logPath/attack.txt
-
 EOF
 ) > attack.sh
 
@@ -271,7 +265,7 @@ if [ `hostname` = n1 -o 1 = 0 ]
 then
 
 #start logging
-tshark -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | /root/install/sedap/IntelAttacker/netCollect.py /root/1_60_60_downAttack_sh_chainCoords_scen_OLSR_chainCoords_txt $myIP > $HN.capture &    
+tshark -a duration:175 -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | /root/install/sedap/IntelAttacker/netCollect.py /root/1_60_60_downAttack_sh_chainCoords_scen_OLSR_chainCoords_txt $myIP > $HN.capture &    
 
 mgen flush input /root/install/sedap/IntelAttacker/flowGenerator/flows/flow`hostname`.mgn output /dev/null &
 
@@ -290,8 +284,6 @@ ifconfig eth0 down
 sleep $duration
 
 ifconfig eth0 up
-rm $logPath/attack.txt
-
 EOF
 ) > attack.sh
 
@@ -348,7 +340,7 @@ if [ `hostname` = n1 -o 1 = 0 ]
 then
 
 #start logging
-tshark -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | /root/install/sedap/IntelAttacker/netCollect.py /root/1_60_60_downAttack_sh_chainCoords_scen_OLSR_chainCoords_txt $myIP > $HN.capture &    
+tshark -a duration:175 -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | /root/install/sedap/IntelAttacker/netCollect.py /root/1_60_60_downAttack_sh_chainCoords_scen_OLSR_chainCoords_txt $myIP > $HN.capture &    
 
 mgen flush input /root/install/sedap/IntelAttacker/flowGenerator/flows/flow`hostname`.mgn output /dev/null &
 
@@ -367,8 +359,6 @@ ifconfig eth0 down
 sleep $duration
 
 ifconfig eth0 up
-rm $logPath/attack.txt
-
 EOF
 ) > attack.sh
 
@@ -425,7 +415,7 @@ if [ `hostname` = n1 -o 1 = 0 ]
 then
 
 #start logging
-tshark -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | /root/install/sedap/IntelAttacker/netCollect.py /root/1_60_60_downAttack_sh_chainCoords_scen_OLSR_chainCoords_txt $myIP > $HN.capture &    
+tshark -a duration:175 -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | /root/install/sedap/IntelAttacker/netCollect.py /root/1_60_60_downAttack_sh_chainCoords_scen_OLSR_chainCoords_txt $myIP > $HN.capture &    
 
 mgen flush input /root/install/sedap/IntelAttacker/flowGenerator/flows/flow`hostname`.mgn output /dev/null &
 
@@ -444,8 +434,6 @@ ifconfig eth0 down
 sleep $duration
 
 ifconfig eth0 up
-rm $logPath/attack.txt
-
 EOF
 ) > attack.sh
 
@@ -502,7 +490,7 @@ if [ `hostname` = n1 -o 1 = 0 ]
 then
 
 #start logging
-tshark -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | /root/install/sedap/IntelAttacker/netCollect.py /root/1_60_60_downAttack_sh_chainCoords_scen_OLSR_chainCoords_txt $myIP > $HN.capture &    
+tshark -a duration:175 -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | /root/install/sedap/IntelAttacker/netCollect.py /root/1_60_60_downAttack_sh_chainCoords_scen_OLSR_chainCoords_txt $myIP > $HN.capture &    
 
 mgen flush input /root/install/sedap/IntelAttacker/flowGenerator/flows/flow`hostname`.mgn output /dev/null &
 
@@ -521,8 +509,6 @@ ifconfig eth0 down
 sleep $duration
 
 ifconfig eth0 up
-rm $logPath/attack.txt
-
 EOF
 ) > attack.sh
 
@@ -579,7 +565,7 @@ if [ `hostname` = n1 -o 1 = 0 ]
 then
 
 #start logging
-tshark -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | /root/install/sedap/IntelAttacker/netCollect.py /root/1_60_60_downAttack_sh_chainCoords_scen_OLSR_chainCoords_txt $myIP > $HN.capture &    
+tshark -a duration:175 -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | /root/install/sedap/IntelAttacker/netCollect.py /root/1_60_60_downAttack_sh_chainCoords_scen_OLSR_chainCoords_txt $myIP > $HN.capture &    
 
 mgen flush input /root/install/sedap/IntelAttacker/flowGenerator/flows/flow`hostname`.mgn output /dev/null &
 
@@ -598,8 +584,6 @@ ifconfig eth0 down
 sleep $duration
 
 ifconfig eth0 up
-rm $logPath/attack.txt
-
 EOF
 ) > attack.sh
 
@@ -656,7 +640,7 @@ if [ `hostname` = n1 -o 1 = 0 ]
 then
 
 #start logging
-tshark -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | /root/install/sedap/IntelAttacker/netCollect.py /root/1_60_60_downAttack_sh_chainCoords_scen_OLSR_chainCoords_txt $myIP > $HN.capture &    
+tshark -a duration:175 -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | /root/install/sedap/IntelAttacker/netCollect.py /root/1_60_60_downAttack_sh_chainCoords_scen_OLSR_chainCoords_txt $myIP > $HN.capture &    
 
 mgen flush input /root/install/sedap/IntelAttacker/flowGenerator/flows/flow`hostname`.mgn output /dev/null &
 
@@ -675,8 +659,6 @@ ifconfig eth0 down
 sleep $duration
 
 ifconfig eth0 up
-rm $logPath/attack.txt
-
 EOF
 ) > attack.sh
 
@@ -733,7 +715,7 @@ if [ `hostname` = n1 -o 1 = 0 ]
 then
 
 #start logging
-tshark -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | /root/install/sedap/IntelAttacker/netCollect.py /root/1_60_60_downAttack_sh_chainCoords_scen_OLSR_chainCoords_txt $myIP > $HN.capture &    
+tshark -a duration:175 -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | /root/install/sedap/IntelAttacker/netCollect.py /root/1_60_60_downAttack_sh_chainCoords_scen_OLSR_chainCoords_txt $myIP > $HN.capture &    
 
 mgen flush input /root/install/sedap/IntelAttacker/flowGenerator/flows/flow`hostname`.mgn output /dev/null &
 
@@ -752,8 +734,6 @@ ifconfig eth0 down
 sleep $duration
 
 ifconfig eth0 up
-rm $logPath/attack.txt
-
 EOF
 ) > attack.sh
 

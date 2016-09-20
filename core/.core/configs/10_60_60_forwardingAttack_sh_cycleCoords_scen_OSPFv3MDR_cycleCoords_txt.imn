@@ -40,9 +40,9 @@ if [ `hostname` = n10 -o 10 = 0 ]
 then
 
 #start logging
-tshark -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | /root/IntelAttacker/netCollect.py $myIP > $HN.capture &    
+tshark -a duration:175 -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | /root/install/sedap/IntelAttacker/netCollect.py /root/10_60_60_forwardingAttack_sh_cycleCoords_scen_OSPFv3MDR_cycleCoords_txt $myIP > $HN.capture &    
 
-mgen flush input /root/IntelAttacker/flowGenerator/flows/flow`hostname`.mgn output /dev/null &
+mgen flush input /root/install/sedap/IntelAttacker/flowGenerator/flows/flow`hostname`.mgn output /dev/null &
 
 (
 cat << 'EOF'
@@ -50,26 +50,26 @@ cat << 'EOF'
 
 startTime=$1
 duration=$2
+logPath=$3
 
-echo "none" > /tmp/attack.txt
+echo "none" > $logPath/attack.txt
 sleep $startTime
-echo "forwarding" > /tmp/attack.txt
+echo "forwarding" > $logPath/attack.txt
 /sbin/sysctl -w net.ipv4.conf.all.forwarding=0
 /sbin/sysctl -w net.ipv6.conf.all.forwarding=0
 sleep $duration
 
 /sbin/sysctl -w net.ipv4.conf.all.forwarding=1
 /sbin/sysctl -w net.ipv6.conf.all.forwarding=1
-rm /tmp/attack.txt
 EOF
 ) > attack.sh
 
 chmod 755 attack.sh
 
-./attack.sh 60 60  
+./attack.sh 60 60 /root/10_60_60_forwardingAttack_sh_cycleCoords_scen_OSPFv3MDR_cycleCoords_txt 
 else
-	echo `hostname` >> /tmp/check.txt
-	mgen flush input /root/IntelAttacker/flowGenerator/flows/flow`hostname`.mgn | /root/IntelAttacker/mgenCollect.py > `hostname`.mgencapture &
+	echo `hostname` >> /root/10_60_60_forwardingAttack_sh_cycleCoords_scen_OSPFv3MDR_cycleCoords_txt/check.txt
+	mgen flush input /root/install/sedap/IntelAttacker/flowGenerator/flows/flow`hostname`.mgn | /root/install/sedap/IntelAttacker/mgenCollect.py /root/10_60_60_forwardingAttack_sh_cycleCoords_scen_OSPFv3MDR_cycleCoords_txt > `hostname`.mgencapture &
 fi
     }
     services {OSPFv3MDR zebra vtysh  IPForward}
@@ -117,9 +117,9 @@ if [ `hostname` = n10 -o 10 = 0 ]
 then
 
 #start logging
-tshark -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | /root/IntelAttacker/netCollect.py $myIP > $HN.capture &    
+tshark -a duration:175 -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | /root/install/sedap/IntelAttacker/netCollect.py /root/10_60_60_forwardingAttack_sh_cycleCoords_scen_OSPFv3MDR_cycleCoords_txt $myIP > $HN.capture &    
 
-mgen flush input /root/IntelAttacker/flowGenerator/flows/flow`hostname`.mgn output /dev/null &
+mgen flush input /root/install/sedap/IntelAttacker/flowGenerator/flows/flow`hostname`.mgn output /dev/null &
 
 (
 cat << 'EOF'
@@ -127,26 +127,26 @@ cat << 'EOF'
 
 startTime=$1
 duration=$2
+logPath=$3
 
-echo "none" > /tmp/attack.txt
+echo "none" > $logPath/attack.txt
 sleep $startTime
-echo "forwarding" > /tmp/attack.txt
+echo "forwarding" > $logPath/attack.txt
 /sbin/sysctl -w net.ipv4.conf.all.forwarding=0
 /sbin/sysctl -w net.ipv6.conf.all.forwarding=0
 sleep $duration
 
 /sbin/sysctl -w net.ipv4.conf.all.forwarding=1
 /sbin/sysctl -w net.ipv6.conf.all.forwarding=1
-rm /tmp/attack.txt
 EOF
 ) > attack.sh
 
 chmod 755 attack.sh
 
-./attack.sh 60 60  
+./attack.sh 60 60 /root/10_60_60_forwardingAttack_sh_cycleCoords_scen_OSPFv3MDR_cycleCoords_txt 
 else
-	echo `hostname` >> /tmp/check.txt
-	mgen flush input /root/IntelAttacker/flowGenerator/flows/flow`hostname`.mgn | /root/IntelAttacker/mgenCollect.py > `hostname`.mgencapture &
+	echo `hostname` >> /root/10_60_60_forwardingAttack_sh_cycleCoords_scen_OSPFv3MDR_cycleCoords_txt/check.txt
+	mgen flush input /root/install/sedap/IntelAttacker/flowGenerator/flows/flow`hostname`.mgn | /root/install/sedap/IntelAttacker/mgenCollect.py /root/10_60_60_forwardingAttack_sh_cycleCoords_scen_OSPFv3MDR_cycleCoords_txt > `hostname`.mgencapture &
 fi
     }
     services {OSPFv3MDR zebra vtysh  IPForward}
@@ -194,9 +194,9 @@ if [ `hostname` = n10 -o 10 = 0 ]
 then
 
 #start logging
-tshark -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | /root/IntelAttacker/netCollect.py $myIP > $HN.capture &    
+tshark -a duration:175 -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | /root/install/sedap/IntelAttacker/netCollect.py /root/10_60_60_forwardingAttack_sh_cycleCoords_scen_OSPFv3MDR_cycleCoords_txt $myIP > $HN.capture &    
 
-mgen flush input /root/IntelAttacker/flowGenerator/flows/flow`hostname`.mgn output /dev/null &
+mgen flush input /root/install/sedap/IntelAttacker/flowGenerator/flows/flow`hostname`.mgn output /dev/null &
 
 (
 cat << 'EOF'
@@ -204,26 +204,26 @@ cat << 'EOF'
 
 startTime=$1
 duration=$2
+logPath=$3
 
-echo "none" > /tmp/attack.txt
+echo "none" > $logPath/attack.txt
 sleep $startTime
-echo "forwarding" > /tmp/attack.txt
+echo "forwarding" > $logPath/attack.txt
 /sbin/sysctl -w net.ipv4.conf.all.forwarding=0
 /sbin/sysctl -w net.ipv6.conf.all.forwarding=0
 sleep $duration
 
 /sbin/sysctl -w net.ipv4.conf.all.forwarding=1
 /sbin/sysctl -w net.ipv6.conf.all.forwarding=1
-rm /tmp/attack.txt
 EOF
 ) > attack.sh
 
 chmod 755 attack.sh
 
-./attack.sh 60 60  
+./attack.sh 60 60 /root/10_60_60_forwardingAttack_sh_cycleCoords_scen_OSPFv3MDR_cycleCoords_txt 
 else
-	echo `hostname` >> /tmp/check.txt
-	mgen flush input /root/IntelAttacker/flowGenerator/flows/flow`hostname`.mgn | /root/IntelAttacker/mgenCollect.py > `hostname`.mgencapture &
+	echo `hostname` >> /root/10_60_60_forwardingAttack_sh_cycleCoords_scen_OSPFv3MDR_cycleCoords_txt/check.txt
+	mgen flush input /root/install/sedap/IntelAttacker/flowGenerator/flows/flow`hostname`.mgn | /root/install/sedap/IntelAttacker/mgenCollect.py /root/10_60_60_forwardingAttack_sh_cycleCoords_scen_OSPFv3MDR_cycleCoords_txt > `hostname`.mgencapture &
 fi
     }
     services {OSPFv3MDR zebra vtysh  IPForward}
@@ -271,9 +271,9 @@ if [ `hostname` = n10 -o 10 = 0 ]
 then
 
 #start logging
-tshark -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | /root/IntelAttacker/netCollect.py $myIP > $HN.capture &    
+tshark -a duration:175 -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | /root/install/sedap/IntelAttacker/netCollect.py /root/10_60_60_forwardingAttack_sh_cycleCoords_scen_OSPFv3MDR_cycleCoords_txt $myIP > $HN.capture &    
 
-mgen flush input /root/IntelAttacker/flowGenerator/flows/flow`hostname`.mgn output /dev/null &
+mgen flush input /root/install/sedap/IntelAttacker/flowGenerator/flows/flow`hostname`.mgn output /dev/null &
 
 (
 cat << 'EOF'
@@ -281,26 +281,26 @@ cat << 'EOF'
 
 startTime=$1
 duration=$2
+logPath=$3
 
-echo "none" > /tmp/attack.txt
+echo "none" > $logPath/attack.txt
 sleep $startTime
-echo "forwarding" > /tmp/attack.txt
+echo "forwarding" > $logPath/attack.txt
 /sbin/sysctl -w net.ipv4.conf.all.forwarding=0
 /sbin/sysctl -w net.ipv6.conf.all.forwarding=0
 sleep $duration
 
 /sbin/sysctl -w net.ipv4.conf.all.forwarding=1
 /sbin/sysctl -w net.ipv6.conf.all.forwarding=1
-rm /tmp/attack.txt
 EOF
 ) > attack.sh
 
 chmod 755 attack.sh
 
-./attack.sh 60 60  
+./attack.sh 60 60 /root/10_60_60_forwardingAttack_sh_cycleCoords_scen_OSPFv3MDR_cycleCoords_txt 
 else
-	echo `hostname` >> /tmp/check.txt
-	mgen flush input /root/IntelAttacker/flowGenerator/flows/flow`hostname`.mgn | /root/IntelAttacker/mgenCollect.py > `hostname`.mgencapture &
+	echo `hostname` >> /root/10_60_60_forwardingAttack_sh_cycleCoords_scen_OSPFv3MDR_cycleCoords_txt/check.txt
+	mgen flush input /root/install/sedap/IntelAttacker/flowGenerator/flows/flow`hostname`.mgn | /root/install/sedap/IntelAttacker/mgenCollect.py /root/10_60_60_forwardingAttack_sh_cycleCoords_scen_OSPFv3MDR_cycleCoords_txt > `hostname`.mgencapture &
 fi
     }
     services {OSPFv3MDR zebra vtysh  IPForward}
@@ -348,9 +348,9 @@ if [ `hostname` = n10 -o 10 = 0 ]
 then
 
 #start logging
-tshark -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | /root/IntelAttacker/netCollect.py $myIP > $HN.capture &    
+tshark -a duration:175 -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | /root/install/sedap/IntelAttacker/netCollect.py /root/10_60_60_forwardingAttack_sh_cycleCoords_scen_OSPFv3MDR_cycleCoords_txt $myIP > $HN.capture &    
 
-mgen flush input /root/IntelAttacker/flowGenerator/flows/flow`hostname`.mgn output /dev/null &
+mgen flush input /root/install/sedap/IntelAttacker/flowGenerator/flows/flow`hostname`.mgn output /dev/null &
 
 (
 cat << 'EOF'
@@ -358,26 +358,26 @@ cat << 'EOF'
 
 startTime=$1
 duration=$2
+logPath=$3
 
-echo "none" > /tmp/attack.txt
+echo "none" > $logPath/attack.txt
 sleep $startTime
-echo "forwarding" > /tmp/attack.txt
+echo "forwarding" > $logPath/attack.txt
 /sbin/sysctl -w net.ipv4.conf.all.forwarding=0
 /sbin/sysctl -w net.ipv6.conf.all.forwarding=0
 sleep $duration
 
 /sbin/sysctl -w net.ipv4.conf.all.forwarding=1
 /sbin/sysctl -w net.ipv6.conf.all.forwarding=1
-rm /tmp/attack.txt
 EOF
 ) > attack.sh
 
 chmod 755 attack.sh
 
-./attack.sh 60 60  
+./attack.sh 60 60 /root/10_60_60_forwardingAttack_sh_cycleCoords_scen_OSPFv3MDR_cycleCoords_txt 
 else
-	echo `hostname` >> /tmp/check.txt
-	mgen flush input /root/IntelAttacker/flowGenerator/flows/flow`hostname`.mgn | /root/IntelAttacker/mgenCollect.py > `hostname`.mgencapture &
+	echo `hostname` >> /root/10_60_60_forwardingAttack_sh_cycleCoords_scen_OSPFv3MDR_cycleCoords_txt/check.txt
+	mgen flush input /root/install/sedap/IntelAttacker/flowGenerator/flows/flow`hostname`.mgn | /root/install/sedap/IntelAttacker/mgenCollect.py /root/10_60_60_forwardingAttack_sh_cycleCoords_scen_OSPFv3MDR_cycleCoords_txt > `hostname`.mgencapture &
 fi
     }
     services {OSPFv3MDR zebra vtysh  IPForward}
@@ -425,9 +425,9 @@ if [ `hostname` = n10 -o 10 = 0 ]
 then
 
 #start logging
-tshark -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | /root/IntelAttacker/netCollect.py $myIP > $HN.capture &    
+tshark -a duration:175 -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | /root/install/sedap/IntelAttacker/netCollect.py /root/10_60_60_forwardingAttack_sh_cycleCoords_scen_OSPFv3MDR_cycleCoords_txt $myIP > $HN.capture &    
 
-mgen flush input /root/IntelAttacker/flowGenerator/flows/flow`hostname`.mgn output /dev/null &
+mgen flush input /root/install/sedap/IntelAttacker/flowGenerator/flows/flow`hostname`.mgn output /dev/null &
 
 (
 cat << 'EOF'
@@ -435,26 +435,26 @@ cat << 'EOF'
 
 startTime=$1
 duration=$2
+logPath=$3
 
-echo "none" > /tmp/attack.txt
+echo "none" > $logPath/attack.txt
 sleep $startTime
-echo "forwarding" > /tmp/attack.txt
+echo "forwarding" > $logPath/attack.txt
 /sbin/sysctl -w net.ipv4.conf.all.forwarding=0
 /sbin/sysctl -w net.ipv6.conf.all.forwarding=0
 sleep $duration
 
 /sbin/sysctl -w net.ipv4.conf.all.forwarding=1
 /sbin/sysctl -w net.ipv6.conf.all.forwarding=1
-rm /tmp/attack.txt
 EOF
 ) > attack.sh
 
 chmod 755 attack.sh
 
-./attack.sh 60 60  
+./attack.sh 60 60 /root/10_60_60_forwardingAttack_sh_cycleCoords_scen_OSPFv3MDR_cycleCoords_txt 
 else
-	echo `hostname` >> /tmp/check.txt
-	mgen flush input /root/IntelAttacker/flowGenerator/flows/flow`hostname`.mgn | /root/IntelAttacker/mgenCollect.py > `hostname`.mgencapture &
+	echo `hostname` >> /root/10_60_60_forwardingAttack_sh_cycleCoords_scen_OSPFv3MDR_cycleCoords_txt/check.txt
+	mgen flush input /root/install/sedap/IntelAttacker/flowGenerator/flows/flow`hostname`.mgn | /root/install/sedap/IntelAttacker/mgenCollect.py /root/10_60_60_forwardingAttack_sh_cycleCoords_scen_OSPFv3MDR_cycleCoords_txt > `hostname`.mgencapture &
 fi
     }
     services {OSPFv3MDR zebra vtysh  IPForward}
@@ -502,9 +502,9 @@ if [ `hostname` = n10 -o 10 = 0 ]
 then
 
 #start logging
-tshark -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | /root/IntelAttacker/netCollect.py $myIP > $HN.capture &    
+tshark -a duration:175 -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | /root/install/sedap/IntelAttacker/netCollect.py /root/10_60_60_forwardingAttack_sh_cycleCoords_scen_OSPFv3MDR_cycleCoords_txt $myIP > $HN.capture &    
 
-mgen flush input /root/IntelAttacker/flowGenerator/flows/flow`hostname`.mgn output /dev/null &
+mgen flush input /root/install/sedap/IntelAttacker/flowGenerator/flows/flow`hostname`.mgn output /dev/null &
 
 (
 cat << 'EOF'
@@ -512,26 +512,26 @@ cat << 'EOF'
 
 startTime=$1
 duration=$2
+logPath=$3
 
-echo "none" > /tmp/attack.txt
+echo "none" > $logPath/attack.txt
 sleep $startTime
-echo "forwarding" > /tmp/attack.txt
+echo "forwarding" > $logPath/attack.txt
 /sbin/sysctl -w net.ipv4.conf.all.forwarding=0
 /sbin/sysctl -w net.ipv6.conf.all.forwarding=0
 sleep $duration
 
 /sbin/sysctl -w net.ipv4.conf.all.forwarding=1
 /sbin/sysctl -w net.ipv6.conf.all.forwarding=1
-rm /tmp/attack.txt
 EOF
 ) > attack.sh
 
 chmod 755 attack.sh
 
-./attack.sh 60 60  
+./attack.sh 60 60 /root/10_60_60_forwardingAttack_sh_cycleCoords_scen_OSPFv3MDR_cycleCoords_txt 
 else
-	echo `hostname` >> /tmp/check.txt
-	mgen flush input /root/IntelAttacker/flowGenerator/flows/flow`hostname`.mgn | /root/IntelAttacker/mgenCollect.py > `hostname`.mgencapture &
+	echo `hostname` >> /root/10_60_60_forwardingAttack_sh_cycleCoords_scen_OSPFv3MDR_cycleCoords_txt/check.txt
+	mgen flush input /root/install/sedap/IntelAttacker/flowGenerator/flows/flow`hostname`.mgn | /root/install/sedap/IntelAttacker/mgenCollect.py /root/10_60_60_forwardingAttack_sh_cycleCoords_scen_OSPFv3MDR_cycleCoords_txt > `hostname`.mgencapture &
 fi
     }
     services {OSPFv3MDR zebra vtysh  IPForward}
@@ -579,9 +579,9 @@ if [ `hostname` = n10 -o 10 = 0 ]
 then
 
 #start logging
-tshark -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | /root/IntelAttacker/netCollect.py $myIP > $HN.capture &    
+tshark -a duration:175 -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | /root/install/sedap/IntelAttacker/netCollect.py /root/10_60_60_forwardingAttack_sh_cycleCoords_scen_OSPFv3MDR_cycleCoords_txt $myIP > $HN.capture &    
 
-mgen flush input /root/IntelAttacker/flowGenerator/flows/flow`hostname`.mgn output /dev/null &
+mgen flush input /root/install/sedap/IntelAttacker/flowGenerator/flows/flow`hostname`.mgn output /dev/null &
 
 (
 cat << 'EOF'
@@ -589,26 +589,26 @@ cat << 'EOF'
 
 startTime=$1
 duration=$2
+logPath=$3
 
-echo "none" > /tmp/attack.txt
+echo "none" > $logPath/attack.txt
 sleep $startTime
-echo "forwarding" > /tmp/attack.txt
+echo "forwarding" > $logPath/attack.txt
 /sbin/sysctl -w net.ipv4.conf.all.forwarding=0
 /sbin/sysctl -w net.ipv6.conf.all.forwarding=0
 sleep $duration
 
 /sbin/sysctl -w net.ipv4.conf.all.forwarding=1
 /sbin/sysctl -w net.ipv6.conf.all.forwarding=1
-rm /tmp/attack.txt
 EOF
 ) > attack.sh
 
 chmod 755 attack.sh
 
-./attack.sh 60 60  
+./attack.sh 60 60 /root/10_60_60_forwardingAttack_sh_cycleCoords_scen_OSPFv3MDR_cycleCoords_txt 
 else
-	echo `hostname` >> /tmp/check.txt
-	mgen flush input /root/IntelAttacker/flowGenerator/flows/flow`hostname`.mgn | /root/IntelAttacker/mgenCollect.py > `hostname`.mgencapture &
+	echo `hostname` >> /root/10_60_60_forwardingAttack_sh_cycleCoords_scen_OSPFv3MDR_cycleCoords_txt/check.txt
+	mgen flush input /root/install/sedap/IntelAttacker/flowGenerator/flows/flow`hostname`.mgn | /root/install/sedap/IntelAttacker/mgenCollect.py /root/10_60_60_forwardingAttack_sh_cycleCoords_scen_OSPFv3MDR_cycleCoords_txt > `hostname`.mgencapture &
 fi
     }
     services {OSPFv3MDR zebra vtysh  IPForward}
@@ -656,9 +656,9 @@ if [ `hostname` = n10 -o 10 = 0 ]
 then
 
 #start logging
-tshark -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | /root/IntelAttacker/netCollect.py $myIP > $HN.capture &    
+tshark -a duration:175 -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | /root/install/sedap/IntelAttacker/netCollect.py /root/10_60_60_forwardingAttack_sh_cycleCoords_scen_OSPFv3MDR_cycleCoords_txt $myIP > $HN.capture &    
 
-mgen flush input /root/IntelAttacker/flowGenerator/flows/flow`hostname`.mgn output /dev/null &
+mgen flush input /root/install/sedap/IntelAttacker/flowGenerator/flows/flow`hostname`.mgn output /dev/null &
 
 (
 cat << 'EOF'
@@ -666,26 +666,26 @@ cat << 'EOF'
 
 startTime=$1
 duration=$2
+logPath=$3
 
-echo "none" > /tmp/attack.txt
+echo "none" > $logPath/attack.txt
 sleep $startTime
-echo "forwarding" > /tmp/attack.txt
+echo "forwarding" > $logPath/attack.txt
 /sbin/sysctl -w net.ipv4.conf.all.forwarding=0
 /sbin/sysctl -w net.ipv6.conf.all.forwarding=0
 sleep $duration
 
 /sbin/sysctl -w net.ipv4.conf.all.forwarding=1
 /sbin/sysctl -w net.ipv6.conf.all.forwarding=1
-rm /tmp/attack.txt
 EOF
 ) > attack.sh
 
 chmod 755 attack.sh
 
-./attack.sh 60 60  
+./attack.sh 60 60 /root/10_60_60_forwardingAttack_sh_cycleCoords_scen_OSPFv3MDR_cycleCoords_txt 
 else
-	echo `hostname` >> /tmp/check.txt
-	mgen flush input /root/IntelAttacker/flowGenerator/flows/flow`hostname`.mgn | /root/IntelAttacker/mgenCollect.py > `hostname`.mgencapture &
+	echo `hostname` >> /root/10_60_60_forwardingAttack_sh_cycleCoords_scen_OSPFv3MDR_cycleCoords_txt/check.txt
+	mgen flush input /root/install/sedap/IntelAttacker/flowGenerator/flows/flow`hostname`.mgn | /root/install/sedap/IntelAttacker/mgenCollect.py /root/10_60_60_forwardingAttack_sh_cycleCoords_scen_OSPFv3MDR_cycleCoords_txt > `hostname`.mgencapture &
 fi
     }
     services {OSPFv3MDR zebra vtysh  IPForward}
@@ -733,9 +733,9 @@ if [ `hostname` = n10 -o 10 = 0 ]
 then
 
 #start logging
-tshark -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | /root/IntelAttacker/netCollect.py $myIP > $HN.capture &    
+tshark -a duration:175 -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | /root/install/sedap/IntelAttacker/netCollect.py /root/10_60_60_forwardingAttack_sh_cycleCoords_scen_OSPFv3MDR_cycleCoords_txt $myIP > $HN.capture &    
 
-mgen flush input /root/IntelAttacker/flowGenerator/flows/flow`hostname`.mgn output /dev/null &
+mgen flush input /root/install/sedap/IntelAttacker/flowGenerator/flows/flow`hostname`.mgn output /dev/null &
 
 (
 cat << 'EOF'
@@ -743,26 +743,26 @@ cat << 'EOF'
 
 startTime=$1
 duration=$2
+logPath=$3
 
-echo "none" > /tmp/attack.txt
+echo "none" > $logPath/attack.txt
 sleep $startTime
-echo "forwarding" > /tmp/attack.txt
+echo "forwarding" > $logPath/attack.txt
 /sbin/sysctl -w net.ipv4.conf.all.forwarding=0
 /sbin/sysctl -w net.ipv6.conf.all.forwarding=0
 sleep $duration
 
 /sbin/sysctl -w net.ipv4.conf.all.forwarding=1
 /sbin/sysctl -w net.ipv6.conf.all.forwarding=1
-rm /tmp/attack.txt
 EOF
 ) > attack.sh
 
 chmod 755 attack.sh
 
-./attack.sh 60 60  
+./attack.sh 60 60 /root/10_60_60_forwardingAttack_sh_cycleCoords_scen_OSPFv3MDR_cycleCoords_txt 
 else
-	echo `hostname` >> /tmp/check.txt
-	mgen flush input /root/IntelAttacker/flowGenerator/flows/flow`hostname`.mgn | /root/IntelAttacker/mgenCollect.py > `hostname`.mgencapture &
+	echo `hostname` >> /root/10_60_60_forwardingAttack_sh_cycleCoords_scen_OSPFv3MDR_cycleCoords_txt/check.txt
+	mgen flush input /root/install/sedap/IntelAttacker/flowGenerator/flows/flow`hostname`.mgn | /root/install/sedap/IntelAttacker/mgenCollect.py /root/10_60_60_forwardingAttack_sh_cycleCoords_scen_OSPFv3MDR_cycleCoords_txt > `hostname`.mgencapture &
 fi
     }
     services {OSPFv3MDR zebra vtysh  IPForward}
@@ -779,7 +779,7 @@ node n11 {
 	 ipv6 address a:1::0/64
 	!
 	scriptfile
-	/root/IntelAttacker/staticScenarios/cycleCoords.scen
+	/root/install/sedap/IntelAttacker/staticScenarios/cycleCoords.scen
 	!
 	mobmodel
 	coreapi
@@ -815,7 +815,7 @@ node n11 {
 	custom-config-id ns2script
 	custom-command {10 3 11 10 10 10 10 10}
 	config {
-	file=/root/IntelAttacker/staticScenarios/cycleCoords.scen
+	file=/root/install/sedap/IntelAttacker/staticScenarios/cycleCoords.scen
 	refresh_ms=50
 	loop=0
 	autostart=1.0

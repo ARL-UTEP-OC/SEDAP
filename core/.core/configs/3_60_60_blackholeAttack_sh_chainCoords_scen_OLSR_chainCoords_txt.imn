@@ -27,8 +27,8 @@ if [ `uname` = "FreeBSD" ]; then
 else SCRIPTDIR=/root/
 fi
 cd $SCRIPTDIR
-mkdir 3_60_60_blackholeAttack_sh_3_10_chainCoords_scen_OLSR_chainCoords_txt
-cd 3_60_60_blackholeAttack_sh_3_10_chainCoords_scen_OLSR_chainCoords_txt
+mkdir 3_60_60_blackholeAttack_sh_chainCoords_scen_OLSR_chainCoords_txt
+cd 3_60_60_blackholeAttack_sh_chainCoords_scen_OLSR_chainCoords_txt
     
 #get ip of current
 hostnameLen=`expr length $HN`
@@ -40,9 +40,9 @@ if [ `hostname` = n3 -o 3 = 0 ]
 then
 
 #start logging
-tshark -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | /root/IntelAttacker/netCollect.py $myIP > $HN.capture &    
+tshark -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | /root/install/sedap/IntelAttacker/netCollect.py /root/3_60_60_blackholeAttack_sh_chainCoords_scen_OLSR_chainCoords_txt $myIP > $HN.capture &    
 
-mgen flush input /root/IntelAttacker/flowGenerator/flows/flow`hostname`.mgn output /dev/null &
+mgen flush input /root/install/sedap/IntelAttacker/flowGenerator/flows/flow`hostname`.mgn output /dev/null &
 
 (
 cat << 'EOF'
@@ -51,16 +51,16 @@ startTime=$1
 pendingDuration=$2
 attackingNode=$3
 numberOfNodes=$4
+logPath=$5
 
 bringDownInterfaces()
 {
 sleep $pendingDuration
 for ((nodeToSpoof=1;nodeToSpoof <= numberOfNodes; nodeToSpoof++))
 	do
-		if [ $nodeToSpoof != attackingNode ]
+		if [ $nodeToSpoof != $attackingNode ]
 			then
 				ifconfig "eth0:$nodeToSpoof" down
-				echo ifconfig "eth0:$nodeToSpoof" down
 		fi
 	done
 }
@@ -68,7 +68,7 @@ for ((nodeToSpoof=1;nodeToSpoof <= numberOfNodes; nodeToSpoof++))
 runOLSRAttack()
 {
 	killall nrlolsrd
-	nrlolsrd -i eth0 -hna tmp.txt &
+	nrlolsrd -i eth0 -hna $logPath/tmp.txt &
 	sleep $pendingDuration
 	stopOLSRAttack
 }
@@ -76,7 +76,6 @@ runOLSRAttack()
 stopOLSRAttack()
 {
 	killall nrlolsrd
-	rm tmp.txt
 	bringDownInterfaces
 	nrlolsrd -i eth0 &
 }
@@ -87,24 +86,23 @@ bringUpInterfaces()
 	for ((nodeToSpoof=1;nodeToSpoof <= numberOfNodes; nodeToSpoof++))
 	do
 		
-		if [ $nodeToSpoof != attackingNode ]
+		if [ $nodeToSpoof != $attackingNode ]
 			then
 				ipToSpoof="10.0.0.$nodeToSpoof"
 				ifconfig eth0:$nodeToSpoof $ipToSpoof netmask 255.255.255.255 up
-				echo "HNA $ipToSpoof 32" >> tmp.txt
+				echo "HNA $ipToSpoof 32" >> $logPath/tmp.txt
 		fi
 	done	
 }
 
-rm tmp.txt
-echo "none" > /tmp/attack.txt
+echo "none" > $logPath/attack.txt
 sleep $startTime
 
-if [ $pendingDuration -gt 0 ]
+if [[ $pendingDuration -gt 0 ]]
 	then
-		echo "blackHole" > /tmp/attack.txt
+		echo "blackHole" > $logPath/attack.txt
 
-		if [ `ps -ef | grep nrlolsrd | wc -l` -gt 1 ]
+		if [[ `ps -ef | grep nrlolsrd | wc -l` -gt 1 ]]
 			then
 				bringUpInterfaces
 				runOLSRAttack
@@ -112,8 +110,7 @@ if [ $pendingDuration -gt 0 ]
 				bringDownInterfaces
 		fi
 fi
-echo "none" > /tmp/attack.txt
-
+echo "none" > $logPath/attack.txt
 
 
 
@@ -122,10 +119,10 @@ EOF
 
 chmod 755 attack.sh
 
-./attack.sh 60 60  3 10 
+./attack.sh 60 60 3 10 /root/3_60_60_blackholeAttack_sh_chainCoords_scen_OLSR_chainCoords_txt 
 else
-	echo `hostname` >> /tmp/check.txt
-	mgen flush input /root/IntelAttacker/flowGenerator/flows/flow`hostname`.mgn | /root/IntelAttacker/mgenCollect.py > `hostname`.mgencapture &
+	echo `hostname` >> /root/3_60_60_blackholeAttack_sh_chainCoords_scen_OLSR_chainCoords_txt/check.txt
+	mgen flush input /root/install/sedap/IntelAttacker/flowGenerator/flows/flow`hostname`.mgn | /root/install/sedap/IntelAttacker/mgenCollect.py /root/3_60_60_blackholeAttack_sh_chainCoords_scen_OLSR_chainCoords_txt > `hostname`.mgencapture &
 fi
     }
     services {OLSR IPForward}
@@ -160,8 +157,8 @@ if [ `uname` = "FreeBSD" ]; then
 else SCRIPTDIR=/root/
 fi
 cd $SCRIPTDIR
-mkdir 3_60_60_blackholeAttack_sh_3_10_chainCoords_scen_OLSR_chainCoords_txt
-cd 3_60_60_blackholeAttack_sh_3_10_chainCoords_scen_OLSR_chainCoords_txt
+mkdir 3_60_60_blackholeAttack_sh_chainCoords_scen_OLSR_chainCoords_txt
+cd 3_60_60_blackholeAttack_sh_chainCoords_scen_OLSR_chainCoords_txt
     
 #get ip of current
 hostnameLen=`expr length $HN`
@@ -173,9 +170,9 @@ if [ `hostname` = n3 -o 3 = 0 ]
 then
 
 #start logging
-tshark -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | /root/IntelAttacker/netCollect.py $myIP > $HN.capture &    
+tshark -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | /root/install/sedap/IntelAttacker/netCollect.py /root/3_60_60_blackholeAttack_sh_chainCoords_scen_OLSR_chainCoords_txt $myIP > $HN.capture &    
 
-mgen flush input /root/IntelAttacker/flowGenerator/flows/flow`hostname`.mgn output /dev/null &
+mgen flush input /root/install/sedap/IntelAttacker/flowGenerator/flows/flow`hostname`.mgn output /dev/null &
 
 (
 cat << 'EOF'
@@ -184,16 +181,16 @@ startTime=$1
 pendingDuration=$2
 attackingNode=$3
 numberOfNodes=$4
+logPath=$5
 
 bringDownInterfaces()
 {
 sleep $pendingDuration
 for ((nodeToSpoof=1;nodeToSpoof <= numberOfNodes; nodeToSpoof++))
 	do
-		if [ $nodeToSpoof != attackingNode ]
+		if [ $nodeToSpoof != $attackingNode ]
 			then
 				ifconfig "eth0:$nodeToSpoof" down
-				echo ifconfig "eth0:$nodeToSpoof" down
 		fi
 	done
 }
@@ -201,7 +198,7 @@ for ((nodeToSpoof=1;nodeToSpoof <= numberOfNodes; nodeToSpoof++))
 runOLSRAttack()
 {
 	killall nrlolsrd
-	nrlolsrd -i eth0 -hna tmp.txt &
+	nrlolsrd -i eth0 -hna $logPath/tmp.txt &
 	sleep $pendingDuration
 	stopOLSRAttack
 }
@@ -209,7 +206,6 @@ runOLSRAttack()
 stopOLSRAttack()
 {
 	killall nrlolsrd
-	rm tmp.txt
 	bringDownInterfaces
 	nrlolsrd -i eth0 &
 }
@@ -220,24 +216,23 @@ bringUpInterfaces()
 	for ((nodeToSpoof=1;nodeToSpoof <= numberOfNodes; nodeToSpoof++))
 	do
 		
-		if [ $nodeToSpoof != attackingNode ]
+		if [ $nodeToSpoof != $attackingNode ]
 			then
 				ipToSpoof="10.0.0.$nodeToSpoof"
 				ifconfig eth0:$nodeToSpoof $ipToSpoof netmask 255.255.255.255 up
-				echo "HNA $ipToSpoof 32" >> tmp.txt
+				echo "HNA $ipToSpoof 32" >> $logPath/tmp.txt
 		fi
 	done	
 }
 
-rm tmp.txt
-echo "none" > /tmp/attack.txt
+echo "none" > $logPath/attack.txt
 sleep $startTime
 
-if [ $pendingDuration -gt 0 ]
+if [[ $pendingDuration -gt 0 ]]
 	then
-		echo "blackHole" > /tmp/attack.txt
+		echo "blackHole" > $logPath/attack.txt
 
-		if [ `ps -ef | grep nrlolsrd | wc -l` -gt 1 ]
+		if [[ `ps -ef | grep nrlolsrd | wc -l` -gt 1 ]]
 			then
 				bringUpInterfaces
 				runOLSRAttack
@@ -245,8 +240,7 @@ if [ $pendingDuration -gt 0 ]
 				bringDownInterfaces
 		fi
 fi
-echo "none" > /tmp/attack.txt
-
+echo "none" > $logPath/attack.txt
 
 
 
@@ -255,10 +249,10 @@ EOF
 
 chmod 755 attack.sh
 
-./attack.sh 60 60  3 10 
+./attack.sh 60 60 3 10 /root/3_60_60_blackholeAttack_sh_chainCoords_scen_OLSR_chainCoords_txt 
 else
-	echo `hostname` >> /tmp/check.txt
-	mgen flush input /root/IntelAttacker/flowGenerator/flows/flow`hostname`.mgn | /root/IntelAttacker/mgenCollect.py > `hostname`.mgencapture &
+	echo `hostname` >> /root/3_60_60_blackholeAttack_sh_chainCoords_scen_OLSR_chainCoords_txt/check.txt
+	mgen flush input /root/install/sedap/IntelAttacker/flowGenerator/flows/flow`hostname`.mgn | /root/install/sedap/IntelAttacker/mgenCollect.py /root/3_60_60_blackholeAttack_sh_chainCoords_scen_OLSR_chainCoords_txt > `hostname`.mgencapture &
 fi
     }
     services {OLSR IPForward}
@@ -293,8 +287,8 @@ if [ `uname` = "FreeBSD" ]; then
 else SCRIPTDIR=/root/
 fi
 cd $SCRIPTDIR
-mkdir 3_60_60_blackholeAttack_sh_3_10_chainCoords_scen_OLSR_chainCoords_txt
-cd 3_60_60_blackholeAttack_sh_3_10_chainCoords_scen_OLSR_chainCoords_txt
+mkdir 3_60_60_blackholeAttack_sh_chainCoords_scen_OLSR_chainCoords_txt
+cd 3_60_60_blackholeAttack_sh_chainCoords_scen_OLSR_chainCoords_txt
     
 #get ip of current
 hostnameLen=`expr length $HN`
@@ -306,9 +300,9 @@ if [ `hostname` = n3 -o 3 = 0 ]
 then
 
 #start logging
-tshark -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | /root/IntelAttacker/netCollect.py $myIP > $HN.capture &    
+tshark -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | /root/install/sedap/IntelAttacker/netCollect.py /root/3_60_60_blackholeAttack_sh_chainCoords_scen_OLSR_chainCoords_txt $myIP > $HN.capture &    
 
-mgen flush input /root/IntelAttacker/flowGenerator/flows/flow`hostname`.mgn output /dev/null &
+mgen flush input /root/install/sedap/IntelAttacker/flowGenerator/flows/flow`hostname`.mgn output /dev/null &
 
 (
 cat << 'EOF'
@@ -317,16 +311,16 @@ startTime=$1
 pendingDuration=$2
 attackingNode=$3
 numberOfNodes=$4
+logPath=$5
 
 bringDownInterfaces()
 {
 sleep $pendingDuration
 for ((nodeToSpoof=1;nodeToSpoof <= numberOfNodes; nodeToSpoof++))
 	do
-		if [ $nodeToSpoof != attackingNode ]
+		if [ $nodeToSpoof != $attackingNode ]
 			then
 				ifconfig "eth0:$nodeToSpoof" down
-				echo ifconfig "eth0:$nodeToSpoof" down
 		fi
 	done
 }
@@ -334,7 +328,7 @@ for ((nodeToSpoof=1;nodeToSpoof <= numberOfNodes; nodeToSpoof++))
 runOLSRAttack()
 {
 	killall nrlolsrd
-	nrlolsrd -i eth0 -hna tmp.txt &
+	nrlolsrd -i eth0 -hna $logPath/tmp.txt &
 	sleep $pendingDuration
 	stopOLSRAttack
 }
@@ -342,7 +336,6 @@ runOLSRAttack()
 stopOLSRAttack()
 {
 	killall nrlolsrd
-	rm tmp.txt
 	bringDownInterfaces
 	nrlolsrd -i eth0 &
 }
@@ -353,24 +346,23 @@ bringUpInterfaces()
 	for ((nodeToSpoof=1;nodeToSpoof <= numberOfNodes; nodeToSpoof++))
 	do
 		
-		if [ $nodeToSpoof != attackingNode ]
+		if [ $nodeToSpoof != $attackingNode ]
 			then
 				ipToSpoof="10.0.0.$nodeToSpoof"
 				ifconfig eth0:$nodeToSpoof $ipToSpoof netmask 255.255.255.255 up
-				echo "HNA $ipToSpoof 32" >> tmp.txt
+				echo "HNA $ipToSpoof 32" >> $logPath/tmp.txt
 		fi
 	done	
 }
 
-rm tmp.txt
-echo "none" > /tmp/attack.txt
+echo "none" > $logPath/attack.txt
 sleep $startTime
 
-if [ $pendingDuration -gt 0 ]
+if [[ $pendingDuration -gt 0 ]]
 	then
-		echo "blackHole" > /tmp/attack.txt
+		echo "blackHole" > $logPath/attack.txt
 
-		if [ `ps -ef | grep nrlolsrd | wc -l` -gt 1 ]
+		if [[ `ps -ef | grep nrlolsrd | wc -l` -gt 1 ]]
 			then
 				bringUpInterfaces
 				runOLSRAttack
@@ -378,8 +370,7 @@ if [ $pendingDuration -gt 0 ]
 				bringDownInterfaces
 		fi
 fi
-echo "none" > /tmp/attack.txt
-
+echo "none" > $logPath/attack.txt
 
 
 
@@ -388,10 +379,10 @@ EOF
 
 chmod 755 attack.sh
 
-./attack.sh 60 60  3 10 
+./attack.sh 60 60 3 10 /root/3_60_60_blackholeAttack_sh_chainCoords_scen_OLSR_chainCoords_txt 
 else
-	echo `hostname` >> /tmp/check.txt
-	mgen flush input /root/IntelAttacker/flowGenerator/flows/flow`hostname`.mgn | /root/IntelAttacker/mgenCollect.py > `hostname`.mgencapture &
+	echo `hostname` >> /root/3_60_60_blackholeAttack_sh_chainCoords_scen_OLSR_chainCoords_txt/check.txt
+	mgen flush input /root/install/sedap/IntelAttacker/flowGenerator/flows/flow`hostname`.mgn | /root/install/sedap/IntelAttacker/mgenCollect.py /root/3_60_60_blackholeAttack_sh_chainCoords_scen_OLSR_chainCoords_txt > `hostname`.mgencapture &
 fi
     }
     services {OLSR IPForward}
@@ -426,8 +417,8 @@ if [ `uname` = "FreeBSD" ]; then
 else SCRIPTDIR=/root/
 fi
 cd $SCRIPTDIR
-mkdir 3_60_60_blackholeAttack_sh_3_10_chainCoords_scen_OLSR_chainCoords_txt
-cd 3_60_60_blackholeAttack_sh_3_10_chainCoords_scen_OLSR_chainCoords_txt
+mkdir 3_60_60_blackholeAttack_sh_chainCoords_scen_OLSR_chainCoords_txt
+cd 3_60_60_blackholeAttack_sh_chainCoords_scen_OLSR_chainCoords_txt
     
 #get ip of current
 hostnameLen=`expr length $HN`
@@ -439,9 +430,9 @@ if [ `hostname` = n3 -o 3 = 0 ]
 then
 
 #start logging
-tshark -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | /root/IntelAttacker/netCollect.py $myIP > $HN.capture &    
+tshark -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | /root/install/sedap/IntelAttacker/netCollect.py /root/3_60_60_blackholeAttack_sh_chainCoords_scen_OLSR_chainCoords_txt $myIP > $HN.capture &    
 
-mgen flush input /root/IntelAttacker/flowGenerator/flows/flow`hostname`.mgn output /dev/null &
+mgen flush input /root/install/sedap/IntelAttacker/flowGenerator/flows/flow`hostname`.mgn output /dev/null &
 
 (
 cat << 'EOF'
@@ -450,16 +441,16 @@ startTime=$1
 pendingDuration=$2
 attackingNode=$3
 numberOfNodes=$4
+logPath=$5
 
 bringDownInterfaces()
 {
 sleep $pendingDuration
 for ((nodeToSpoof=1;nodeToSpoof <= numberOfNodes; nodeToSpoof++))
 	do
-		if [ $nodeToSpoof != attackingNode ]
+		if [ $nodeToSpoof != $attackingNode ]
 			then
 				ifconfig "eth0:$nodeToSpoof" down
-				echo ifconfig "eth0:$nodeToSpoof" down
 		fi
 	done
 }
@@ -467,7 +458,7 @@ for ((nodeToSpoof=1;nodeToSpoof <= numberOfNodes; nodeToSpoof++))
 runOLSRAttack()
 {
 	killall nrlolsrd
-	nrlolsrd -i eth0 -hna tmp.txt &
+	nrlolsrd -i eth0 -hna $logPath/tmp.txt &
 	sleep $pendingDuration
 	stopOLSRAttack
 }
@@ -475,7 +466,6 @@ runOLSRAttack()
 stopOLSRAttack()
 {
 	killall nrlolsrd
-	rm tmp.txt
 	bringDownInterfaces
 	nrlolsrd -i eth0 &
 }
@@ -486,24 +476,23 @@ bringUpInterfaces()
 	for ((nodeToSpoof=1;nodeToSpoof <= numberOfNodes; nodeToSpoof++))
 	do
 		
-		if [ $nodeToSpoof != attackingNode ]
+		if [ $nodeToSpoof != $attackingNode ]
 			then
 				ipToSpoof="10.0.0.$nodeToSpoof"
 				ifconfig eth0:$nodeToSpoof $ipToSpoof netmask 255.255.255.255 up
-				echo "HNA $ipToSpoof 32" >> tmp.txt
+				echo "HNA $ipToSpoof 32" >> $logPath/tmp.txt
 		fi
 	done	
 }
 
-rm tmp.txt
-echo "none" > /tmp/attack.txt
+echo "none" > $logPath/attack.txt
 sleep $startTime
 
-if [ $pendingDuration -gt 0 ]
+if [[ $pendingDuration -gt 0 ]]
 	then
-		echo "blackHole" > /tmp/attack.txt
+		echo "blackHole" > $logPath/attack.txt
 
-		if [ `ps -ef | grep nrlolsrd | wc -l` -gt 1 ]
+		if [[ `ps -ef | grep nrlolsrd | wc -l` -gt 1 ]]
 			then
 				bringUpInterfaces
 				runOLSRAttack
@@ -511,8 +500,7 @@ if [ $pendingDuration -gt 0 ]
 				bringDownInterfaces
 		fi
 fi
-echo "none" > /tmp/attack.txt
-
+echo "none" > $logPath/attack.txt
 
 
 
@@ -521,10 +509,10 @@ EOF
 
 chmod 755 attack.sh
 
-./attack.sh 60 60  3 10 
+./attack.sh 60 60 3 10 /root/3_60_60_blackholeAttack_sh_chainCoords_scen_OLSR_chainCoords_txt 
 else
-	echo `hostname` >> /tmp/check.txt
-	mgen flush input /root/IntelAttacker/flowGenerator/flows/flow`hostname`.mgn | /root/IntelAttacker/mgenCollect.py > `hostname`.mgencapture &
+	echo `hostname` >> /root/3_60_60_blackholeAttack_sh_chainCoords_scen_OLSR_chainCoords_txt/check.txt
+	mgen flush input /root/install/sedap/IntelAttacker/flowGenerator/flows/flow`hostname`.mgn | /root/install/sedap/IntelAttacker/mgenCollect.py /root/3_60_60_blackholeAttack_sh_chainCoords_scen_OLSR_chainCoords_txt > `hostname`.mgencapture &
 fi
     }
     services {OLSR IPForward}
@@ -559,8 +547,8 @@ if [ `uname` = "FreeBSD" ]; then
 else SCRIPTDIR=/root/
 fi
 cd $SCRIPTDIR
-mkdir 3_60_60_blackholeAttack_sh_3_10_chainCoords_scen_OLSR_chainCoords_txt
-cd 3_60_60_blackholeAttack_sh_3_10_chainCoords_scen_OLSR_chainCoords_txt
+mkdir 3_60_60_blackholeAttack_sh_chainCoords_scen_OLSR_chainCoords_txt
+cd 3_60_60_blackholeAttack_sh_chainCoords_scen_OLSR_chainCoords_txt
     
 #get ip of current
 hostnameLen=`expr length $HN`
@@ -572,9 +560,9 @@ if [ `hostname` = n3 -o 3 = 0 ]
 then
 
 #start logging
-tshark -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | /root/IntelAttacker/netCollect.py $myIP > $HN.capture &    
+tshark -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | /root/install/sedap/IntelAttacker/netCollect.py /root/3_60_60_blackholeAttack_sh_chainCoords_scen_OLSR_chainCoords_txt $myIP > $HN.capture &    
 
-mgen flush input /root/IntelAttacker/flowGenerator/flows/flow`hostname`.mgn output /dev/null &
+mgen flush input /root/install/sedap/IntelAttacker/flowGenerator/flows/flow`hostname`.mgn output /dev/null &
 
 (
 cat << 'EOF'
@@ -583,16 +571,16 @@ startTime=$1
 pendingDuration=$2
 attackingNode=$3
 numberOfNodes=$4
+logPath=$5
 
 bringDownInterfaces()
 {
 sleep $pendingDuration
 for ((nodeToSpoof=1;nodeToSpoof <= numberOfNodes; nodeToSpoof++))
 	do
-		if [ $nodeToSpoof != attackingNode ]
+		if [ $nodeToSpoof != $attackingNode ]
 			then
 				ifconfig "eth0:$nodeToSpoof" down
-				echo ifconfig "eth0:$nodeToSpoof" down
 		fi
 	done
 }
@@ -600,7 +588,7 @@ for ((nodeToSpoof=1;nodeToSpoof <= numberOfNodes; nodeToSpoof++))
 runOLSRAttack()
 {
 	killall nrlolsrd
-	nrlolsrd -i eth0 -hna tmp.txt &
+	nrlolsrd -i eth0 -hna $logPath/tmp.txt &
 	sleep $pendingDuration
 	stopOLSRAttack
 }
@@ -608,7 +596,6 @@ runOLSRAttack()
 stopOLSRAttack()
 {
 	killall nrlolsrd
-	rm tmp.txt
 	bringDownInterfaces
 	nrlolsrd -i eth0 &
 }
@@ -619,24 +606,23 @@ bringUpInterfaces()
 	for ((nodeToSpoof=1;nodeToSpoof <= numberOfNodes; nodeToSpoof++))
 	do
 		
-		if [ $nodeToSpoof != attackingNode ]
+		if [ $nodeToSpoof != $attackingNode ]
 			then
 				ipToSpoof="10.0.0.$nodeToSpoof"
 				ifconfig eth0:$nodeToSpoof $ipToSpoof netmask 255.255.255.255 up
-				echo "HNA $ipToSpoof 32" >> tmp.txt
+				echo "HNA $ipToSpoof 32" >> $logPath/tmp.txt
 		fi
 	done	
 }
 
-rm tmp.txt
-echo "none" > /tmp/attack.txt
+echo "none" > $logPath/attack.txt
 sleep $startTime
 
-if [ $pendingDuration -gt 0 ]
+if [[ $pendingDuration -gt 0 ]]
 	then
-		echo "blackHole" > /tmp/attack.txt
+		echo "blackHole" > $logPath/attack.txt
 
-		if [ `ps -ef | grep nrlolsrd | wc -l` -gt 1 ]
+		if [[ `ps -ef | grep nrlolsrd | wc -l` -gt 1 ]]
 			then
 				bringUpInterfaces
 				runOLSRAttack
@@ -644,8 +630,7 @@ if [ $pendingDuration -gt 0 ]
 				bringDownInterfaces
 		fi
 fi
-echo "none" > /tmp/attack.txt
-
+echo "none" > $logPath/attack.txt
 
 
 
@@ -654,10 +639,10 @@ EOF
 
 chmod 755 attack.sh
 
-./attack.sh 60 60  3 10 
+./attack.sh 60 60 3 10 /root/3_60_60_blackholeAttack_sh_chainCoords_scen_OLSR_chainCoords_txt 
 else
-	echo `hostname` >> /tmp/check.txt
-	mgen flush input /root/IntelAttacker/flowGenerator/flows/flow`hostname`.mgn | /root/IntelAttacker/mgenCollect.py > `hostname`.mgencapture &
+	echo `hostname` >> /root/3_60_60_blackholeAttack_sh_chainCoords_scen_OLSR_chainCoords_txt/check.txt
+	mgen flush input /root/install/sedap/IntelAttacker/flowGenerator/flows/flow`hostname`.mgn | /root/install/sedap/IntelAttacker/mgenCollect.py /root/3_60_60_blackholeAttack_sh_chainCoords_scen_OLSR_chainCoords_txt > `hostname`.mgencapture &
 fi
     }
     services {OLSR IPForward}
@@ -692,8 +677,8 @@ if [ `uname` = "FreeBSD" ]; then
 else SCRIPTDIR=/root/
 fi
 cd $SCRIPTDIR
-mkdir 3_60_60_blackholeAttack_sh_3_10_chainCoords_scen_OLSR_chainCoords_txt
-cd 3_60_60_blackholeAttack_sh_3_10_chainCoords_scen_OLSR_chainCoords_txt
+mkdir 3_60_60_blackholeAttack_sh_chainCoords_scen_OLSR_chainCoords_txt
+cd 3_60_60_blackholeAttack_sh_chainCoords_scen_OLSR_chainCoords_txt
     
 #get ip of current
 hostnameLen=`expr length $HN`
@@ -705,9 +690,9 @@ if [ `hostname` = n3 -o 3 = 0 ]
 then
 
 #start logging
-tshark -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | /root/IntelAttacker/netCollect.py $myIP > $HN.capture &    
+tshark -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | /root/install/sedap/IntelAttacker/netCollect.py /root/3_60_60_blackholeAttack_sh_chainCoords_scen_OLSR_chainCoords_txt $myIP > $HN.capture &    
 
-mgen flush input /root/IntelAttacker/flowGenerator/flows/flow`hostname`.mgn output /dev/null &
+mgen flush input /root/install/sedap/IntelAttacker/flowGenerator/flows/flow`hostname`.mgn output /dev/null &
 
 (
 cat << 'EOF'
@@ -716,16 +701,16 @@ startTime=$1
 pendingDuration=$2
 attackingNode=$3
 numberOfNodes=$4
+logPath=$5
 
 bringDownInterfaces()
 {
 sleep $pendingDuration
 for ((nodeToSpoof=1;nodeToSpoof <= numberOfNodes; nodeToSpoof++))
 	do
-		if [ $nodeToSpoof != attackingNode ]
+		if [ $nodeToSpoof != $attackingNode ]
 			then
 				ifconfig "eth0:$nodeToSpoof" down
-				echo ifconfig "eth0:$nodeToSpoof" down
 		fi
 	done
 }
@@ -733,7 +718,7 @@ for ((nodeToSpoof=1;nodeToSpoof <= numberOfNodes; nodeToSpoof++))
 runOLSRAttack()
 {
 	killall nrlolsrd
-	nrlolsrd -i eth0 -hna tmp.txt &
+	nrlolsrd -i eth0 -hna $logPath/tmp.txt &
 	sleep $pendingDuration
 	stopOLSRAttack
 }
@@ -741,7 +726,6 @@ runOLSRAttack()
 stopOLSRAttack()
 {
 	killall nrlolsrd
-	rm tmp.txt
 	bringDownInterfaces
 	nrlolsrd -i eth0 &
 }
@@ -752,24 +736,23 @@ bringUpInterfaces()
 	for ((nodeToSpoof=1;nodeToSpoof <= numberOfNodes; nodeToSpoof++))
 	do
 		
-		if [ $nodeToSpoof != attackingNode ]
+		if [ $nodeToSpoof != $attackingNode ]
 			then
 				ipToSpoof="10.0.0.$nodeToSpoof"
 				ifconfig eth0:$nodeToSpoof $ipToSpoof netmask 255.255.255.255 up
-				echo "HNA $ipToSpoof 32" >> tmp.txt
+				echo "HNA $ipToSpoof 32" >> $logPath/tmp.txt
 		fi
 	done	
 }
 
-rm tmp.txt
-echo "none" > /tmp/attack.txt
+echo "none" > $logPath/attack.txt
 sleep $startTime
 
-if [ $pendingDuration -gt 0 ]
+if [[ $pendingDuration -gt 0 ]]
 	then
-		echo "blackHole" > /tmp/attack.txt
+		echo "blackHole" > $logPath/attack.txt
 
-		if [ `ps -ef | grep nrlolsrd | wc -l` -gt 1 ]
+		if [[ `ps -ef | grep nrlolsrd | wc -l` -gt 1 ]]
 			then
 				bringUpInterfaces
 				runOLSRAttack
@@ -777,8 +760,7 @@ if [ $pendingDuration -gt 0 ]
 				bringDownInterfaces
 		fi
 fi
-echo "none" > /tmp/attack.txt
-
+echo "none" > $logPath/attack.txt
 
 
 
@@ -787,10 +769,10 @@ EOF
 
 chmod 755 attack.sh
 
-./attack.sh 60 60  3 10 
+./attack.sh 60 60 3 10 /root/3_60_60_blackholeAttack_sh_chainCoords_scen_OLSR_chainCoords_txt 
 else
-	echo `hostname` >> /tmp/check.txt
-	mgen flush input /root/IntelAttacker/flowGenerator/flows/flow`hostname`.mgn | /root/IntelAttacker/mgenCollect.py > `hostname`.mgencapture &
+	echo `hostname` >> /root/3_60_60_blackholeAttack_sh_chainCoords_scen_OLSR_chainCoords_txt/check.txt
+	mgen flush input /root/install/sedap/IntelAttacker/flowGenerator/flows/flow`hostname`.mgn | /root/install/sedap/IntelAttacker/mgenCollect.py /root/3_60_60_blackholeAttack_sh_chainCoords_scen_OLSR_chainCoords_txt > `hostname`.mgencapture &
 fi
     }
     services {OLSR IPForward}
@@ -825,8 +807,8 @@ if [ `uname` = "FreeBSD" ]; then
 else SCRIPTDIR=/root/
 fi
 cd $SCRIPTDIR
-mkdir 3_60_60_blackholeAttack_sh_3_10_chainCoords_scen_OLSR_chainCoords_txt
-cd 3_60_60_blackholeAttack_sh_3_10_chainCoords_scen_OLSR_chainCoords_txt
+mkdir 3_60_60_blackholeAttack_sh_chainCoords_scen_OLSR_chainCoords_txt
+cd 3_60_60_blackholeAttack_sh_chainCoords_scen_OLSR_chainCoords_txt
     
 #get ip of current
 hostnameLen=`expr length $HN`
@@ -838,9 +820,9 @@ if [ `hostname` = n3 -o 3 = 0 ]
 then
 
 #start logging
-tshark -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | /root/IntelAttacker/netCollect.py $myIP > $HN.capture &    
+tshark -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | /root/install/sedap/IntelAttacker/netCollect.py /root/3_60_60_blackholeAttack_sh_chainCoords_scen_OLSR_chainCoords_txt $myIP > $HN.capture &    
 
-mgen flush input /root/IntelAttacker/flowGenerator/flows/flow`hostname`.mgn output /dev/null &
+mgen flush input /root/install/sedap/IntelAttacker/flowGenerator/flows/flow`hostname`.mgn output /dev/null &
 
 (
 cat << 'EOF'
@@ -849,16 +831,16 @@ startTime=$1
 pendingDuration=$2
 attackingNode=$3
 numberOfNodes=$4
+logPath=$5
 
 bringDownInterfaces()
 {
 sleep $pendingDuration
 for ((nodeToSpoof=1;nodeToSpoof <= numberOfNodes; nodeToSpoof++))
 	do
-		if [ $nodeToSpoof != attackingNode ]
+		if [ $nodeToSpoof != $attackingNode ]
 			then
 				ifconfig "eth0:$nodeToSpoof" down
-				echo ifconfig "eth0:$nodeToSpoof" down
 		fi
 	done
 }
@@ -866,7 +848,7 @@ for ((nodeToSpoof=1;nodeToSpoof <= numberOfNodes; nodeToSpoof++))
 runOLSRAttack()
 {
 	killall nrlolsrd
-	nrlolsrd -i eth0 -hna tmp.txt &
+	nrlolsrd -i eth0 -hna $logPath/tmp.txt &
 	sleep $pendingDuration
 	stopOLSRAttack
 }
@@ -874,7 +856,6 @@ runOLSRAttack()
 stopOLSRAttack()
 {
 	killall nrlolsrd
-	rm tmp.txt
 	bringDownInterfaces
 	nrlolsrd -i eth0 &
 }
@@ -885,24 +866,23 @@ bringUpInterfaces()
 	for ((nodeToSpoof=1;nodeToSpoof <= numberOfNodes; nodeToSpoof++))
 	do
 		
-		if [ $nodeToSpoof != attackingNode ]
+		if [ $nodeToSpoof != $attackingNode ]
 			then
 				ipToSpoof="10.0.0.$nodeToSpoof"
 				ifconfig eth0:$nodeToSpoof $ipToSpoof netmask 255.255.255.255 up
-				echo "HNA $ipToSpoof 32" >> tmp.txt
+				echo "HNA $ipToSpoof 32" >> $logPath/tmp.txt
 		fi
 	done	
 }
 
-rm tmp.txt
-echo "none" > /tmp/attack.txt
+echo "none" > $logPath/attack.txt
 sleep $startTime
 
-if [ $pendingDuration -gt 0 ]
+if [[ $pendingDuration -gt 0 ]]
 	then
-		echo "blackHole" > /tmp/attack.txt
+		echo "blackHole" > $logPath/attack.txt
 
-		if [ `ps -ef | grep nrlolsrd | wc -l` -gt 1 ]
+		if [[ `ps -ef | grep nrlolsrd | wc -l` -gt 1 ]]
 			then
 				bringUpInterfaces
 				runOLSRAttack
@@ -910,8 +890,7 @@ if [ $pendingDuration -gt 0 ]
 				bringDownInterfaces
 		fi
 fi
-echo "none" > /tmp/attack.txt
-
+echo "none" > $logPath/attack.txt
 
 
 
@@ -920,10 +899,10 @@ EOF
 
 chmod 755 attack.sh
 
-./attack.sh 60 60  3 10 
+./attack.sh 60 60 3 10 /root/3_60_60_blackholeAttack_sh_chainCoords_scen_OLSR_chainCoords_txt 
 else
-	echo `hostname` >> /tmp/check.txt
-	mgen flush input /root/IntelAttacker/flowGenerator/flows/flow`hostname`.mgn | /root/IntelAttacker/mgenCollect.py > `hostname`.mgencapture &
+	echo `hostname` >> /root/3_60_60_blackholeAttack_sh_chainCoords_scen_OLSR_chainCoords_txt/check.txt
+	mgen flush input /root/install/sedap/IntelAttacker/flowGenerator/flows/flow`hostname`.mgn | /root/install/sedap/IntelAttacker/mgenCollect.py /root/3_60_60_blackholeAttack_sh_chainCoords_scen_OLSR_chainCoords_txt > `hostname`.mgencapture &
 fi
     }
     services {OLSR IPForward}
@@ -958,8 +937,8 @@ if [ `uname` = "FreeBSD" ]; then
 else SCRIPTDIR=/root/
 fi
 cd $SCRIPTDIR
-mkdir 3_60_60_blackholeAttack_sh_3_10_chainCoords_scen_OLSR_chainCoords_txt
-cd 3_60_60_blackholeAttack_sh_3_10_chainCoords_scen_OLSR_chainCoords_txt
+mkdir 3_60_60_blackholeAttack_sh_chainCoords_scen_OLSR_chainCoords_txt
+cd 3_60_60_blackholeAttack_sh_chainCoords_scen_OLSR_chainCoords_txt
     
 #get ip of current
 hostnameLen=`expr length $HN`
@@ -971,9 +950,9 @@ if [ `hostname` = n3 -o 3 = 0 ]
 then
 
 #start logging
-tshark -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | /root/IntelAttacker/netCollect.py $myIP > $HN.capture &    
+tshark -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | /root/install/sedap/IntelAttacker/netCollect.py /root/3_60_60_blackholeAttack_sh_chainCoords_scen_OLSR_chainCoords_txt $myIP > $HN.capture &    
 
-mgen flush input /root/IntelAttacker/flowGenerator/flows/flow`hostname`.mgn output /dev/null &
+mgen flush input /root/install/sedap/IntelAttacker/flowGenerator/flows/flow`hostname`.mgn output /dev/null &
 
 (
 cat << 'EOF'
@@ -982,16 +961,16 @@ startTime=$1
 pendingDuration=$2
 attackingNode=$3
 numberOfNodes=$4
+logPath=$5
 
 bringDownInterfaces()
 {
 sleep $pendingDuration
 for ((nodeToSpoof=1;nodeToSpoof <= numberOfNodes; nodeToSpoof++))
 	do
-		if [ $nodeToSpoof != attackingNode ]
+		if [ $nodeToSpoof != $attackingNode ]
 			then
 				ifconfig "eth0:$nodeToSpoof" down
-				echo ifconfig "eth0:$nodeToSpoof" down
 		fi
 	done
 }
@@ -999,7 +978,7 @@ for ((nodeToSpoof=1;nodeToSpoof <= numberOfNodes; nodeToSpoof++))
 runOLSRAttack()
 {
 	killall nrlolsrd
-	nrlolsrd -i eth0 -hna tmp.txt &
+	nrlolsrd -i eth0 -hna $logPath/tmp.txt &
 	sleep $pendingDuration
 	stopOLSRAttack
 }
@@ -1007,7 +986,6 @@ runOLSRAttack()
 stopOLSRAttack()
 {
 	killall nrlolsrd
-	rm tmp.txt
 	bringDownInterfaces
 	nrlolsrd -i eth0 &
 }
@@ -1018,24 +996,23 @@ bringUpInterfaces()
 	for ((nodeToSpoof=1;nodeToSpoof <= numberOfNodes; nodeToSpoof++))
 	do
 		
-		if [ $nodeToSpoof != attackingNode ]
+		if [ $nodeToSpoof != $attackingNode ]
 			then
 				ipToSpoof="10.0.0.$nodeToSpoof"
 				ifconfig eth0:$nodeToSpoof $ipToSpoof netmask 255.255.255.255 up
-				echo "HNA $ipToSpoof 32" >> tmp.txt
+				echo "HNA $ipToSpoof 32" >> $logPath/tmp.txt
 		fi
 	done	
 }
 
-rm tmp.txt
-echo "none" > /tmp/attack.txt
+echo "none" > $logPath/attack.txt
 sleep $startTime
 
-if [ $pendingDuration -gt 0 ]
+if [[ $pendingDuration -gt 0 ]]
 	then
-		echo "blackHole" > /tmp/attack.txt
+		echo "blackHole" > $logPath/attack.txt
 
-		if [ `ps -ef | grep nrlolsrd | wc -l` -gt 1 ]
+		if [[ `ps -ef | grep nrlolsrd | wc -l` -gt 1 ]]
 			then
 				bringUpInterfaces
 				runOLSRAttack
@@ -1043,8 +1020,7 @@ if [ $pendingDuration -gt 0 ]
 				bringDownInterfaces
 		fi
 fi
-echo "none" > /tmp/attack.txt
-
+echo "none" > $logPath/attack.txt
 
 
 
@@ -1053,10 +1029,10 @@ EOF
 
 chmod 755 attack.sh
 
-./attack.sh 60 60  3 10 
+./attack.sh 60 60 3 10 /root/3_60_60_blackholeAttack_sh_chainCoords_scen_OLSR_chainCoords_txt 
 else
-	echo `hostname` >> /tmp/check.txt
-	mgen flush input /root/IntelAttacker/flowGenerator/flows/flow`hostname`.mgn | /root/IntelAttacker/mgenCollect.py > `hostname`.mgencapture &
+	echo `hostname` >> /root/3_60_60_blackholeAttack_sh_chainCoords_scen_OLSR_chainCoords_txt/check.txt
+	mgen flush input /root/install/sedap/IntelAttacker/flowGenerator/flows/flow`hostname`.mgn | /root/install/sedap/IntelAttacker/mgenCollect.py /root/3_60_60_blackholeAttack_sh_chainCoords_scen_OLSR_chainCoords_txt > `hostname`.mgencapture &
 fi
     }
     services {OLSR IPForward}
@@ -1091,8 +1067,8 @@ if [ `uname` = "FreeBSD" ]; then
 else SCRIPTDIR=/root/
 fi
 cd $SCRIPTDIR
-mkdir 3_60_60_blackholeAttack_sh_3_10_chainCoords_scen_OLSR_chainCoords_txt
-cd 3_60_60_blackholeAttack_sh_3_10_chainCoords_scen_OLSR_chainCoords_txt
+mkdir 3_60_60_blackholeAttack_sh_chainCoords_scen_OLSR_chainCoords_txt
+cd 3_60_60_blackholeAttack_sh_chainCoords_scen_OLSR_chainCoords_txt
     
 #get ip of current
 hostnameLen=`expr length $HN`
@@ -1104,9 +1080,9 @@ if [ `hostname` = n3 -o 3 = 0 ]
 then
 
 #start logging
-tshark -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | /root/IntelAttacker/netCollect.py $myIP > $HN.capture &    
+tshark -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | /root/install/sedap/IntelAttacker/netCollect.py /root/3_60_60_blackholeAttack_sh_chainCoords_scen_OLSR_chainCoords_txt $myIP > $HN.capture &    
 
-mgen flush input /root/IntelAttacker/flowGenerator/flows/flow`hostname`.mgn output /dev/null &
+mgen flush input /root/install/sedap/IntelAttacker/flowGenerator/flows/flow`hostname`.mgn output /dev/null &
 
 (
 cat << 'EOF'
@@ -1115,16 +1091,16 @@ startTime=$1
 pendingDuration=$2
 attackingNode=$3
 numberOfNodes=$4
+logPath=$5
 
 bringDownInterfaces()
 {
 sleep $pendingDuration
 for ((nodeToSpoof=1;nodeToSpoof <= numberOfNodes; nodeToSpoof++))
 	do
-		if [ $nodeToSpoof != attackingNode ]
+		if [ $nodeToSpoof != $attackingNode ]
 			then
 				ifconfig "eth0:$nodeToSpoof" down
-				echo ifconfig "eth0:$nodeToSpoof" down
 		fi
 	done
 }
@@ -1132,7 +1108,7 @@ for ((nodeToSpoof=1;nodeToSpoof <= numberOfNodes; nodeToSpoof++))
 runOLSRAttack()
 {
 	killall nrlolsrd
-	nrlolsrd -i eth0 -hna tmp.txt &
+	nrlolsrd -i eth0 -hna $logPath/tmp.txt &
 	sleep $pendingDuration
 	stopOLSRAttack
 }
@@ -1140,7 +1116,6 @@ runOLSRAttack()
 stopOLSRAttack()
 {
 	killall nrlolsrd
-	rm tmp.txt
 	bringDownInterfaces
 	nrlolsrd -i eth0 &
 }
@@ -1151,24 +1126,23 @@ bringUpInterfaces()
 	for ((nodeToSpoof=1;nodeToSpoof <= numberOfNodes; nodeToSpoof++))
 	do
 		
-		if [ $nodeToSpoof != attackingNode ]
+		if [ $nodeToSpoof != $attackingNode ]
 			then
 				ipToSpoof="10.0.0.$nodeToSpoof"
 				ifconfig eth0:$nodeToSpoof $ipToSpoof netmask 255.255.255.255 up
-				echo "HNA $ipToSpoof 32" >> tmp.txt
+				echo "HNA $ipToSpoof 32" >> $logPath/tmp.txt
 		fi
 	done	
 }
 
-rm tmp.txt
-echo "none" > /tmp/attack.txt
+echo "none" > $logPath/attack.txt
 sleep $startTime
 
-if [ $pendingDuration -gt 0 ]
+if [[ $pendingDuration -gt 0 ]]
 	then
-		echo "blackHole" > /tmp/attack.txt
+		echo "blackHole" > $logPath/attack.txt
 
-		if [ `ps -ef | grep nrlolsrd | wc -l` -gt 1 ]
+		if [[ `ps -ef | grep nrlolsrd | wc -l` -gt 1 ]]
 			then
 				bringUpInterfaces
 				runOLSRAttack
@@ -1176,8 +1150,7 @@ if [ $pendingDuration -gt 0 ]
 				bringDownInterfaces
 		fi
 fi
-echo "none" > /tmp/attack.txt
-
+echo "none" > $logPath/attack.txt
 
 
 
@@ -1186,10 +1159,10 @@ EOF
 
 chmod 755 attack.sh
 
-./attack.sh 60 60  3 10 
+./attack.sh 60 60 3 10 /root/3_60_60_blackholeAttack_sh_chainCoords_scen_OLSR_chainCoords_txt 
 else
-	echo `hostname` >> /tmp/check.txt
-	mgen flush input /root/IntelAttacker/flowGenerator/flows/flow`hostname`.mgn | /root/IntelAttacker/mgenCollect.py > `hostname`.mgencapture &
+	echo `hostname` >> /root/3_60_60_blackholeAttack_sh_chainCoords_scen_OLSR_chainCoords_txt/check.txt
+	mgen flush input /root/install/sedap/IntelAttacker/flowGenerator/flows/flow`hostname`.mgn | /root/install/sedap/IntelAttacker/mgenCollect.py /root/3_60_60_blackholeAttack_sh_chainCoords_scen_OLSR_chainCoords_txt > `hostname`.mgencapture &
 fi
     }
     services {OLSR IPForward}
@@ -1224,8 +1197,8 @@ if [ `uname` = "FreeBSD" ]; then
 else SCRIPTDIR=/root/
 fi
 cd $SCRIPTDIR
-mkdir 3_60_60_blackholeAttack_sh_3_10_chainCoords_scen_OLSR_chainCoords_txt
-cd 3_60_60_blackholeAttack_sh_3_10_chainCoords_scen_OLSR_chainCoords_txt
+mkdir 3_60_60_blackholeAttack_sh_chainCoords_scen_OLSR_chainCoords_txt
+cd 3_60_60_blackholeAttack_sh_chainCoords_scen_OLSR_chainCoords_txt
     
 #get ip of current
 hostnameLen=`expr length $HN`
@@ -1237,9 +1210,9 @@ if [ `hostname` = n3 -o 3 = 0 ]
 then
 
 #start logging
-tshark -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | /root/IntelAttacker/netCollect.py $myIP > $HN.capture &    
+tshark -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | /root/install/sedap/IntelAttacker/netCollect.py /root/3_60_60_blackholeAttack_sh_chainCoords_scen_OLSR_chainCoords_txt $myIP > $HN.capture &    
 
-mgen flush input /root/IntelAttacker/flowGenerator/flows/flow`hostname`.mgn output /dev/null &
+mgen flush input /root/install/sedap/IntelAttacker/flowGenerator/flows/flow`hostname`.mgn output /dev/null &
 
 (
 cat << 'EOF'
@@ -1248,16 +1221,16 @@ startTime=$1
 pendingDuration=$2
 attackingNode=$3
 numberOfNodes=$4
+logPath=$5
 
 bringDownInterfaces()
 {
 sleep $pendingDuration
 for ((nodeToSpoof=1;nodeToSpoof <= numberOfNodes; nodeToSpoof++))
 	do
-		if [ $nodeToSpoof != attackingNode ]
+		if [ $nodeToSpoof != $attackingNode ]
 			then
 				ifconfig "eth0:$nodeToSpoof" down
-				echo ifconfig "eth0:$nodeToSpoof" down
 		fi
 	done
 }
@@ -1265,7 +1238,7 @@ for ((nodeToSpoof=1;nodeToSpoof <= numberOfNodes; nodeToSpoof++))
 runOLSRAttack()
 {
 	killall nrlolsrd
-	nrlolsrd -i eth0 -hna tmp.txt &
+	nrlolsrd -i eth0 -hna $logPath/tmp.txt &
 	sleep $pendingDuration
 	stopOLSRAttack
 }
@@ -1273,7 +1246,6 @@ runOLSRAttack()
 stopOLSRAttack()
 {
 	killall nrlolsrd
-	rm tmp.txt
 	bringDownInterfaces
 	nrlolsrd -i eth0 &
 }
@@ -1284,24 +1256,23 @@ bringUpInterfaces()
 	for ((nodeToSpoof=1;nodeToSpoof <= numberOfNodes; nodeToSpoof++))
 	do
 		
-		if [ $nodeToSpoof != attackingNode ]
+		if [ $nodeToSpoof != $attackingNode ]
 			then
 				ipToSpoof="10.0.0.$nodeToSpoof"
 				ifconfig eth0:$nodeToSpoof $ipToSpoof netmask 255.255.255.255 up
-				echo "HNA $ipToSpoof 32" >> tmp.txt
+				echo "HNA $ipToSpoof 32" >> $logPath/tmp.txt
 		fi
 	done	
 }
 
-rm tmp.txt
-echo "none" > /tmp/attack.txt
+echo "none" > $logPath/attack.txt
 sleep $startTime
 
-if [ $pendingDuration -gt 0 ]
+if [[ $pendingDuration -gt 0 ]]
 	then
-		echo "blackHole" > /tmp/attack.txt
+		echo "blackHole" > $logPath/attack.txt
 
-		if [ `ps -ef | grep nrlolsrd | wc -l` -gt 1 ]
+		if [[ `ps -ef | grep nrlolsrd | wc -l` -gt 1 ]]
 			then
 				bringUpInterfaces
 				runOLSRAttack
@@ -1309,8 +1280,7 @@ if [ $pendingDuration -gt 0 ]
 				bringDownInterfaces
 		fi
 fi
-echo "none" > /tmp/attack.txt
-
+echo "none" > $logPath/attack.txt
 
 
 
@@ -1319,10 +1289,10 @@ EOF
 
 chmod 755 attack.sh
 
-./attack.sh 60 60  3 10 
+./attack.sh 60 60 3 10 /root/3_60_60_blackholeAttack_sh_chainCoords_scen_OLSR_chainCoords_txt 
 else
-	echo `hostname` >> /tmp/check.txt
-	mgen flush input /root/IntelAttacker/flowGenerator/flows/flow`hostname`.mgn | /root/IntelAttacker/mgenCollect.py > `hostname`.mgencapture &
+	echo `hostname` >> /root/3_60_60_blackholeAttack_sh_chainCoords_scen_OLSR_chainCoords_txt/check.txt
+	mgen flush input /root/install/sedap/IntelAttacker/flowGenerator/flows/flow`hostname`.mgn | /root/install/sedap/IntelAttacker/mgenCollect.py /root/3_60_60_blackholeAttack_sh_chainCoords_scen_OLSR_chainCoords_txt > `hostname`.mgencapture &
 fi
     }
     services {OLSR IPForward}
@@ -1339,7 +1309,7 @@ node n11 {
 	 ipv6 address a:1::0/64
 	!
 	scriptfile
-	/root/IntelAttacker/staticScenarios/chainCoords.scen
+	/root/install/sedap/IntelAttacker/staticScenarios/chainCoords.scen
 	!
 	mobmodel
 	coreapi
@@ -1375,7 +1345,7 @@ node n11 {
 	custom-config-id ns2script
 	custom-command {10 3 11 10 10 10 10 10}
 	config {
-	file=/root/IntelAttacker/staticScenarios/chainCoords.scen
+	file=/root/install/sedap/IntelAttacker/staticScenarios/chainCoords.scen
 	refresh_ms=50
 	loop=0
 	autostart=1.0
