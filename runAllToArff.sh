@@ -1,9 +1,20 @@
 #!/bin/bash
 
-currentDir=`pwd`
-cd /root/
+# This script is responsible for generating res.arff files within a 
+# scenario folder and a all.arff file within its parent folder. 
+# Note: Generated res.arffs are currently used for scenario integrity 
+# validation within the cleaScenarios.sh script.
 
-rm all.arff
+arffDir=$1
+scriptDir=`pwd`
+
+cd $arffDir
+
+
+if [ -f all.arff ]; then
+    rm all.arff
+fi
+
 #write header here
 #instance += str(flow[0])+","+str(fromHop)+","+str(toHop)+","+str(type)+","+str(dist)+","+str(passThrough)+","+str(beforeDelay)+","+str(beforeMissed)+","+str(beforeOOO)+","+str(beforeNumPackets)+","+str(duringDelay)+","+str(duringMissed)+","+str(duringOOO)+","+str(duringNumPackets)+","+str(afterDelay)+","+str(afterMissed)+","+str(afterOOO)+","+str(afterNumPackets)+","+destIsSpoofed+","+str(attackName)
 echo "@relation manet" > all.arff
@@ -46,6 +57,7 @@ echo "@attribute isSrcBetweenSpoofedAndDstgw {true, false}" >> all.arff
 echo "@attribute altPathWithoutAttacker {true, false}" >> all.arff
 echo "@data" >> "all.arff"
 
+#traverse through each directory within the current directory
 for dir in `ls -d */`; do
 	
 	if [[ $dir == *"_sh"* ]]
@@ -54,7 +66,6 @@ for dir in `ls -d */`; do
 		echo "inside $dir"
 		attackNum=`echo $dir | cut -d'_' -f1` #will change to f2 if ID parameter is insterted
 		#echo "first char is " $attackNum 
-		#rm res.arff
 		#file=n"$attackNum".capture
 		#echo "FILE",$file
 		#write header here
@@ -98,9 +109,9 @@ for dir in `ls -d */`; do
 		echo "@attribute isSrcBetweenSpoofedAndDstgw {true, false}" >> res.arff
 		echo "@attribute altPathWithoutAttacker {true, false}" >> res.arff
 		echo "@data" >> res.arff
-		$currentDir/netStateBuilder.py 30 30 $attackNum >> res.arff
+		$scriptDir/netStateBuilder.py 30 30 $attackNum >> res.arff
 		#echo "$dir" >> ../all.arff
-		$currentDir/netStateBuilder.py 30 30 $attackNum >> ../all.arff
+		$scriptDir/netStateBuilder.py 30 30 $attackNum >> ../all.arff
 		cd ../
 		fi
 done

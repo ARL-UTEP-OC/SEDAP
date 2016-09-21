@@ -10,7 +10,7 @@ cd $scriptDir
 ./generateScenarios.sh
 
 imnTextFile=$scriptDir"/imnSets.txt"
-maxProcs=2
+maxProcs=1
 #---------- End: Hard-coded section to be removed later -----------#
 
 #count number of current scenarios created to amount needed
