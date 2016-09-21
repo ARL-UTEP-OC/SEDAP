@@ -18,18 +18,18 @@ portStart = 12000
 # outFlowPattern speifies which nodes to send to relative to the current node: Example [-1, +1, +2] means send to previous, next and next next
 # Note: node 1's previous node is node N, where N = number of nodes
 #outFlowPattern = [-1, 1, 2, 3,4,5,6,7,8]
-outFlowPattern = [-1, 1, 2]
+outFlowPattern = [-3, -2, -1, 1, 2, 3, -3, -2, -1, 1, 2, 3]
 
 
 # portPattern specifies which port to use next relative to the starting port
 # Note: portPattern list must be of the same size as the outFlowPattern
 # Example: outFlowPattern = [-1, +1, +2] & portPattern = [0, +1, +2] ==> use port portStart to send to previous node (-1), use port (portstart + 1) to send to next node (+1), and use port (portStart + 2) to send to next next node (+2)
 #portPattern = [0, 1, 2, 3,4,5,6,7,8]
-portPattern = [0, 1, 2]
+portPattern = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
 
 #add a protocolPattern, where 0 is udp and 1 is tcp
 #protocolPattern = ["UDP","UDP","UDP","UDP","UDP","UDP","UDP","UDP","UDP"]
-protocolPattern = ["TCP","TCP","UDP"]
+protocolPattern = ["TCP","TCP","TCP","TCP","TCP","TCP","TCP","TCP","TCP","TCP","TCP","TCP"]
 
 # outFlowHash and inFlowHash are hash tables to store all send and listen communications specifying nodes and ports involved
 outFlowHash = {}
