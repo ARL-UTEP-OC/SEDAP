@@ -81,9 +81,14 @@ for hashkey in range(0,numNodes):
     f.write("\n")
     if hashkey in outFlowHash:
         sendingTo = outFlowHash[hashkey]
-        for pairIndex in range(len(sendingTo)):
-            f.write("30.0 ON " + str(index) + " " + str(sendingTo[pairIndex][2]) + " DST 10.0.0." + str(sendingTo[pairIndex][0]) + "/" + str(sendingTo[pairIndex][1]) + " PERIODIC [50.0 1280]\n")
-            index += 1
+		for pairIndex in range(len(sendingTo)):
+			if "wired" in wireType:
+				destination = " DST " + str(10 + sendingTo[pairIndex][0]) + ".0.0.2"
+			else:
+				destination = " DST 10.0.0." + str(sendingTo[pairIndex][0])
+			
+			f.write("30.0 ON " + str(index) + " " + str(sendingTo[pairIndex][2]) + destination + "/" + str(sendingTo[pairIndex][1]) + " PERIODIC [50.0 1280]\n")
+			index += 1
     
     f.close()
 

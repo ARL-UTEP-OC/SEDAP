@@ -1,11 +1,14 @@
 #!/bin/bash
 
 # This script is responsible for generating res.arff files within a 
-# scenario folder and a all.arff file within its parent folder. 
+# scenario folder and an all.arff file within its parent folder. 
+# Is also used to validate contents of wireless attacks and wired 
+# attacks (successfulAttack.py)
 # Note: Generated res.arffs are currently used for scenario integrity 
 # validation within the cleaScenarios.sh script.
 
 arffDir=$1
+wireType=$2
 scriptDir=`pwd`
 
 cd $arffDir
@@ -58,6 +61,7 @@ echo "@attribute altPathWithoutAttacker {true, false}" >> all.arff
 echo "@data" >> "all.arff"
 
 #traverse through each directory within the current directory
+echo `pwd`
 for dir in `ls -d */`; do
 	
 	if [[ $dir == *"_sh"* ]]
@@ -65,53 +69,56 @@ for dir in `ls -d */`; do
 		cd $dir
 		echo "inside $dir"
 		attackNum=`echo $dir | cut -d'_' -f1` #will change to f2 if ID parameter is insterted
-		#echo "first char is " $attackNum 
-		#file=n"$attackNum".capture
-		#echo "FILE",$file
-		#write header here
 		
-		echo "@relation manet" > res.arff
-		echo "@attribute path string" >> res.arff
-		echo "@attribute attackNodeNum {1,2,3,4,5,6,7,8,9,10}" >> res.arff
-		echo "@attribute description string" >> res.arff
-		echo "@attribute fromHop {1,2,3,4,5,6,7,8,9,10}" >> res.arff
-		echo "@attribute toHop {1,2,3,4,5,6,7,8,9,10}" >> res.arff
-		echo "@attribute type {TCP,UDP}" >> res.arff
-		echo "@attribute distance {1,2,3,4,5,6,7,8,9,10}" >> res.arff
-		echo "@attribute passthrough {true, false}" >> res.arff
-		echo "@attribute beforeDelay numeric" >> res.arff
-		echo "@attribute beforeMissed numeric" >> res.arff
-		echo "@attribute beforeOOO numeric" >> res.arff
-		echo "@attribute beforeNumPackets numeric" >> res.arff
-		echo "@attribute duringDelay numeric" >> res.arff
-		echo "@attribute duringMissed numeric" >> res.arff
-		echo "@attribute duringOOO numeric" >> res.arff
-		echo "@attribute duringNumPackets numeric" >> res.arff
-		echo "@attribute afterDelay numeric" >> res.arff
-		echo "@attribute afterMissed numeric" >> res.arff
-		echo "@attribute afterOOO numeric" >> res.arff
-		echo "@attribute afterNumPackets numeric" >> res.arff
-		echo "@attribute srcSpoofed {true, false}" >> res.arff
-		echo "@attribute destSpoofed {true, false}" >> res.arff
-		echo "@attribute hopsToSpoofed {0,1,2,3,4,5,6,7,8,9,10}" >> res.arff
-		echo "@attribute duringLinkLost {true, false}" >> res.arff
-		echo "@attribute afterLinkLost {true, false}" >> res.arff
-		echo "@attribute attackName string" >> res.arff
-		echo "@attribute hopsFromSpoofedToDest numeric" >> res.arff
-		echo "@attribute attackerCloserToDestThanSpoofed {true, false}" >> res.arff
-		echo "@attribute spoofedBetweenAttacker {true, false}" >> res.arff
-		echo "@attribute isDstBetweenSpoofedAndAttacker {true, false}" >> res.arff
-		echo "@attribute spoofedBetweenAttackergw {true, false}" >> res.arff
-		echo "@attribute isDstBetweenSpoofedAndAttackergw {true, false}" >> res.arff
-		echo "@attribute isAttackerBetweenSpoofedAndDst {true, false}" >> res.arff
-		echo "@attribute isAttackerBetweenSpoofedAndDstgw {true, false}" >> res.arff
-		echo "@attribute isSrcBetweenSpoofedAndDst {true, false}" >> res.arff
-		echo "@attribute isSrcBetweenSpoofedAndDstgw {true, false}" >> res.arff
-		echo "@attribute altPathWithoutAttacker {true, false}" >> res.arff
-		echo "@data" >> res.arff
-		$scriptDir/netStateBuilder.py 30 30 $attackNum >> res.arff
-		#echo "$dir" >> ../all.arff
-		$scriptDir/netStateBuilder.py 30 30 $attackNum >> ../all.arff
-		cd ../
+		if [[ $wireType == *"wired"* ]]
+		then
+			fullDir=`pwd`
+			$scriptDir/successfulAttack.py $fullDir
+		else
+			echo "@relation manet" > res.arff
+			echo "@attribute path string" >> res.arff
+			echo "@attribute attackNodeNum {1,2,3,4,5,6,7,8,9,10}" >> res.arff
+			echo "@attribute description string" >> res.arff
+			echo "@attribute fromHop {1,2,3,4,5,6,7,8,9,10}" >> res.arff
+			echo "@attribute toHop {1,2,3,4,5,6,7,8,9,10}" >> res.arff
+			echo "@attribute type {TCP,UDP}" >> res.arff
+			echo "@attribute distance {1,2,3,4,5,6,7,8,9,10}" >> res.arff
+			echo "@attribute passthrough {true, false}" >> res.arff
+			echo "@attribute beforeDelay numeric" >> res.arff
+			echo "@attribute beforeMissed numeric" >> res.arff
+			echo "@attribute beforeOOO numeric" >> res.arff
+			echo "@attribute beforeNumPackets numeric" >> res.arff
+			echo "@attribute duringDelay numeric" >> res.arff
+			echo "@attribute duringMissed numeric" >> res.arff
+			echo "@attribute duringOOO numeric" >> res.arff
+			echo "@attribute duringNumPackets numeric" >> res.arff
+			echo "@attribute afterDelay numeric" >> res.arff
+			echo "@attribute afterMissed numeric" >> res.arff
+			echo "@attribute afterOOO numeric" >> res.arff
+			echo "@attribute afterNumPackets numeric" >> res.arff
+			echo "@attribute srcSpoofed {true, false}" >> res.arff
+			echo "@attribute destSpoofed {true, false}" >> res.arff
+			echo "@attribute hopsToSpoofed {0,1,2,3,4,5,6,7,8,9,10}" >> res.arff
+			echo "@attribute duringLinkLost {true, false}" >> res.arff
+			echo "@attribute afterLinkLost {true, false}" >> res.arff
+			echo "@attribute attackName string" >> res.arff
+			echo "@attribute hopsFromSpoofedToDest numeric" >> res.arff
+			echo "@attribute attackerCloserToDestThanSpoofed {true, false}" >> res.arff
+			echo "@attribute spoofedBetweenAttacker {true, false}" >> res.arff
+			echo "@attribute isDstBetweenSpoofedAndAttacker {true, false}" >> res.arff
+			echo "@attribute spoofedBetweenAttackergw {true, false}" >> res.arff
+			echo "@attribute isDstBetweenSpoofedAndAttackergw {true, false}" >> res.arff
+			echo "@attribute isAttackerBetweenSpoofedAndDst {true, false}" >> res.arff
+			echo "@attribute isAttackerBetweenSpoofedAndDstgw {true, false}" >> res.arff
+			echo "@attribute isSrcBetweenSpoofedAndDst {true, false}" >> res.arff
+			echo "@attribute isSrcBetweenSpoofedAndDstgw {true, false}" >> res.arff
+			echo "@attribute altPathWithoutAttacker {true, false}" >> res.arff
+			echo "@data" >> res.arff
+	
+			$scriptDir/netStateBuilder.py 30 30 $attackNum $wireType >> res.arff
+			#echo "$dir" >> ../all.arff
+			$scriptDir/netStateBuilder.py 30 30 $attackNum $wireType >> ../all.arff
 		fi
+		cd ../
+	fi
 done

@@ -12,10 +12,10 @@ import os
 
 
 numNodes = int(sys.argv[1])
-
+wireType = sys.argv[2]
 portStart = 12000
 
-# outFlowPattern speifies which nodes to send to relative to the current node: Example [-1, +1, +2] means send to previous, next and next next
+# outFlowPattern specifies which nodes to send to relative to the current node: Example [-1, +1, +2] means send to previous, next and next next
 # Note: node 1's previous node is node N, where N = number of nodes
 #outFlowPattern = [-1, 1, 2, 3,4,5,6,7,8]
 outFlowPattern = [-1, 1, 2]
@@ -29,7 +29,7 @@ portPattern = [0, 1, 2]
 
 #add a protocolPattern, where 0 is udp and 1 is tcp
 #protocolPattern = ["UDP","UDP","UDP","UDP","UDP","UDP","UDP","UDP","UDP"]
-protocolPattern = ["TCP","TCP","UDP"]
+protocolPattern = ["UDP","UDP","UDP","UDP","UDP","UDP","UDP","UDP","UDP","UDP","UDP","UDP"]
 
 # outFlowHash and inFlowHash are hash tables to store all send and listen communications specifying nodes and ports involved
 outFlowHash = {}
@@ -65,20 +65,27 @@ except:
     pass
 index = 1
 for hashkey in outFlowHash:
-    f = open("flows/flown" + str(hashkey) + ".mgn", 'w')
-    f.write("#flow " + str(hashkey) + "\n")
-    sendingTo = outFlowHash[hashkey]
-    listeningTo = inFlowHash[hashkey]
-    # assumes a pair (node number, port number)
-    for pairIndex in range(len(listeningTo)):
-	#THis is the problem, on the incoming connections, unless the population method is changed, the TCP is not always the first!
-        f.write("0.0 LISTEN " + str(listeningTo[pairIndex][2]) + " " + str(listeningTo[pairIndex][1]) + " # Node " + str(listeningTo[pairIndex][0]) + "\n")
-    f.write("\n")
-    for pairIndex in range(len(sendingTo)):
-        f.write("30.0 ON " + str(index) + " " + str(sendingTo[pairIndex][2]) + " DST 10.0.0." + str(sendingTo[pairIndex][0]) + "/" + str(sendingTo[pairIndex][1]) + " PERIODIC [50.0 1280]\n")
-        index += 1
+	f = open("flows/flown" + str(hashkey) + ".mgn", 'w')
+	f.write("#flow " + str(hashkey) + "\n")
+	sendingTo = outFlowHash[hashkey]
+	listeningTo = inFlowHash[hashkey]
     
-    f.close()
+	# assumes a pair (node number, port number)
+	for pairIndex in range(len(listeningTo)):
+	#This is the problem, on the incoming connections, unless the population method is changed, the TCP is not always the first!
+		f.write("0.0 LISTEN " + str(listeningTo[pairIndex][2]) + " " + str(listeningTo[pairIndex][1]) + " # Node " + str(listeningTo[pairIndex][0]) + "\n")
+	f.write("\n")
+    
+	for pairIndex in range(len(sendingTo)):
+		if "wired" in wireType:
+			destination = " DST " + str(10 + sendingTo[pairIndex][0]) + ".0.0.2"
+		else:
+			destination = " DST 10.0.0." + str(sendingTo[pairIndex][0])
+			
+		f.write("30.0 ON " + str(index) + " " + str(sendingTo[pairIndex][2]) + destination + "/" + str(sendingTo[pairIndex][1]) + " PERIODIC [50.0 1280]\n")
+		index += 1
+    
+	f.close()
 
 #print hashes
 print "OUTFLOW HASH"

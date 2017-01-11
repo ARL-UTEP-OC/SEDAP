@@ -1,16 +1,27 @@
 #!/usr/bin/python
 
+# Generates .imn files based on parameters passed in.
+# Currently capable of generating wired and wireless .imns
+
 import sys
+import os
 import commands
 
-#get command line args:
 startTime = sys.argv[1]
 duration = sys.argv[2]
 numNodes = int(sys.argv[3])
 attackNodeNumber = sys.argv[4]
 attackScriptPath = sys.argv[5]
+scenario = sys.argv[6]
+routingProtocol= sys.argv[7]
+wireTypeDir = sys.argv[8]
+
+workingDirectory = os.getcwd()
+rootDirectory = "/root/" + wireTypeDir + "/"
 spoofNode = ""
+wired="wired" in wireTypeDir
 attackScriptInputs = []
+
 #the script path contains inputs for the string separated by '.'
 attackScriptPathInputsSplit = attackScriptPath.split("spoofingAttack.sh")
 if len(attackScriptPathInputsSplit) > 1:
@@ -18,197 +29,179 @@ if len(attackScriptPathInputsSplit) > 1:
     attackScriptInputs.append(attackScriptPathInputsSplit[1])
     spoofNode = attackScriptPathInputsSplit[1]
 
-if attackScriptPath == "blackholeAttack.sh":
+elif attackScriptPath == "blackholeAttack.sh":
     attackScriptInputs.append(attackNodeNumber)
-    attackScriptInputs.append(str(numNodes))       
+    attackScriptInputs.append(str(numNodes))
 
-mobility = sys.argv[6]
-routingProtocol= sys.argv[7]
-coordFile = sys.argv[8]
+maxNodes = int(numNodes)
+if wired:
+	maxNodes = int(numNodes) * 2
 
-
-def insertAttack():
-	global myStr 
-	global duration
-	global attackScriptPath
-	global attackScriptInputs
-	global spoofNode
-	myStr+="""
-    custom-post-config-commands {
+def insertBasicConfigs():
+	global myStr
+	
+	myStr += """
+	custom-config-id service:UserDefined:custom-post-config-commands.sh
+	custom-command custom-post-config-commands.sh
+	config {"""
+	
+	if not wired:
+		myStr += """
 route add default dev eth0
-route add -net 224.0.0.0 netmask 224.0.0.0 dev eth0
-    """
+route add -net 224.0.0.0 netmask 224.0.0.0 dev eth0"""
+
 	myStr += """
 #!/bin/sh
 HN=`hostname`
 if [ `uname` = "FreeBSD" ]; then
   SCRIPTDIR=/tmp/e0_$HN
-else SCRIPTDIR=/root/
+else SCRIPTDIR=""" + rootDirectory + """
 fi
 cd $SCRIPTDIR
 """
+
+def insertMgen():
+	global myStr
+	
 	logPath = attackNodeNumber+"_"+startTime+"_"+duration+"_"+attackScriptPath+spoofNode
-	logPath+="_"+mobility+"_"+routingProtocol+"_"+coordFile
+	logPath+="_"+scenario+"_"+routingProtocol+"_"+wireTypeDir
 	logPath = logPath.replace(".","_")
 	logPath = logPath.replace("/","_")
-	myStr += "mkdir " + logPath + """
+	logPath += "*"
+	
+	myStr += """
+mkdir """ + logPath + """
 cd """ + logPath +"""
-    
+
 #get ip of current
 hostnameLen=`expr length $HN`
-hostnameLen=`expr $hostnameLen - 1`
-myIP="10.0.0.`expr substr $HN 2 $hostnameLen`"
+hostnameLen=`expr $hostnameLen - 1` """
+	if wired:
+		myStr += """
+myIP="`expr substr $HN 2 $hostnameLen`.0.0.1" 
+"""
 
-#now insert attack script
-if [ `hostname` = n"""+attackNodeNumber+""" -o """ + attackNodeNumber + """ = 0 ]
+		if "OSPF" in routingProtocol and nodeCount == int(attackNodeNumber):
+			myStr += """
+#stop quagga
+#killall vtysh
+#killall ospfd
+#killall zebra
+"""
+
+	else:
+		myStr += """
+myIP="10.0.0.`expr substr $HN 2 $hostnameLen`" 
+"""
+
+	myStr += """
+#now insert attack script and mgen flush if node is attacker
+if [ `hostname` = n""" + attackNodeNumber + """ -o """ + attackNodeNumber + """ = 0 ]
 then
 
 #start logging
-tshark -a duration:175 -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | /root/install/sedap/IntelAttacker/netCollect.py /root/""" + logPath + """ $myIP > $HN.capture &    
+tshark -a duration:175 -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | """ + workingDirectory + """/netCollect.py """ + rootDirectory + logPath + """ $myIP > $HN.capture &    
 
-mgen flush input /root/install/sedap/IntelAttacker/flowGenerator/flows/flow`hostname`.mgn output /dev/null &
+mgen flush input """ + workingDirectory + """/flowGenerator/flows/flow`hostname`.mgn output /dev/null &
 
 (
 cat << 'EOF'
 """
-	myStr += commands.getoutput("cat " +str(attackScriptPath)) + """
+	myStr += commands.getoutput("cat " +str("wireTypeAttacks/" + wireTypeDir + "Attacks/" + attackScriptPath)) + """
 EOF
 ) > attack.sh
 
 chmod 755 attack.sh
 
-./attack.sh """ + startTime +" " + duration
+./attack.sh """ + startTime + " " + duration
 	for attackScriptInput in attackScriptInputs:
 		myStr+=" "+attackScriptInput
-	myStr+=" /root/" + logPath + " " 
-	serviceString = routingProtocol
+	myStr+=" " + rootDirectory + logPath + """ 
 
-	myStr+="""
 else
-	echo `hostname` >> /root/""" + logPath +"""/check.txt
-	mgen flush input /root/install/sedap/IntelAttacker/flowGenerator/flows/flow`hostname`.mgn | /root/install/sedap/IntelAttacker/mgenCollect.py /root/""" + logPath + """ > `hostname`.mgencapture &
+	echo `hostname` >> """ + rootDirectory + logPath +"""/check.txt
+	mgen flush input """ + workingDirectory + """/flowGenerator/flows/flow`hostname`.mgn | """ + workingDirectory + """/mgenCollect.py """ + rootDirectory + logPath + """ > `hostname`.mgencapture &
 fi
-    }"""
-	if "OSPF" in routingProtocol or "RIP" in routingProtocol:
-		serviceString += " zebra vtysh "
+"""
+
+def insertRoutingProtocol(router):
+	global myStr
+	
+	if router is True:
+		
+		serviceString = routingProtocol
+		
+		if "OLSR" in routingProtocol:
+			serviceString += "_Mod IPForward"
+			
+		else:
+			serviceString += " zebra vtysh IPForward"
+	else:
+		serviceString = "DefaultRoute SSH"
+	
 	myStr+="""
-    services {"""+str(serviceString) + """ IPForward}
-    """
+	services {"""+str(serviceString) + """ UserDefined}
+"""
 
-#Read file and get 1 line at a time here
-coordLines = open("/root/install/sedap/IntelAttacker/staticScenarios/"+coordFile)
 myStr = ""
-for i in range(1,numNodes+1):
-    myStr += """
-node n"""+str(i)+""" {
-    type router
-    """
-    if "RIP" or "OLSR" in routingProtocol:
-        myStr += "model router"
-    else: myStr += "model mdr"
-    myStr += """
-    network-config {
-	hostname n"""+str(i)+"""
-	!
-	interface eth0
-	 ip address 10.0.0."""+str(i)+"""/32
-	 ipv6 address a:0::"""+str(i)+"""/128
-	!
-    }
-    iconcoords {"""+coordLines.readline()+"""}
-    labelcoords {196.387421 486.134022}
-    canvas c1
-    interface-peer {eth0 n"""+str(numNodes+1)+"""}
-"""
-    insertAttack()
-    myStr +="""
-}
-"""
-#############
-myStr += """
-node n"""+str(numNodes+1)+""" {
-    type wlan
-    network-config {
-	hostname wlan"""+str(numNodes+1)+"""
-	!
-	interface wireless
-	 ip address 10.0.1.0/24
-	 ipv6 address a:1::0/64
-	!
-	scriptfile
-	/root/install/sedap/IntelAttacker/staticScenarios/"""+mobility+"""
-	!
-	mobmodel
-	coreapi
-	basic_range
-	ns2script
-	!
-    }
-    iconcoords {0 0}
-    labelcoords {0 0}
-    canvas c1"""
-for i in range(0,numNodes):
-    myStr += """
-    interface-peer {e"""+str(i)+""" n"""+str(i+1)+"""}"""
-myStr +="""
-	custom-config {
-	custom-config-id basic_range
-	custom-command {3 3 9 9 9}
-	config {
-	range=176
-	bandwidth=54000000
-	jitter=0
-	delay=50000
-	error=0
+nodeCount = 0
+scenarioFile="staticScenarios/" + wireTypeDir + "_scenarios/" + scenario + ".imn"
+
+with open(scenarioFile) as readFile:
+
+	readyToInsert = False
+	
+	for line in readFile:
+		
+		nodeIsAttacker = nodeCount == int(attackNodeNumber)
+		inRange = nodeCount <= int(numNodes)
+		
+		if readyToInsert is True:
+			insertBasicConfigs()
+			
+			# Inserts configurations for everything but wlan11
+			if inRange:
+				insertMgen()
+				
+			myStr += """
 	}
-    }
+	}
     custom-config {
-	custom-config-id ns2script
-	custom-command {10 3 11 10 10 10 10 10}
+	custom-config-id service:UserDefined
+	custom-command UserDefined
 	config {
-	file=/root/install/sedap/IntelAttacker/staticScenarios/"""+mobility+"""
-	refresh_ms=50
-	loop=0
-	autostart=1.0
-	map=
-	script_start=
-	script_pause=
-	script_stop=
+	files=('custom-post-config-commands.sh', )
+	startidx=120
+	cmdup=('sh custom-post-config-commands.sh', )
 	}
     }
-}
-"""
+"""			# Will only insert routing protocols for routers.
+			isRouter = True
+			
+			if not wired and inRange:
+				insertRoutingProtocol(isRouter)
 
-for i in range(1,numNodes+1):
-    myStr += """
-link l"""+str(i)+""" {
-    nodes {n"""+str(numNodes+1)+""" n"""+str(i)+"""}
-    bandwidth 54000000
-    delay 50000
-}
-"""
-myStr += """
-canvas c1 {
-    name {Canvas1}
-    wallpaper-style {upperleft}
-    wallpaper {sample4-bg.jpg}
-    size {1000 750}
-}
+			elif wired:
+				if not inRange or nodeIsAttacker:
+					insertRoutingProtocol(isRouter)
+				else:
+					isRouter = False
+					insertRoutingProtocol(isRouter)
+				
+			readyToInsert = False
 
+		
+		if "model host" in line and nodeIsAttacker:
+			myStr += """
+	model router"""
+			continue
+		
+		elif "node n" in line:
+			nodeCount += 1
+			
+		elif "custom-config {" in line and nodeCount <= maxNodes:
+			readyToInsert = True
+		
+		myStr += line
 
-option global {
-    interface_names no
-    ip_addresses yes
-    ipv6_addresses yes
-    node_labels yes
-    link_labels yes
-    ipsec_configs yes
-    remote_exec no
-    exec_errors yes
-    show_api no
-    background_images no
-    annotations yes
-    grid no
-}
-"""
 print myStr
