@@ -77,7 +77,7 @@ if [ -f all.arff ]; then
     rm $writingDir/all.arff
 fi
 
-protocolDirectories=`ls $writingDir | grep -v "_sh" | grep -E 'OLSR|OSPF'`
+protocolDirectories=`ls $writingDir | grep -v "_sh" | grep -iE 'OLSR|OSPF|RIP'`
 
 for protocolDir in $protocolDirectories
 do

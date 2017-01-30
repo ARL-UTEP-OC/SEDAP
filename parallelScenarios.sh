@@ -21,15 +21,16 @@ do
 	attack=${imnParams[1]}
 	scenario=${imnParams[2]}
 	protocol=${imnParams[3]}
+	subnet=${imnParams[4]}
 
 	#name of file to be created is based on parameters passed in
-	imnName="$nodeNum"_"$startTime"_60_"$attack"_"$scenario"_"$protocol"_"$wireType"
+	imnName="$nodeNum"_"$startTime"_60_"$attack"_"$scenario"_"$protocol"_"$wireType"_"$subnet"
 	imnName=${imnName//\./_}
 
 	#check for existance of scenario to avoid unnecessary overwriting
-	if [[ ! -d /$mainDir/$imnName ]] && [[ ! -d /$mainDir/$imnName"*" ]]					
+	if [[ ! -d /$mainDir/$imnName ]] 		
 	then	
-		./imnGenerator.py $startTime 60 10 $nodeNum $attack $scenario $protocol $wireType > core/.core/configs/$imnName.imn
+		./imnGenerator.py $startTime 60 10 $nodeNum $attack $scenario $protocol $wireType $subnet > core/.core/configs/$imnName.imn
 		path=core/.core/configs/$imnName.imn
 		
 		#start core with the specified file and sleep for one second

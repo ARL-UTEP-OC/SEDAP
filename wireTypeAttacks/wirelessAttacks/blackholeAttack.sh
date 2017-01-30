@@ -4,6 +4,7 @@ pendingDuration=$2
 attackingNode=$3
 numberOfNodes=$4
 logPath=$5
+subnet=`echo $logPath | cut -d '_' -f9`
 
 bringDownInterfaces()
 {
@@ -41,7 +42,7 @@ bringUpInterfaces()
 		if [ $nodeToSpoof != $attackingNode ]
 			then
 				ipToSpoof="10.0.0.$nodeToSpoof"
-				ifconfig eth0:$nodeToSpoof $ipToSpoof netmask 255.255.255.255 up
+				ifconfig eth0:$nodeToSpoof $ipToSpoof netmask 255.255.255.$subnet up
 				echo "HNA $ipToSpoof 32" >> $logPath/tmp.txt
 		fi
 	done	

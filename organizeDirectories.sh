@@ -10,6 +10,7 @@ directoriesToTar=`ls $mainDir | grep "_sh"`
 
 protocols=`cat protocols.txt`
 attacks=`cat attacks.txt`
+subnets=`cat subnets.txt`
 
 for protocol in $protocols
 do
@@ -19,13 +20,17 @@ do
 	fi
 		
 	for attack in $attacks
-	do
-		# get rid of redundant names to avoid duplicates
-		atk=`echo $attack | sed s/".sh".*/""/`
-
-		if [ ! -d $protocol/$atk ]; then
-			mkdir $protocol/$atk
-		fi
+	do			
+		for subnet in $subnets
+		do
+			# get rid of redundant names to avoid duplicates
+			atk=`echo $attack | sed s/".sh".*/""/`
+		
+			if [ ! -d $protocol/$atk$subnet ]; then
+				echo "making directory $atk$subnet"
+				mkdir $protocol/$atk$subnet
+			fi
+		done
 	done
 done
 
@@ -34,7 +39,8 @@ for dir in $directoriesToTar; do
 
 	protocol=`echo $dir | cut -d'_' -f7`
 	attack=`echo $dir | cut -d'_' -f4`
-	
-	cp -r $dir/ $protocol/$attack/
+	subnet=`echo $dir | cut -d'_' -f9`
+
+	cp -r $dir/ $protocol/$attack$subnet
 	
 done
