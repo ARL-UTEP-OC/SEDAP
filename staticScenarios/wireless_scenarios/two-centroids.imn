@@ -14,6 +14,7 @@ node n1 {
     labelcoords {325.0 192.0}
     interface-peer {eth0 n11}
     custom-config {
+	}
 }
 
 node n2 {
@@ -32,6 +33,7 @@ node n2 {
     labelcoords {483.0 141.0}
     interface-peer {eth0 n11}
     custom-config {
+	}
 }
 
 node n3 {
@@ -50,6 +52,7 @@ node n3 {
     labelcoords {601.0 274.0}
     interface-peer {eth0 n11}
     custom-config {
+	}
 }
 
 node n4 {
@@ -68,6 +71,7 @@ node n4 {
     labelcoords {509.0 429.0}
     interface-peer {eth0 n11}
     custom-config {
+	}
 }
 
 node n5 {
@@ -86,6 +90,7 @@ node n5 {
     labelcoords {460.0 297.0}
     interface-peer {eth0 n11}
     custom-config {
+	}
 }
 
 node n6 {
@@ -104,6 +109,7 @@ node n6 {
     labelcoords {341.0 373.0}
     interface-peer {eth0 n11}
     custom-config {
+	}
 }
 
 node n7 {
@@ -122,6 +128,7 @@ node n7 {
     labelcoords {286.0 512.0}
     interface-peer {eth0 n11}
     custom-config {
+	}
 }
 
 node n8 {
@@ -140,6 +147,7 @@ node n8 {
     labelcoords {160.0 498.0}
     interface-peer {eth0 n11}
     custom-config {
+	}
 }
 
 node n9 {
@@ -158,6 +166,7 @@ node n9 {
     labelcoords {220.0 664.0}
     interface-peer {eth0 n11}
     custom-config {
+	}
 }
 
 node n10 {
@@ -176,6 +185,7 @@ node n10 {
     labelcoords {383.0 605.0}
     interface-peer {eth0 n11}
     custom-config {
+	}
 }
 
 node n11 {

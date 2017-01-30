@@ -14,7 +14,6 @@ node n1 {
     labelcoords {224.0 145.0}
     interface-peer {eth0 n11}
     custom-config {
-
 	custom-config-id service:UserDefined:custom-post-config-commands.sh
 	custom-command custom-post-config-commands.sh
 	config {
@@ -27,7 +26,6 @@ if [ `uname` = "FreeBSD" ]; then
 else SCRIPTDIR=/root/wireless/
 fi
 cd $SCRIPTDIR
-
 mkdir 1_60_60_spoofingAttack_sh8_chain_OLSR_wireless*
 cd 1_60_60_spoofingAttack_sh8_chain_OLSR_wireless*
 
@@ -108,10 +106,10 @@ fi
 	files=('custom-post-config-commands.sh', )
 	startidx=120
 	cmdup=('sh custom-post-config-commands.sh', )
-	}
     }
-
-	services {OLSR_Mod IPForward UserDefined}
+    }
+	services {OLSR_Mod IPForward UserDefined
+    }
 }
 
 node n2 {
@@ -130,7 +128,6 @@ node n2 {
     labelcoords {364.0 90.0}
     interface-peer {eth0 n11}
     custom-config {
-
 	custom-config-id service:UserDefined:custom-post-config-commands.sh
 	custom-command custom-post-config-commands.sh
 	config {
@@ -143,7 +140,6 @@ if [ `uname` = "FreeBSD" ]; then
 else SCRIPTDIR=/root/wireless/
 fi
 cd $SCRIPTDIR
-
 mkdir 1_60_60_spoofingAttack_sh8_chain_OLSR_wireless*
 cd 1_60_60_spoofingAttack_sh8_chain_OLSR_wireless*
 
@@ -224,10 +220,10 @@ fi
 	files=('custom-post-config-commands.sh', )
 	startidx=120
 	cmdup=('sh custom-post-config-commands.sh', )
-	}
     }
-
-	services {OLSR_Mod IPForward UserDefined}
+    }
+	services {OLSR_Mod IPForward UserDefined
+    }
 }
 
 node n3 {
@@ -246,7 +242,6 @@ node n3 {
     labelcoords {503.0 104.0}
     interface-peer {eth0 n11}
     custom-config {
-
 	custom-config-id service:UserDefined:custom-post-config-commands.sh
 	custom-command custom-post-config-commands.sh
 	config {
@@ -259,7 +254,6 @@ if [ `uname` = "FreeBSD" ]; then
 else SCRIPTDIR=/root/wireless/
 fi
 cd $SCRIPTDIR
-
 mkdir 1_60_60_spoofingAttack_sh8_chain_OLSR_wireless*
 cd 1_60_60_spoofingAttack_sh8_chain_OLSR_wireless*
 
@@ -340,10 +334,10 @@ fi
 	files=('custom-post-config-commands.sh', )
 	startidx=120
 	cmdup=('sh custom-post-config-commands.sh', )
-	}
     }
-
-	services {OLSR_Mod IPForward UserDefined}
+    }
+	services {OLSR_Mod IPForward UserDefined
+    }
 }
 
 node n4 {
@@ -362,7 +356,6 @@ node n4 {
     labelcoords {622.0 193.0}
     interface-peer {eth0 n11}
     custom-config {
-
 	custom-config-id service:UserDefined:custom-post-config-commands.sh
 	custom-command custom-post-config-commands.sh
 	config {
@@ -375,7 +368,6 @@ if [ `uname` = "FreeBSD" ]; then
 else SCRIPTDIR=/root/wireless/
 fi
 cd $SCRIPTDIR
-
 mkdir 1_60_60_spoofingAttack_sh8_chain_OLSR_wireless*
 cd 1_60_60_spoofingAttack_sh8_chain_OLSR_wireless*
 
@@ -456,10 +448,10 @@ fi
 	files=('custom-post-config-commands.sh', )
 	startidx=120
 	cmdup=('sh custom-post-config-commands.sh', )
-	}
     }
-
-	services {OLSR_Mod IPForward UserDefined}
+    }
+	services {OLSR_Mod IPForward UserDefined
+    }
 }
 
 node n5 {
@@ -478,7 +470,6 @@ node n5 {
     labelcoords {685.0 301.0}
     interface-peer {eth0 n11}
     custom-config {
-
 	custom-config-id service:UserDefined:custom-post-config-commands.sh
 	custom-command custom-post-config-commands.sh
 	config {
@@ -491,7 +482,6 @@ if [ `uname` = "FreeBSD" ]; then
 else SCRIPTDIR=/root/wireless/
 fi
 cd $SCRIPTDIR
-
 mkdir 1_60_60_spoofingAttack_sh8_chain_OLSR_wireless*
 cd 1_60_60_spoofingAttack_sh8_chain_OLSR_wireless*
 
@@ -572,10 +562,10 @@ fi
 	files=('custom-post-config-commands.sh', )
 	startidx=120
 	cmdup=('sh custom-post-config-commands.sh', )
-	}
     }
-
-	services {OLSR_Mod IPForward UserDefined}
+    }
+	services {OLSR_Mod IPForward UserDefined
+    }
 }
 
 node n6 {
@@ -594,7 +584,6 @@ node n6 {
     labelcoords {638.0 425.0}
     interface-peer {eth0 n11}
     custom-config {
-
 	custom-config-id service:UserDefined:custom-post-config-commands.sh
 	custom-command custom-post-config-commands.sh
 	config {
@@ -607,7 +596,6 @@ if [ `uname` = "FreeBSD" ]; then
 else SCRIPTDIR=/root/wireless/
 fi
 cd $SCRIPTDIR
-
 mkdir 1_60_60_spoofingAttack_sh8_chain_OLSR_wireless*
 cd 1_60_60_spoofingAttack_sh8_chain_OLSR_wireless*
 
@@ -688,10 +676,10 @@ fi
 	files=('custom-post-config-commands.sh', )
 	startidx=120
 	cmdup=('sh custom-post-config-commands.sh', )
-	}
     }
-
-	services {OLSR_Mod IPForward UserDefined}
+    }
+	services {OLSR_Mod IPForward UserDefined
+    }
 }
 
 node n7 {
@@ -710,7 +698,6 @@ node n7 {
     labelcoords {552.0 498.0}
     interface-peer {eth0 n11}
     custom-config {
-
 	custom-config-id service:UserDefined:custom-post-config-commands.sh
 	custom-command custom-post-config-commands.sh
 	config {
@@ -723,7 +710,6 @@ if [ `uname` = "FreeBSD" ]; then
 else SCRIPTDIR=/root/wireless/
 fi
 cd $SCRIPTDIR
-
 mkdir 1_60_60_spoofingAttack_sh8_chain_OLSR_wireless*
 cd 1_60_60_spoofingAttack_sh8_chain_OLSR_wireless*
 
@@ -804,10 +790,10 @@ fi
 	files=('custom-post-config-commands.sh', )
 	startidx=120
 	cmdup=('sh custom-post-config-commands.sh', )
-	}
     }
-
-	services {OLSR_Mod IPForward UserDefined}
+    }
+	services {OLSR_Mod IPForward UserDefined
+    }
 }
 
 node n8 {
@@ -826,7 +812,6 @@ node n8 {
     labelcoords {436.0 478.0}
     interface-peer {eth0 n11}
     custom-config {
-
 	custom-config-id service:UserDefined:custom-post-config-commands.sh
 	custom-command custom-post-config-commands.sh
 	config {
@@ -839,7 +824,6 @@ if [ `uname` = "FreeBSD" ]; then
 else SCRIPTDIR=/root/wireless/
 fi
 cd $SCRIPTDIR
-
 mkdir 1_60_60_spoofingAttack_sh8_chain_OLSR_wireless*
 cd 1_60_60_spoofingAttack_sh8_chain_OLSR_wireless*
 
@@ -920,10 +904,10 @@ fi
 	files=('custom-post-config-commands.sh', )
 	startidx=120
 	cmdup=('sh custom-post-config-commands.sh', )
-	}
     }
-
-	services {OLSR_Mod IPForward UserDefined}
+    }
+	services {OLSR_Mod IPForward UserDefined
+    }
 }
 
 node n9 {
@@ -942,7 +926,6 @@ node n9 {
     labelcoords {329.0 424.0}
     interface-peer {eth0 n11}
     custom-config {
-
 	custom-config-id service:UserDefined:custom-post-config-commands.sh
 	custom-command custom-post-config-commands.sh
 	config {
@@ -955,7 +938,6 @@ if [ `uname` = "FreeBSD" ]; then
 else SCRIPTDIR=/root/wireless/
 fi
 cd $SCRIPTDIR
-
 mkdir 1_60_60_spoofingAttack_sh8_chain_OLSR_wireless*
 cd 1_60_60_spoofingAttack_sh8_chain_OLSR_wireless*
 
@@ -1036,10 +1018,10 @@ fi
 	files=('custom-post-config-commands.sh', )
 	startidx=120
 	cmdup=('sh custom-post-config-commands.sh', )
-	}
     }
-
-	services {OLSR_Mod IPForward UserDefined}
+    }
+	services {OLSR_Mod IPForward UserDefined
+    }
 }
 
 node n10 {
@@ -1058,7 +1040,6 @@ node n10 {
     labelcoords {228.0 328.0}
     interface-peer {eth0 n11}
     custom-config {
-
 	custom-config-id service:UserDefined:custom-post-config-commands.sh
 	custom-command custom-post-config-commands.sh
 	config {
@@ -1071,7 +1052,6 @@ if [ `uname` = "FreeBSD" ]; then
 else SCRIPTDIR=/root/wireless/
 fi
 cd $SCRIPTDIR
-
 mkdir 1_60_60_spoofingAttack_sh8_chain_OLSR_wireless*
 cd 1_60_60_spoofingAttack_sh8_chain_OLSR_wireless*
 
@@ -1152,10 +1132,10 @@ fi
 	files=('custom-post-config-commands.sh', )
 	startidx=120
 	cmdup=('sh custom-post-config-commands.sh', )
-	}
     }
-
-	services {OLSR_Mod IPForward UserDefined}
+    }
+	services {OLSR_Mod IPForward UserDefined
+    }
 }
 
 node n11 {
@@ -1284,5 +1264,4 @@ option global {
     annotations yes
     grid no
 }
-
 

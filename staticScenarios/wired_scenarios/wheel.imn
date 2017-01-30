@@ -13,6 +13,7 @@ node n1 {
     labelcoords {364.0 660.0}
     interface-peer {eth0 n11}
     custom-config {
+	}
 }
 
 node n2 {
@@ -30,6 +31,7 @@ node n2 {
     labelcoords {600.0 102.0}
     interface-peer {eth0 n12}
     custom-config {
+	}
 }
 
 node n3 {
@@ -47,6 +49,7 @@ node n3 {
     labelcoords {778.0 164.0}
     interface-peer {eth0 n13}
     custom-config {
+	}
 }
 
 node n4 {
@@ -64,6 +67,7 @@ node n4 {
     labelcoords {866.0 304.0}
     interface-peer {eth0 n14}
     custom-config {
+	}
 }
 
 node n5 {
@@ -81,6 +85,7 @@ node n5 {
     labelcoords {828.0 429.0}
     interface-peer {eth0 n15}
     custom-config {
+	}
 }
 
 node n6 {
@@ -98,6 +103,7 @@ node n6 {
     labelcoords {534.0 592.0}
     interface-peer {eth0 n16}
     custom-config {
+	}
 }
 
 node n7 {
@@ -115,6 +121,7 @@ node n7 {
     labelcoords {177.0 525.0}
     interface-peer {eth0 n17}
     custom-config {
+	}
 }
 
 node n8 {
@@ -132,6 +139,7 @@ node n8 {
     labelcoords {58.0 422.0}
     interface-peer {eth0 n18}
     custom-config {
+	}
 }
 
 node n9 {
@@ -149,6 +157,7 @@ node n9 {
     labelcoords {70.0 230.0}
     interface-peer {eth0 n19}
     custom-config {
+	}
 }
 
 node n10 {
@@ -166,6 +175,7 @@ node n10 {
     labelcoords {285.0 96.0}
     interface-peer {eth0 n20}
     custom-config {
+	}
 }
 
 node n11 {
@@ -219,6 +229,7 @@ node n11 {
     interface-peer {eth8 n20}
     interface-peer {eth9 n1}
     custom-config {
+	}
 }
 
 node n12 {
@@ -248,6 +259,7 @@ node n12 {
     interface-peer {eth2 n11}
     interface-peer {eth3 n2}
     custom-config {
+	}
 }
 
 node n13 {
@@ -277,6 +289,7 @@ node n13 {
     interface-peer {eth2 n11}
     interface-peer {eth3 n3}
     custom-config {
+	}
 }
 
 node n14 {
@@ -306,6 +319,7 @@ node n14 {
     interface-peer {eth2 n11}
     interface-peer {eth3 n4}
     custom-config {
+	}
 }
 
 node n15 {
@@ -335,6 +349,7 @@ node n15 {
     interface-peer {eth2 n11}
     interface-peer {eth3 n5}
     custom-config {
+	}
 }
 
 node n16 {
@@ -364,6 +379,7 @@ node n16 {
     interface-peer {eth2 n11}
     interface-peer {eth3 n6}
     custom-config {
+	}
 }
 
 node n17 {
@@ -393,6 +409,7 @@ node n17 {
     interface-peer {eth2 n11}
     interface-peer {eth3 n7}
     custom-config {
+	}
 }
 
 node n18 {
@@ -422,6 +439,7 @@ node n18 {
     interface-peer {eth2 n11}
     interface-peer {eth3 n8}
     custom-config {
+	}
 }
 
 node n19 {
@@ -451,6 +469,7 @@ node n19 {
     interface-peer {eth2 n11}
     interface-peer {eth3 n9}
     custom-config {
+	}
 }
 
 node n20 {
@@ -480,6 +499,7 @@ node n20 {
     interface-peer {eth2 n11}
     interface-peer {eth3 n10}
     custom-config {
+	}
 }
 
 link l1 {

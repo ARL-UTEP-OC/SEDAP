@@ -33,7 +33,7 @@ sh quaggaboot.sh "$routingProtocol"d
 sh quaggaboot.sh vtysh
 
 echo ifconfig eth0:1 $ipToSpoof netmask 255.255.255.255 up
-ifconfig eth0:1 $ipToSpoof netmask 255.255.255.255 up
+ifconfig eth0:1 $ipToSpoof netmask 255.255.255.255 up #try a bigger size on ospf ... and if same size or closer
 #fi
 echo "$protocol" ":" "$ipToSpoof"
 echo "starting spoof"

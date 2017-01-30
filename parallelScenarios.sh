@@ -28,9 +28,11 @@ do
 
 	#check for existance of scenario to avoid unnecessary overwriting
 	if [[ ! -d /$mainDir/$imnName ]] && [[ ! -d /$mainDir/$imnName"*" ]]					
-	then	
-		./imnGenerator.py $startTime 60 10 $nodeNum $attack $scenario $protocol $wireType > core/.core/configs/$imnName.imn
+	then
+		# first make a copy of the file to be modified
 		path=core/.core/configs/$imnName.imn
+		cat staticScenarios/"$wireType"_scenarios/"$scenario".imn > $path
+		./imnGenerator.py $startTime 60 10 $nodeNum $attack $scenario $protocol $wireType $path
 		
 		#start core with the specified file and sleep for one second
 		#core-gui --batch $path

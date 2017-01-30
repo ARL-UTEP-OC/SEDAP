@@ -14,6 +14,7 @@ node n1 {
     canvas c1
     interface-peer {eth0 n11}
     custom-config {
+	}
 }
 
 node n2 {
@@ -32,6 +33,7 @@ node n2 {
     canvas c1
     interface-peer {eth0 n11}
     custom-config {
+	}
 }
 
 node n3 {
@@ -50,6 +52,7 @@ node n3 {
     canvas c1
     interface-peer {eth0 n11}
     custom-config {
+	}
 }
 
 node n4 {
@@ -68,6 +71,7 @@ node n4 {
     canvas c1
     interface-peer {eth0 n11}
     custom-config {
+	}
 }
 
 node n5 {
@@ -86,6 +90,7 @@ node n5 {
     canvas c1
     interface-peer {eth0 n11}
     custom-config {
+	}
 }
 
 node n6 {
@@ -104,6 +109,7 @@ node n6 {
     canvas c1
     interface-peer {eth0 n11}
     custom-config {
+	}
 }
 
 node n7 {
@@ -122,6 +128,7 @@ node n7 {
     canvas c1
     interface-peer {eth0 n11}
     custom-config {
+	}
 }
 
 node n8 {
@@ -140,6 +147,7 @@ node n8 {
     canvas c1
     interface-peer {eth0 n11}
     custom-config {
+	}
 }
 
 node n9 {
@@ -158,6 +166,7 @@ node n9 {
     canvas c1
     interface-peer {eth0 n11}
     custom-config {
+	}
 }
 
 node n10 {
@@ -176,6 +185,7 @@ node n10 {
     canvas c1
     interface-peer {eth0 n11}
     custom-config {
+	}
 }
 
 node n11 {
@@ -210,6 +220,7 @@ node n11 {
     interface-peer {e8 n9}
     interface-peer {e9 n10}
 	custom-config {
+	}
 	custom-config-id basic_range
 	custom-command {3 3 9 9 9}
 	config {

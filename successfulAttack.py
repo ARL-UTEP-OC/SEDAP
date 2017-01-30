@@ -32,7 +32,7 @@ def writeToFile():
 	successFile.close()
 
 
-with open(mgenFile) as readFile:
+with open(logPath + "/" + mgenFile) as readFile:
 	for line in readFile:
 		# Split is used over and over to parse flows.
 		columns = line.split(";")

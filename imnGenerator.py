@@ -1,11 +1,12 @@
 #!/usr/bin/python
 
-# Generates .imn files based on parameters passed in.
+# Generates .imn configurations to be passed in based on parameters given.
 # Currently capable of generating wired and wireless .imns
 
 import sys
 import os
 import commands
+import subprocess
 
 startTime = sys.argv[1]
 duration = sys.argv[2]
@@ -15,6 +16,7 @@ attackScriptPath = sys.argv[5]
 scenario = sys.argv[6]
 routingProtocol= sys.argv[7]
 wireTypeDir = sys.argv[8]
+path = sys.argv[9]
 
 workingDirectory = os.getcwd()
 rootDirectory = "/root/" + wireTypeDir + "/"
@@ -38,19 +40,18 @@ if wired:
 	maxNodes = int(numNodes) * 2
 
 def insertBasicConfigs():
-	global myStr
 	
-	myStr += """
+	basicConfigs = """------
 	custom-config-id service:UserDefined:custom-post-config-commands.sh
 	custom-command custom-post-config-commands.sh
 	config {"""
 	
 	if not wired:
-		myStr += """
+		basicConfigs += """
 route add default dev eth0
 route add -net 224.0.0.0 netmask 224.0.0.0 dev eth0"""
 
-	myStr += """
+	basicConfigs += """
 #!/bin/sh
 HN=`hostname`
 if [ `uname` = "FreeBSD" ]; then
@@ -58,18 +59,28 @@ if [ `uname` = "FreeBSD" ]; then
 else SCRIPTDIR=""" + rootDirectory + """
 fi
 cd $SCRIPTDIR
-"""
 
-def insertMgen():
-	global myStr
-	
+	}
+	}
+    custom-config {
+	custom-config-id service:UserDefined
+	custom-command UserDefined
+	config {
+	files=('custom-post-config-commands.sh', )
+	startidx=120
+	cmdup=('sh custom-post-config-commands.sh', )
+------"""
+	return basicConfigs
+
+def insertMgen(node):
+
 	logPath = attackNodeNumber+"_"+startTime+"_"+duration+"_"+attackScriptPath+spoofNode
 	logPath+="_"+scenario+"_"+routingProtocol+"_"+wireTypeDir
 	logPath = logPath.replace(".","_")
 	logPath = logPath.replace("/","_")
 	logPath += "*"
 	
-	myStr += """
+	mgenConfigs = """------
 mkdir """ + logPath + """
 cd """ + logPath +"""
 
@@ -77,24 +88,15 @@ cd """ + logPath +"""
 hostnameLen=`expr length $HN`
 hostnameLen=`expr $hostnameLen - 1` """
 	if wired:
-		myStr += """
+		mgenConfigs += """
 myIP="`expr substr $HN 2 $hostnameLen`.0.0.1" 
 """
-
-		if "OSPF" in routingProtocol and nodeCount == int(attackNodeNumber):
-			myStr += """
-#stop quagga
-#killall vtysh
-#killall ospfd
-#killall zebra
-"""
-
 	else:
-		myStr += """
+		mgenConfigs += """
 myIP="10.0.0.`expr substr $HN 2 $hostnameLen`" 
 """
 
-	myStr += """
+	mgenConfigs += """
 #now insert attack script and mgen flush if node is attacker
 if [ `hostname` = n""" + attackNodeNumber + """ -o """ + attackNodeNumber + """ = 0 ]
 then
@@ -107,7 +109,7 @@ mgen flush input """ + workingDirectory + """/flowGenerator/flows/flow`hostname`
 (
 cat << 'EOF'
 """
-	myStr += commands.getoutput("cat " +str("wireTypeAttacks/" + wireTypeDir + "Attacks/" + attackScriptPath)) + """
+	mgenConfigs += commands.getoutput("cat " +str("wireTypeAttacks/" + wireTypeDir + "Attacks/" + attackScriptPath)) + """
 EOF
 ) > attack.sh
 
@@ -115,17 +117,17 @@ chmod 755 attack.sh
 
 ./attack.sh """ + startTime + " " + duration
 	for attackScriptInput in attackScriptInputs:
-		myStr+=" "+attackScriptInput
-	myStr+=" " + rootDirectory + logPath + """ 
+		mgenConfigs+=" "+attackScriptInput
+	mgenConfigs+=" " + rootDirectory + logPath + """ 
 
 else
 	echo `hostname` >> """ + rootDirectory + logPath +"""/check.txt
 	mgen flush input """ + workingDirectory + """/flowGenerator/flows/flow`hostname`.mgn | """ + workingDirectory + """/mgenCollect.py """ + rootDirectory + logPath + """ > `hostname`.mgencapture &
 fi
-"""
+------"""
+	return mgenConfigs
 
 def insertRoutingProtocol(router):
-	global myStr
 	
 	if router is True:
 		
@@ -139,69 +141,57 @@ def insertRoutingProtocol(router):
 	else:
 		serviceString = "DefaultRoute SSH"
 	
-	myStr+="""
-	services {"""+str(serviceString) + """ UserDefined}
-"""
-
-myStr = ""
-nodeCount = 0
-scenarioFile="staticScenarios/" + wireTypeDir + "_scenarios/" + scenario + ".imn"
-
-with open(scenarioFile) as readFile:
-
-	readyToInsert = False
-	
-	for line in readFile:
-		
-		nodeIsAttacker = nodeCount == int(attackNodeNumber)
-		inRange = nodeCount <= int(numNodes)
-		
-		if readyToInsert is True:
-			insertBasicConfigs()
-			
-			# Inserts configurations for everything but wlan11
-			if inRange:
-				insertMgen()
-				
-			myStr += """
-	}
-	}
-    custom-config {
-	custom-config-id service:UserDefined
-	custom-command UserDefined
-	config {
-	files=('custom-post-config-commands.sh', )
-	startidx=120
-	cmdup=('sh custom-post-config-commands.sh', )
-	}
+	service ="""------
     }
-"""			# Will only insert routing protocols for routers.
+    }
+	services {"""+str(serviceString) + """ UserDefined
+------"""
+	return service
+
+scenarioFile="staticScenarios/" + wireTypeDir + "_scenarios/" + scenario + ".imn"
+basicConfigs = insertBasicConfigs()
+
+toFindConfig = """custom-config {"""
+toFindBasic = """cd $SCRIPTDIR"""
+toFindService = """cmdup=('sh custom-post-config-commands.sh', )"""
+
+for node in range(1,maxNodes+1):
+	
+	nodeIsAttacker = node == int(attackNodeNumber)
+	inRange = node <= int(numNodes)
+
+	adjustedConfigValue = int(node)*2 - 1
+	subprocess.call(["./insertConfigs.sh", toFindConfig, basicConfigs, str(adjustedConfigValue), path])
+
+	# Inserts configurations for everything but wlan11
+	if inRange:
+		mgenConfigs = insertMgen(node)
+		subprocess.call(["./insertConfigs.sh", toFindBasic, mgenConfigs, str(node), path])
+
+		
+	if not wired and inRange:
+		services = insertRoutingProtocol(True)
+
+
+	# Will insert services based on router or host
+	isRouter = True
+		
+	if not wired and inRange:
+		isRouter = True
+
+	elif wired:
+		if not inRange or nodeIsAttacker:
 			isRouter = True
-			
-			if not wired and inRange:
-				insertRoutingProtocol(isRouter)
+		else:
+			isRouter = False
 
-			elif wired:
-				if not inRange or nodeIsAttacker:
-					insertRoutingProtocol(isRouter)
-				else:
-					isRouter = False
-					insertRoutingProtocol(isRouter)
-				
-			readyToInsert = False
+	services = insertRoutingProtocol(isRouter)
+	subprocess.call(["./insertConfigs.sh", toFindService, services, str(node), path])
 
-		
-		if "model host" in line and nodeIsAttacker:
-			myStr += """
-	model router"""
-			continue
-		
-		elif "node n" in line:
-			nodeCount += 1
-			
-		elif "custom-config {" in line and nodeCount <= maxNodes:
-			readyToInsert = True
-		
-		myStr += line
 
-print myStr
+toFindModel="""model host"""
+replaceModel="""model router"""
+
+subprocess.call(["./insertConfigs.sh", toFindModel, replaceModel, attackNodeNumber, path])
+
+subprocess.call(["./insertConfigs.sh", """------""", "", "0", path])
