@@ -15,6 +15,7 @@ attackScriptPath = sys.argv[5]
 scenario = sys.argv[6]
 routingProtocol= sys.argv[7]
 wireTypeDir = sys.argv[8]
+subnet = sys.argv[9]
 
 workingDirectory = os.getcwd()
 rootDirectory = "/root/" + wireTypeDir + "/"
@@ -64,10 +65,9 @@ def insertMgen():
 	global myStr
 	
 	logPath = attackNodeNumber+"_"+startTime+"_"+duration+"_"+attackScriptPath+spoofNode
-	logPath+="_"+scenario+"_"+routingProtocol+"_"+wireTypeDir
+	logPath+="_"+scenario+"_"+routingProtocol+"_"+wireTypeDir+"_"+subnet
 	logPath = logPath.replace(".","_")
 	logPath = logPath.replace("/","_")
-	logPath += "*"
 	
 	myStr += """
 mkdir """ + logPath + """

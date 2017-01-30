@@ -7,6 +7,7 @@ logPath=$4
 
 # Parse routing protocol and convert to lowercase
 routingProtocol=`echo $logPath | cut -d'_' -f7 | cut -d 'v' -f1 | sed 's/./\L&/g'`
+subnet=`echo $logPath | cut -d '_' -f9`
 
 cd "$SESSION_DIR/$NODE_NAME.conf"
 
@@ -32,8 +33,8 @@ sh quaggaboot.sh zebra
 sh quaggaboot.sh "$routingProtocol"d
 sh quaggaboot.sh vtysh
 
-echo ifconfig eth0:1 $ipToSpoof netmask 255.255.255.255 up
-ifconfig eth0:1 $ipToSpoof netmask 255.255.255.255 up
+echo ifconfig eth0:1 $ipToSpoof netmask 255.255.255.$subnet up
+ifconfig eth0:1 $ipToSpoof netmask 255.255.255.$subnet up
 #fi
 echo "$protocol" ":" "$ipToSpoof"
 echo "starting spoof"

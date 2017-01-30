@@ -1,10 +1,15 @@
 #!/bin/bash
+
+#SHOULD VALIDATE THIS ATTACK 
+
 startTime=$1
 pendingDuration=$2
 attackingNode=$3
 numberOfNodes=$4
 logPath=$5
 
+routingProtocol=`echo $logPath | cut -d'_' -f7 | cut -d 'v' -f1 | sed 's/./\L&/g'`
+subnet=`echo $logPath | cut -d '_' -f9`
 
 bringDownInterfaces()
 {
@@ -30,8 +35,8 @@ identifyRoutingProtocol()
 		exit
 	fi
 	
-	#if ospf used in log path
-	if [[ $logPath == *"OSPF"* ]]
+	#if ospf is used
+	if [[ $routingProtocol == *"ospf"* ]]
 	then
 		sleep 5
 		vtysh <<< $'configure terminal \n router ospf \n redistribute connected'
@@ -57,7 +62,7 @@ bringUpInterfaces()
 			else
 				protocol="IPv4" 
 				ipToSpoof="$nodeToSpoof.0.0.2"
-				ifconfig eth0:$nodeToSpoof $ipToSpoof netmask 255.255.255.255 up
+				ifconfig eth0:$nodeToSpoof $ipToSpoof netmask 255.255.255.$subnet up
 			fi
 			echo "$protocol" ":" "$ipToSpoof"
 			echo "HNA $ipToSpoof 32" >> $logPath/tmp.txt
