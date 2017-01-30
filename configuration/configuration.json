@@ -1,0 +1,71 @@
+{
+    "flows": {
+      "flows-per-node": "2",
+        "nodes": [
+          "11.0.0.2",
+          "12.0.0.2",
+          "13.0.0.2",
+          "14.0.0.2",
+          "15.0.0.2",
+          "16.0.0.2",
+          "17.0.0.2",
+          "18.0.0.2"
+        ],
+        "protocols": [
+          "UDP",
+          "TCP"
+        ]
+    },
+    "parallel-executions": "1",
+    "show-gui": "false",
+    "imn-template": { "path": "/root/install/IntelAttacker/imns/ospf_scenarios/test1.imn" },
+      "attacks": [
+        {
+          "name": "hostSpoofing",
+          "start-time": "10",
+          "duration": "60",
+          "path": "/root/attacks/h_spoofing.sh",
+            "subnets-size": [
+              "255.255.255.0",
+              "255.255.255.128",
+              "255.255.255.255"
+            ],
+            "attacker-nodes": [
+              "12.0.0.1",
+              "13.0.0.1",
+              "15.0.0.1",
+              "18.0.0.1"
+            ],
+            "victim-nodes": [
+              "11.0.0.1",
+              "12.0.0.1",
+              "13.0.0.1",
+              "14.0.0.1",
+              "15.0.0.1"
+            ]
+        },
+        {
+          "name": "routerSpoofing",
+          "start-time": "10",
+          "duration": "60",
+          "path": "/root/attacks/r_spoofing.sh",
+            "subnets-size": [
+              "255.255.255.0",
+              "255.255.255.128",
+              "255.255.255.255"
+            ],
+            "attacker-nodes": [
+              "16.0.0.1",
+              "17.0.0.1",
+              "18.0.0.1"
+            ],
+            "victim-nodes": [
+              "13.0.0.1",
+              "14.0.0.1",
+              "15.0.0.1",
+              "16.0.0.1",
+              "17.0.0.1"
+            ]
+        }
+      ]
+}

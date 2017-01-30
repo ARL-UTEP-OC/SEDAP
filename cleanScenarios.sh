@@ -15,7 +15,7 @@ for dir in `ls -d */ | grep _sh`; do
 	##lines=`cat res.arff | wc -l`
 	##cd ../
 	found=`find $dir -size 0`
-	echo $found
+	#echo $found
 	##if [[ $lines -lt 40 && $dir == *"_sh"* ]]
 	if [[ $found ]]
 	then

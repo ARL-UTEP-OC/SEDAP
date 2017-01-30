@@ -21,9 +21,10 @@ do
 	attack=${imnParams[1]}
 	scenario=${imnParams[2]}
 	protocol=${imnParams[3]}
+	subnet=${imnParams[4]}
 
 	#name of file to be created is based on parameters passed in
-	imnName="$nodeNum"_"$startTime"_60_"$attack"_"$scenario"_"$protocol"_"$wireType"
+	imnName="$nodeNum"_"$startTime"_60_"$attack"_"$scenario"_"$protocol"_"$wireType"_"$subnet"
 	imnName=${imnName//\./_}
 
 	#check for existance of scenario to avoid unnecessary overwriting
@@ -32,7 +33,7 @@ do
 		# first make a copy of the file to be modified
 		path=core/.core/configs/$imnName.imn
 		cat staticScenarios/"$wireType"_scenarios/"$scenario".imn > $path
-		./imnGenerator.py $startTime 60 10 $nodeNum $attack $scenario $protocol $wireType $path
+		./imnGenerator.py $startTime 60 10 $nodeNum $attack $scenario $protocol $wireType $path $subnet
 		
 		#start core with the specified file and sleep for one second
 		#core-gui --batch $path
