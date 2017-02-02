@@ -10,26 +10,49 @@
 import sys
 import os
 
+### import configuration from file - Edgar P.
+import json
 
-numNodes = int(sys.argv[1])
-wireType = sys.argv[2]
-portStart = 12000
+data_str =  open('../configuration/configuration.json','r')    
+# loading json data
+json_data = json.load(data_str)
+
+flow_nodes =  json_data["flows"]["nodes"]
+numNodes = len(flow_nodes)
+wireType = json_data["flows"]["wire-type"]
+portStart = int(json_data["flows"]["initial-port"])
+
+outFlowPattern = []
+portPattern = []
+protocolPattern = []
+
+outgoing_patterns =  json_data["flows"]["outgoing-patterns"]
+for outgoing_pattern in outgoing_patterns:
+	outFlowPattern.append(int(outgoing_pattern["relative-node"]))
+	portPattern.append(int(outgoing_pattern["relative-port"]))
+	protocolPattern.append(outgoing_pattern["protocol"])
+	
+### end of reading configuration
+
+#numNodes = int(sys.argv[1])
+#wireType = sys.argv[2]
+#portStart = 12000
 
 # outFlowPattern specifies which nodes to send to relative to the current node: Example [-1, +1, +2] means send to previous, next and next next
 # Note: node 1's previous node is node N, where N = number of nodes
 #outFlowPattern = [-1, 1, 2, 3,4,5,6,7,8]
-outFlowPattern = [-1, 1, 2]
+#outFlowPattern = [-1, 1, 2]
 
 
 # portPattern specifies which port to use next relative to the starting port
 # Note: portPattern list must be of the same size as the outFlowPattern
 # Example: outFlowPattern = [-1, +1, +2] & portPattern = [0, +1, +2] ==> use port portStart to send to previous node (-1), use port (portstart + 1) to send to next node (+1), and use port (portStart + 2) to send to next next node (+2)
 #portPattern = [0, 1, 2, 3,4,5,6,7,8]
-portPattern = [0, 1, 2]
+#portPattern = [0, 1, 2]
 
 #add a protocolPattern, where 0 is udp and 1 is tcp
 #protocolPattern = ["UDP","UDP","UDP","UDP","UDP","UDP","UDP","UDP","UDP"]
-protocolPattern = ["UDP","UDP","UDP","UDP","UDP","UDP","UDP","UDP","UDP","UDP","UDP","UDP"]
+#protocolPattern = ["UDP","UDP","UDP","UDP","UDP","UDP","UDP","UDP","UDP","UDP","UDP","UDP"]
 
 # outFlowHash and inFlowHash are hash tables to store all send and listen communications specifying nodes and ports involved
 outFlowHash = {}
