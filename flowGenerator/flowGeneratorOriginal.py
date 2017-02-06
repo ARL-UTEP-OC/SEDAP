@@ -10,49 +10,27 @@
 import sys
 import os
 
-### import configuration from file - Edgar P.
-import json
 
-data_str =  open('../configuration/configuration.json','r')    
-# loading json data
-json_data = json.load(data_str)
-
-ipFormat = json_data["flows"]["ip-format"]
-numNodes = int(json_data["flows"]["nodes-num"])
-wireType = json_data["flows"]["wire-type"]
-portStart = int(json_data["flows"]["initial-port"])
-
-outFlowPattern = []
-portPattern = []
-protocolPattern = []
-
-outgoing_patterns =  json_data["flows"]["outgoing-patterns"]
-for outgoing_pattern in outgoing_patterns:
-	outFlowPattern.append(int(outgoing_pattern["relative-node"]))
-	portPattern.append(int(outgoing_pattern["relative-port"]))
-	protocolPattern.append(outgoing_pattern["protocol"])
-	
-### end of reading configuration
-
-#numNodes = int(sys.argv[1])
-#wireType = sys.argv[2]
-#portStart = 12000
+numNodes = int(sys.argv[1])
+wireType = sys.argv[2]
+portStart = 12000
 
 # outFlowPattern specifies which nodes to send to relative to the current node: Example [-1, +1, +2] means send to previous, next and next next
 # Note: node 1's previous node is node N, where N = number of nodes
 #outFlowPattern = [-1, 1, 2, 3,4,5,6,7,8]
-#outFlowPattern = [-1, 1, 2]
+outFlowPattern = [-1, 1, 2]
 
 
 # portPattern specifies which port to use next relative to the starting port
 # Note: portPattern list must be of the same size as the outFlowPattern
 # Example: outFlowPattern = [-1, +1, +2] & portPattern = [0, +1, +2] ==> use port portStart to send to previous node (-1), use port (portstart + 1) to send to next node (+1), and use port (portStart + 2) to send to next next node (+2)
 #portPattern = [0, 1, 2, 3,4,5,6,7,8]
-#portPattern = [0, 1, 2]
+portPattern = [0, 1, 2]
 
 #add a protocolPattern, where 0 is udp and 1 is tcp
-#protocolPattern = ["UDP","UDP","UDP","UDP","UDP","UDP","UDP","UDP","UDP"]
-#protocolPattern = ["UDP","UDP","UDP","UDP","UDP","UDP","UDP","UDP","UDP","UDP","UDP","UDP"]
+#protocolPattern = ["TCP","TCP","TCP","UDP","UDP","UDP","UDP","UDP","UDP"]
+#protocolPattern = ["TCP","TCP","TCP","TCP","UDP","UDP","UDP","UDP","UDP","UDP","UDP","UDP"]
+protocolPattern = ["TCP","TCP","TCP","TCP","TCP","TCP","TCP","TCP","TCP","TCP","TCP","TCP"]
 
 # outFlowHash and inFlowHash are hash tables to store all send and listen communications specifying nodes and ports involved
 outFlowHash = {}
@@ -88,7 +66,7 @@ except:
     pass
 index = 1
 for hashkey in outFlowHash:
-	f = open("flows/flown" + str(hashkey) + ".mgn", 'w')
+	f = open("flows/flown" + str(hashkey) + ".mgn-o", 'w')
 	f.write("#flow " + str(hashkey) + "\n")
 	sendingTo = outFlowHash[hashkey]
 	listeningTo = inFlowHash[hashkey]
@@ -100,10 +78,11 @@ for hashkey in outFlowHash:
 	f.write("\n")
     
 	for pairIndex in range(len(sendingTo)):
-	 	offset = 0	
 		if "wired" in wireType:
-			offset = 10
-		destination = " DST " + ipFormat.replace("X",str(offset + sendingTo[pairIndex][0]))
+			destination = " DST " + str(10 + sendingTo[pairIndex][0]) + ".0.0.2"
+		else:
+			destination = " DST 10.0.0." + str(sendingTo[pairIndex][0])
+			
 		f.write("30.0 ON " + str(index) + " " + str(sendingTo[pairIndex][2]) + destination + "/" + str(sendingTo[pairIndex][1]) + " PERIODIC [50.0 1280]\n")
 		index += 1
     
@@ -115,4 +94,3 @@ print outFlowHash
 print "\n"
 print "INFLOW HASH"
 print inFlowHash
-
