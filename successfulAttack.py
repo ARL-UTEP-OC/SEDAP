@@ -31,12 +31,16 @@ def writeToFile():
 		
 	successFile.close()
 
+attackSeenCount = 0
 
 with open(logPath + "/" + mgenFile) as readFile:
 	for line in readFile:
 		# Split is used over and over to parse flows.
 		columns = line.split(";")
 		colAttributes = columns[1].split(":")
+		
+		if "none" not in line
+			attackSeenCount += 1
 		
 		for values in colAttributes: 
 			toBeCleaned = values.split("'")
@@ -47,6 +51,12 @@ with open(logPath + "/" + mgenFile) as readFile:
 		
 		time = int(ast.literal_eval(columns[0]))
 		timeDiff = time - previousSecond
+		
+		
+		# Conditions check if node completely dies and doesn't notice attack
+		if attackSeenCount < 10:
+			success = True
+			successString="Node dies during attack."
 		
 		# Conditions check if time between events was too great or if flow is missing. 
 		if timeDiff > 5:
