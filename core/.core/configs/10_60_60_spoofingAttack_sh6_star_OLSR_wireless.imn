@@ -64,8 +64,7 @@ then
 	ifconfig eth0:1 $ipToSpoof netmask 255.255.255.255 up
 
 	#check if its olsrd running:
-	echo `ps -ef | grep nrlolsrd | wc -l` > $logPath/valid.txt
-	if [ `ps -ef | grep nrlolsrd | wc -l` -gt 1 ]
+	if [[ $logPath == *"OLSR"* ]]
 	then
 		echo "HNA $ipToSpoof 32" > $logPath/tmp.txt
 		killall nrlolsrd
@@ -181,8 +180,7 @@ then
 	ifconfig eth0:1 $ipToSpoof netmask 255.255.255.255 up
 
 	#check if its olsrd running:
-	echo `ps -ef | grep nrlolsrd | wc -l` > $logPath/valid.txt
-	if [ `ps -ef | grep nrlolsrd | wc -l` -gt 1 ]
+	if [[ $logPath == *"OLSR"* ]]
 	then
 		echo "HNA $ipToSpoof 32" > $logPath/tmp.txt
 		killall nrlolsrd
@@ -298,8 +296,7 @@ then
 	ifconfig eth0:1 $ipToSpoof netmask 255.255.255.255 up
 
 	#check if its olsrd running:
-	echo `ps -ef | grep nrlolsrd | wc -l` > $logPath/valid.txt
-	if [ `ps -ef | grep nrlolsrd | wc -l` -gt 1 ]
+	if [[ $logPath == *"OLSR"* ]]
 	then
 		echo "HNA $ipToSpoof 32" > $logPath/tmp.txt
 		killall nrlolsrd
@@ -415,8 +412,7 @@ then
 	ifconfig eth0:1 $ipToSpoof netmask 255.255.255.255 up
 
 	#check if its olsrd running:
-	echo `ps -ef | grep nrlolsrd | wc -l` > $logPath/valid.txt
-	if [ `ps -ef | grep nrlolsrd | wc -l` -gt 1 ]
+	if [[ $logPath == *"OLSR"* ]]
 	then
 		echo "HNA $ipToSpoof 32" > $logPath/tmp.txt
 		killall nrlolsrd
@@ -532,8 +528,7 @@ then
 	ifconfig eth0:1 $ipToSpoof netmask 255.255.255.255 up
 
 	#check if its olsrd running:
-	echo `ps -ef | grep nrlolsrd | wc -l` > $logPath/valid.txt
-	if [ `ps -ef | grep nrlolsrd | wc -l` -gt 1 ]
+	if [[ $logPath == *"OLSR"* ]]
 	then
 		echo "HNA $ipToSpoof 32" > $logPath/tmp.txt
 		killall nrlolsrd
@@ -649,8 +644,7 @@ then
 	ifconfig eth0:1 $ipToSpoof netmask 255.255.255.255 up
 
 	#check if its olsrd running:
-	echo `ps -ef | grep nrlolsrd | wc -l` > $logPath/valid.txt
-	if [ `ps -ef | grep nrlolsrd | wc -l` -gt 1 ]
+	if [[ $logPath == *"OLSR"* ]]
 	then
 		echo "HNA $ipToSpoof 32" > $logPath/tmp.txt
 		killall nrlolsrd
@@ -766,8 +760,7 @@ then
 	ifconfig eth0:1 $ipToSpoof netmask 255.255.255.255 up
 
 	#check if its olsrd running:
-	echo `ps -ef | grep nrlolsrd | wc -l` > $logPath/valid.txt
-	if [ `ps -ef | grep nrlolsrd | wc -l` -gt 1 ]
+	if [[ $logPath == *"OLSR"* ]]
 	then
 		echo "HNA $ipToSpoof 32" > $logPath/tmp.txt
 		killall nrlolsrd
@@ -883,8 +876,7 @@ then
 	ifconfig eth0:1 $ipToSpoof netmask 255.255.255.255 up
 
 	#check if its olsrd running:
-	echo `ps -ef | grep nrlolsrd | wc -l` > $logPath/valid.txt
-	if [ `ps -ef | grep nrlolsrd | wc -l` -gt 1 ]
+	if [[ $logPath == *"OLSR"* ]]
 	then
 		echo "HNA $ipToSpoof 32" > $logPath/tmp.txt
 		killall nrlolsrd
@@ -1000,8 +992,7 @@ then
 	ifconfig eth0:1 $ipToSpoof netmask 255.255.255.255 up
 
 	#check if its olsrd running:
-	echo `ps -ef | grep nrlolsrd | wc -l` > $logPath/valid.txt
-	if [ `ps -ef | grep nrlolsrd | wc -l` -gt 1 ]
+	if [[ $logPath == *"OLSR"* ]]
 	then
 		echo "HNA $ipToSpoof 32" > $logPath/tmp.txt
 		killall nrlolsrd
@@ -1117,8 +1108,7 @@ then
 	ifconfig eth0:1 $ipToSpoof netmask 255.255.255.255 up
 
 	#check if its olsrd running:
-	echo `ps -ef | grep nrlolsrd | wc -l` > $logPath/valid.txt
-	if [ `ps -ef | grep nrlolsrd | wc -l` -gt 1 ]
+	if [[ $logPath == *"OLSR"* ]]
 	then
 		echo "HNA $ipToSpoof 32" > $logPath/tmp.txt
 		killall nrlolsrd

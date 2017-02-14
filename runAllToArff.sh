@@ -73,7 +73,7 @@ for dir in `ls -d */`; do
 		if [[ $wireType == *"wired"* ]]
 		then
 			fullDir=`pwd`
-			$scriptDir/successfulAttack.py $fullDir
+			$scriptDir/successfulAttack.py
 		else
 			echo "@relation manet" > res.arff
 			echo "@attribute path string" >> res.arff

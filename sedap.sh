@@ -49,17 +49,8 @@ until [ $scenarioFolders -eq $permutations ]; do
 	cd $scriptDir
 	./parallelScenarios.sh $imnTextFile $maxProcs $wireType $gui
 	
-	# validate only if wireless
-	#if [[ $wireType != *"wired"* ]]
-	#then
-		# ran to provide file for cleanscenarios script to check
-		#cd $scriptDir
-		#./runAllToArff.sh $writingDir $wireType
-	
-		# clears bad scenario folders
 	cd $scriptDir
 	./cleanScenarios.sh $writingDir
-	#fi
 	
 	permutations=`cat $imnTextFile | wc -l`
 	echo $permutations

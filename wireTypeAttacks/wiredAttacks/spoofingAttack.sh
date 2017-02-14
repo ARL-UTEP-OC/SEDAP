@@ -33,8 +33,8 @@ sh quaggaboot.sh zebra
 sh quaggaboot.sh "$routingProtocol"d
 sh quaggaboot.sh vtysh
 
-echo ifconfig eth0:1 $ipToSpoof netmask 255.255.255.$subnet up
-ifconfig eth0:1 $ipToSpoof netmask 255.255.255.$subnet up
+echo ifconfig eth0:1 $ipToSpoof netmask $subnet up
+ifconfig eth0:1 $ipToSpoof netmask $subnet up
 
 #fi
 echo "$protocol" ":" "$ipToSpoof"

@@ -26,10 +26,11 @@ do
 	#name of file to be created is based on parameters passed in
 	imnName="$nodeNum"_"$startTime"_60_"$attack"_"$scenario"_"$protocol"_"$wireType"_"$subnet"
 	imnName=${imnName//\./_}
-
+	echo $imnName
 	#check for existance of scenario to avoid unnecessary overwriting
-	if [[ ! -d /$mainDir/$imnName ]] && [[ ! -d /$mainDir/$imnName"*" ]]					
+	if [[ ! -d /$mainDir/$imnName ]]					
 	then
+		echo "inside"
 		# first make a copy of the file to be modified
 		path=core/.core/configs/$imnName.imn
 		cat staticScenarios/"$wireType"_scenarios/"$scenario".imn > $path
@@ -42,8 +43,15 @@ do
 		
 	fi
 	
-	
 	currentProcs=`pgrep -c wish`
+	permutations=`cat $imnFile | wc -l`
+	scenarioFolders=`ls /$mainDir/ | grep "_sh" | wc -l`
+	scenariosLeft=`expr $permutations - $scenarioFolders`
+	tempMaxProcs=$maxProcs
+	if [[ $scenariosLeft -lt $maxProcs ]]
+	then
+		maxProcs=$scenariosLeft
+	fi
 	
 	#compare current processes to amount of max processes allowed
 	if [[ $currentProcs -ge $maxProcs ]]
@@ -63,7 +71,9 @@ do
 		rm /tmp/maxn*	
 
 	fi
-					
+	
+	maxProcs=$tempMaxProcs
+			
 done < "$imnFile"
 
 
