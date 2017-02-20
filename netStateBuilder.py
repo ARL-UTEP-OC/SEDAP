@@ -88,7 +88,7 @@ def getAttackerPerspective():
         attackNodeIP = "10.0.0."+ attackNodeNum
     else:
         attackNodeIP = str(int(attackNodeNum)+10) + ".0.0.2"
-    print "Attacker: ", attackNodeIP
+#    print "Attacker: ", attackNodeIP
 
     for line in lines:
         lineNum = lineNum +1
@@ -152,7 +152,7 @@ def getNonAttackerPerspective(): #next open the non-attackers files and fill out
             nodeFromFilename = "10.0.0."+nodeNum
         else:
             nodeFromFilename = str(int(nodeNum)+10) + ".0.0.2"
-        print "Victim " , nodeFromFilename 
+#        print "Victim " , nodeFromFilename 
         nonAttackerFiles.append(sysNonAttackerFile)
         nonAttackerFile = open(sysNonAttackerFile)
         fileStatesNBeforeAttack = []
