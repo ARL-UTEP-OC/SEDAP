@@ -11,6 +11,27 @@ mAfterAttack = sys.argv[2]
 attackNodeNum = sys.argv[3]
 wireType = sys.argv[4]
 
+#output: 
+#1. fromHop
+#2. toHop
+#3. type
+#4. distance
+#5. passthrough
+#10. srcSpoofed
+#11. destSpoofed
+#12. hopsToSpoofed
+#14. hopsFromSpoofedToDest
+#15. spoofedBetweenAttacker
+#16. isDstBetweenSpoofedAndAttacker
+#17. spoofedBetweenAttackergw
+#18. isDstBetweenSpoofedAndAttackergw
+#19. isAttackerBetweenSpoofedAndDst
+#20. isAttackerBetweenSpoofedAndDstgw
+#21. isSrcBetweenSpoofedAndDst
+#22. isSrcBetweenSpoofedAndDstgw
+#23. altPathWithoutAttacker
+#24. duringLinkLost
+
 G = nx.Graph()
 
 attackName = "none"
@@ -62,6 +83,13 @@ def getAttackerPerspective():
     attackerFile = open('n'+attackNodeNum+'.capture')
     lines = attackerFile.readlines()[2:-1]
     lineNum = 0
+    #now populate the attacker's gateways:
+    if "wireless" in wireType:
+        attackNodeIP = "10.0.0."+ attackNodeNum
+    else:
+        attackNodeIP = str(int(attackNodeNum)+10) + ".0.0.2"
+    print "Attacker: ", attackNodeIP
+
     for line in lines:
         lineNum = lineNum +1
         time = int(ast.literal_eval(line.split(";")[0]))
@@ -78,15 +106,13 @@ def getAttackerPerspective():
         else :
             routes = routesPrev
             attackName = attackRunning.strip()
-            #now populate the attacker's gateways:
-            attackNodeIP = "10.0.0." + attackNodeNum
             for sRoute in routes:
                 if (attackNodeIP,sRoute) not in gateways:
                     gateways[(attackNodeIP,sRoute)] = routes[sRoute][1]
                 if routes[sRoute][1] != "0.0.0.0":
                     G.add_edge(attackNodeIP,routes[sRoute][1])
-	    if lineNum == len(lines):
-		    attackName = "down"
+        if lineNum == len(lines):
+            attackName = "down"
             break
         
     #get the union of all paths seen
@@ -118,15 +144,15 @@ def getNonAttackerPerspective(): #next open the non-attackers files and fill out
     global G
     
     sysNonAttackerFiles = commands.getoutput("ls *.mgencapture")
-    allStatesNBeforeAttack = []
-
+    
     for sysNonAttackerFile in sysNonAttackerFiles.split("\n"):
         state = "before"
-        if "wired" not in wireType:
-            nodeFromFilename = "10.0.0."+sysNonAttackerFile.split(".")[0].split("n")[1]
+        nodeNum = sysNonAttackerFile.split(".")[0].split("n")[1]
+        if "wireless" in wireType:
+            nodeFromFilename = "10.0.0."+nodeNum
         else:
-            nodeFromFilename = str(int(sysNonAttackerFile.split(".")[0].split("n")[1])+10) + ".0.0.2"
-        
+            nodeFromFilename = str(int(nodeNum)+10) + ".0.0.2"
+        print "Victim " , nodeFromFilename 
         nonAttackerFiles.append(sysNonAttackerFile)
         nonAttackerFile = open(sysNonAttackerFile)
         fileStatesNBeforeAttack = []
@@ -445,4 +471,4 @@ buildHopTraff()
 
 print instance
 
- 
+
