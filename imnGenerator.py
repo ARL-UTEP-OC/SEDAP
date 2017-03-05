@@ -134,7 +134,7 @@ def insertRoutingProtocol(router):
 		serviceString = routingProtocol
 		
 		if "OLSR" in routingProtocol:
-			serviceString += "_Mod IPForward"
+			serviceString += " IPForward"
 			
 		else:
 			serviceString += " zebra vtysh IPForward"
