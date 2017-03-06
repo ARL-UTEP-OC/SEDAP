@@ -32,6 +32,9 @@ for nodeNum in range(1, numNodes):
 	outFlowPattern.append(nodeNum)
         portPattern.append(nodeNum)
 	protocolPattern.append(protocol)
+print outFlowPattern
+print portPattern
+print protocolPattern
 
 ### end of reading configuration
 
@@ -52,7 +55,6 @@ for nodeNum in range(1, numNodes):
 #portPattern = [0, 1, 2]
 
 #add a protocolPattern, where 0 is udp and 1 is tcp
-#protocolPattern = ["UDP","UDP","UDP","UDP","UDP","UDP","UDP","UDP","UDP"]
 #protocolPattern = ["UDP","UDP","UDP","UDP","UDP","UDP","UDP","UDP","UDP","UDP","UDP","UDP"]
 
 # outFlowHash and inFlowHash are hash tables to store all send and listen communications specifying nodes and ports involved
@@ -117,4 +119,3 @@ print outFlowHash
 print "\n"
 print "INFLOW HASH"
 print inFlowHash
-

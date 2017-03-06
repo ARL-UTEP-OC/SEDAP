@@ -89,7 +89,10 @@ hostnameLen=`expr length $HN`
 hostnameLen=`expr $hostnameLen - 1` """
 	if wired:
 		mgenConfigs += """
-myIP="`expr substr $HN 2 $hostnameLen`.0.0.1" 
+nodeNumber="`expr substr $HN 2 $hostnameLen`" 
+nodeNumber=$(( $nodeNumber + 10))
+myIP=$nodeNumber".0.0.2"
+echo $myIP >> /root/IPs.txt 
 """
 	else:
 		mgenConfigs += """

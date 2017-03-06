@@ -29,7 +29,7 @@ fi
 
 #---------- Begin: Initialization of files to be read -----------#
 cd "$scriptDir/flowGenerator"
-./flowGenerator_3Nodes.py 10 $wireType #Script and number of nodes may be changed
+./flowGenerator.py 10 $wireType #Script and number of nodes may be changed
 cd $scriptDir
 ./generateScenarios.sh $wireType
 
