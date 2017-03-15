@@ -1,7 +1,5 @@
 #!/bin/bash
 
-#SHOULD VALIDATE THIS ATTACK 
-
 startTime=$1
 pendingDuration=$2
 attackingNode=$3
@@ -10,6 +8,9 @@ logPath=$5
 
 routingProtocol=`echo $logPath | cut -d'_' -f7 | cut -d 'v' -f1 | sed 's/./\L&/g'`
 subnet=`echo $logPath | cut -d '_' -f9`
+
+# Necessary, otherwise working directory is seen as logging directory instead of node
+cd "$SESSION_DIR/$NODE_NAME.conf"
 
 bringDownInterfaces()
 {
@@ -57,12 +58,12 @@ bringUpInterfaces()
 			if [[ -n "$6" && "IPv6" -eq "$6" ]]
 				then
 				protocol="IPv6"
-				ipToSpoof="2001:""$nodeToSpoof""::2"	
+				ipToSpoof="2001:"`expr 10 + $nodeToSpoof`"::2"	
 				ifconfig eth0:$nodeToSpoof inet6 add "$ipToSpoof/120" up
 			else
 				protocol="IPv4" 
-				ipToSpoof="$nodeToSpoof.0.0.2"
-				ifconfig eth0:$nodeToSpoof $ipToSpoof netmask 255.255.255.$subnet up
+				ipToSpoof=`expr 10 + $nodeToSpoof`".0.0.2"
+				ifconfig eth0:$nodeToSpoof $ipToSpoof netmask $subnet up
 			fi
 			echo "$protocol" ":" "$ipToSpoof"
 			echo "HNA $ipToSpoof 32" >> $logPath/tmp.txt

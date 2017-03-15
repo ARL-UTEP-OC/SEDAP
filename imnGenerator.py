@@ -76,9 +76,10 @@ cd $SCRIPTDIR
 def insertMgen(node):
 
 	logPath = attackNodeNumber+"_"+startTime+"_"+duration+"_"+attackScriptPath+spoofNode
-	logPath+="_"+scenario+"_"+routingProtocol+"_"+wireTypeDir+"_"+subnet
+	logPath+="_"+scenario+"_"+routingProtocol+"_"+wireTypeDir
 	logPath = logPath.replace(".","_")
 	logPath = logPath.replace("/","_")
+	logPath += "_"+subnet
 	
 	mgenConfigs = """------
 mkdir """ + logPath + """

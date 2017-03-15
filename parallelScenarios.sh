@@ -24,13 +24,13 @@ do
 	subnet=${imnParams[4]}
 
 	#name of file to be created is based on parameters passed in
-	imnName="$nodeNum"_"$startTime"_60_"$attack"_"$scenario"_"$protocol"_"$wireType"_"$subnet"
+	imnName="$nodeNum"_"$startTime"_60_"$attack"_"$scenario"_"$protocol"_"$wireType"
 	imnName=${imnName//\./_}
-	echo $imnName
+	imnName+=_"$subnet"
+
 	#check for existance of scenario to avoid unnecessary overwriting
 	if [[ ! -d /$mainDir/$imnName ]]					
 	then
-		echo "inside"
 		# first make a copy of the file to be modified
 		path=core/.core/configs/$imnName.imn
 		cat staticScenarios/"$wireType"_scenarios/"$scenario".imn > $path

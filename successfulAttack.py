@@ -17,8 +17,8 @@ previousSecond = 0
 lineBefore=""
 
 #if spoofing attack...
-parsedPath = logPath.split("spoofingAttack_sh")
-victim = parsedPath[1].split("_")[0]
+#parsedPath = logPath.split("spoofingAttack_sh")
+victim = 5
 parsedAttacker = parsedPath[0].split("/")
 attacker = parsedAttacker[len(parsedAttacker)-1].split("_")[0]
 attackerIPFlow = str(int(attacker) + 10) + ".0.0.2_"
