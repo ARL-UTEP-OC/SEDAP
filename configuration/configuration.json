@@ -1,32 +1,25 @@
 {
-      "flows": {
-		  "flows-per-node": "2",
-		  "wire-type": "wireless",
-		  "initial-port": "12000",
-		  "outgoing-patterns": [
-				{
-					"relative-node": "-1",
-					"relative-port": "0",
-					"protocol": "TCP"
-				},
-				{
-					"relative-node": "1",
-					"relative-port": "1",
-					"protocol": "TCP"
-				},
-				{
-					"relative-node": "2",
-					"relative-port": "2",
-					"protocol": "TCP"
-				}
-			  ],
-		  "ip-format": "10.0.0.X",
-	 	  "nodes-num": "10"
+    "flows": {
+	    "wire-type": "wireless",
+    	    "initial-port": "12000",
+	    "protocol": "UDP",
+            "traffic-nodes": [
+              "11.0.0.2",
+              "12.0.0.2",
+              "13.0.0.2",
+              "14.0.0.2",
+              "15.0.0.2",
+              "16.0.0.2",
+              "17.0.0.2",
+              "18.0.0.2",
+              "19.0.0.2",
+              "20.0.0.2"
+            ]
     },
     "parallel-executions": "1",
     "show-gui": "false",
     "imn-template": { "path": "/root/install/IntelAttacker/imns/ospf_scenarios/test1.imn" },
-      "attacks": [
+    "attacks": [
         {
           "name": "hostSpoofing",
           "start-time": "10",

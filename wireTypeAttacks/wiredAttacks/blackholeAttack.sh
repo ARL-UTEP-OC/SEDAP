@@ -49,7 +49,7 @@ identifyRoutingProtocol()
 
 bringUpInterfaces()
 {
-	for ((nodeToSpoof=1;nodeToSpoof <= numberOfNodes; nodeToSpoof++))
+	for ((nodeToSpoof=11;nodeToSpoof <= numberOfNodes; nodeToSpoof++))
 	do
 		
 		if [ $nodeToSpoof != $attackingNode ]

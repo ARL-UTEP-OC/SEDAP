@@ -17,8 +17,7 @@ data_str =  open('../configuration/configuration.json','r')
 # loading json data
 json_data = json.load(data_str)
 
-ipFormat = json_data["flows"]["ip-format"]
-numNodes = int(json_data["flows"]["nodes-num"])
+protocol = json_data["flows"]["protocol"]
 wireType = json_data["flows"]["wire-type"]
 portStart = int(json_data["flows"]["initial-port"])
 
@@ -26,12 +25,17 @@ outFlowPattern = []
 portPattern = []
 protocolPattern = []
 
-outgoing_patterns =  json_data["flows"]["outgoing-patterns"]
-for outgoing_pattern in outgoing_patterns:
-	outFlowPattern.append(int(outgoing_pattern["relative-node"]))
-	portPattern.append(int(outgoing_pattern["relative-port"]))
-	protocolPattern.append(outgoing_pattern["protocol"])
-	
+traffic_nodes =  json_data["flows"]["traffic-nodes"]
+numNodes = len(traffic_nodes)
+
+for nodeNum in range(1, numNodes):
+	outFlowPattern.append(nodeNum)
+        portPattern.append(nodeNum)
+	protocolPattern.append(protocol)
+print outFlowPattern
+print portPattern
+print protocolPattern
+
 ### end of reading configuration
 
 #numNodes = int(sys.argv[1])
@@ -51,7 +55,6 @@ for outgoing_pattern in outgoing_patterns:
 #portPattern = [0, 1, 2]
 
 #add a protocolPattern, where 0 is udp and 1 is tcp
-#protocolPattern = ["UDP","UDP","UDP","UDP","UDP","UDP","UDP","UDP","UDP"]
 #protocolPattern = ["UDP","UDP","UDP","UDP","UDP","UDP","UDP","UDP","UDP","UDP","UDP","UDP"]
 
 # outFlowHash and inFlowHash are hash tables to store all send and listen communications specifying nodes and ports involved
@@ -65,6 +68,8 @@ for node in range(1, numNodes + 1):
         outFlowHash[node] = []
     for nodeIndex in outFlowPattern:
         receivingNode = (node + nodeIndex) % numNodes
+#	print 'node : ', node, '  nodeIndex: ', nodeIndex, ' numNodes: ' , numNodes
+#	print 'receivingNode: ', receivingNode
         if receivingNode == 0:
             receivingNode = numNodes
         if receivingNode not in inFlowHash: 
@@ -72,7 +77,9 @@ for node in range(1, numNodes + 1):
 
     # process and store comunications data: outflow
     for index in range(len(outFlowPattern)):
+#	print 'node : ', node,' outFlowPattern[index]: ', outFlowPattern[index]
         receivingNode = (node + outFlowPattern[index]) % numNodes
+#	print 'receivingNode: ', receivingNode
         if receivingNode == 0:
             receivingNode = numNodes
         outFlowHash[node].append((receivingNode, portStart + portPattern[index],protocolPattern[index]))
@@ -100,10 +107,7 @@ for hashkey in outFlowHash:
 	f.write("\n")
     
 	for pairIndex in range(len(sendingTo)):
-	 	offset = 0	
-		if "wired" in wireType:
-			offset = 10
-		destination = " DST " + ipFormat.replace("X",str(offset + sendingTo[pairIndex][0]))
+		destination = " DST " + traffic_nodes[int(sendingTo[pairIndex][0])-1]
 		f.write("30.0 ON " + str(index) + " " + str(sendingTo[pairIndex][2]) + destination + "/" + str(sendingTo[pairIndex][1]) + " PERIODIC [50.0 1280]\n")
 		index += 1
     
@@ -115,4 +119,3 @@ print outFlowHash
 print "\n"
 print "INFLOW HASH"
 print inFlowHash
-
