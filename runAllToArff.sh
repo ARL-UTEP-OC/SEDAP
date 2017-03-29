@@ -109,9 +109,12 @@ for dir in `ls -d */`; do
 		echo "@data" >> res.arff
 
 		attackerIP=`ls | grep capture | grep -v mgen | cut -d'.' -f1`
-		$scriptDir/netStateBuilder.py 30 30 $attackerIP >> res.arff
-		$scriptDir/netStateBuilder.py 30 30 $attackerIP >> ../all.arff
+		netmask=`pwd | cut -d '_' -f9`
+		echo $netmask
+		$scriptDir/netStateBuilder.py 30 30 $attackerIP $netmask>> res.arff
+		$scriptDir/netStateBuilder.py 30 30 $attackerIP $netmask>> ../all.arff
 
 		cd ../
+		break
 	fi
 done

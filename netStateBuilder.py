@@ -4,17 +4,15 @@ import thread
 import sys
 import commands
 import ast
+import re
 import networkx as nx
+from netaddr import IPNetwork, IPAddress
 
 nBeforeAttack = sys.argv[1]
 mAfterAttack = sys.argv[2]
-attackerFile = sys.argv[3] # Sould be in x_x_x_x format # NEED TO CHANGE CAPTURE FILES TO BE IP BASED
+attackerFile = sys.argv[3] # Sould be in x_x_x_x format 
+netmask = sys.argv[4]
 attackNodeIP = attackerFile.replace(".","_")
-
-#if "wireless" in wireType:
-#	attackNodeIP = "10.0.0."+ attackNodeNum
-#else:
-#	attackNodeIP = str(int(attackNodeNum)+10) + ".0.0.2"
 
 
 #output: 
@@ -71,6 +69,8 @@ gateways = {}
 #---pending---:
 #recoverTime
 #iDstSpoofed, isSrcAttacker, secondsUntilHit
+target = open("/root/Desktop/test.txt", 'w')
+
 
 
 def getAttackerPerspective():
@@ -82,7 +82,7 @@ def getAttackerPerspective():
     global attackNodeIP
     global attackerFile
     global G
-    
+    global target
     statesNBeforeAttack = []  
     #need to open the attacker files first
     attackerFile = open(attackerFile + '.capture')
@@ -96,9 +96,11 @@ def getAttackerPerspective():
         lineNum = lineNum +1
         time = int(ast.literal_eval(line.split(";")[0]))
         flows = ast.literal_eval(line.split(";")[1])
+        target.write("FLOWS: "+str(flows))
         routesPrev = routes
-        routes = ast.literal_eval(line.split(";")[2])
+        routes = ast.literal_eval(line.split(";")[2]) # NO ROUTES BEING GIVEN! ---------- SHOULD BE TAKEN CARE OF BY MAKING ALL ROUTERS
         attackRunning = line.split(";")[3]
+        target.write("\n"+str(routes)+"\n")
 
         #get all network bypass n before attack from flows:
         if attackRunning.startswith("no") and lineNum < len(lines):
@@ -155,7 +157,7 @@ def getNonAttackerPerspective(): #next open the non-attackers files and fill out
         fileStatesDuringAttack = []
         fileStatesMAfterAttack = []
         numAttackLines = 0
-        lines = nonAttackerFile.readlines()[2:-2] #exclude last line (may be corrupt).
+        lines = nonAttackerFile.readlines()[2:-1] #exclude last line (may be corrupt).
 
         for line in lines:
             elements = len(line.split(";"))
@@ -166,8 +168,7 @@ def getNonAttackerPerspective(): #next open the non-attackers files and fill out
 
             attackRunning = line.split(";")[6]
                 
-            if state == "before":              
-                #get all network bypass n before attack from flows:
+            if state == "before":          
                 if attackRunning.startswith("no"):
 					
                     #populate routes and gateways:
@@ -180,7 +181,7 @@ def getNonAttackerPerspective(): #next open the non-attackers files and fill out
                             gateways[(nodeFromFilename,sRoute)] = nonAttackerRoutesSingle[sRoute][1]
                             if nonAttackerRoutesSingle[sRoute][1] != "0.0.0.0":
                                 G.add_edge(nodeFromFilename,nonAttackerRoutesSingle[sRoute][1])
-
+                                
                     if len(fileStatesNBeforeAttack) >= int(nBeforeAttack):
                         fileStatesNBeforeAttack.pop()
                     fileStatesNBeforeAttack.append(flows)
@@ -226,7 +227,7 @@ def getNonAttackerPerspective(): #next open the non-attackers files and fill out
                                     nonAttackerFlowsAfterAttack[flow] = allFlows[flow]
                                 else:
                                     nonAttackerFlowsAfterAttack[flow] = (allFlows[flow][0]+nonAttackerFlowsAfterAttack[flow][0],allFlows[flow][1]+nonAttackerFlowsAfterAttack[flow][1],allFlows[flow][2]+nonAttackerFlowsAfterAttack[flow][2],allFlows[flow][3]+nonAttackerFlowsAfterAttack[flow][3],allFlows[flow][4])
-        
+
 def calcBeforeAttackAvgs():   
     global nonAttackerFlowsBeforeAttack
 
@@ -283,16 +284,28 @@ def calcPassThroughs():
     global nonAttackerFlowsBeforeAttack
     global attackerPathsSeen
     global passThroughsBefore
-    
+    global target
     for flow in nonAttackerFlowsBeforeAttack:
         fromHop = "*"
         toHop = "*"
-        if flow[0].split("_")[0] in routes:
-            fromHop = routes[flow[0].split("_")[0]][0]
-        if flow[0].split("_")[1] in routes:
-            toHop = routes[flow[0].split("_")[1]][0]
-
-        if (flow[0],flow[1]) in attackerPathsSeen: 
+        toIP = flow[0].split("_")[1]
+        fromIP = flow[0].split("_")[0]
+        ipToRange = IPNetwork(toIP + "/" + netmask)
+        ipFromRange = IPNetwork(fromIP + "/" + netmask)
+        
+        target.write("nonattacker flows: "+str(nonAttackerFlowsBeforeAttack))
+        
+        #if fromIP not in routes and IPAddress(fromIP) in ipFromRange:
+         #   fromHop = ipToRange[0]  #Not changing for wired scenarios------------------------------------------------
+        if fromIP in routes:
+            fromHop = routes[fromIP][0]
+        target.write("\n toip:" +toIP + "\n") 
+        if toIP not in routes and IPAddress(toIP) in ipToRange:
+            toIP = ipFromRange[0]
+        if toIP in routes:
+            toHop = routes[toIP][0]
+        target.write("\n fromhop: "+ fromHop +" tohop: " + toHop + "\n" + "routes: " + str(routes))    
+        if (flow[0],flow[1]) in attackerPathsSeen: # CHECK ALL THREE IN TEST.TXT!---------------------
             passThroughsBefore[(flow[0],flow[1])] = ("true",flow[0].split("_")[0],fromHop,flow[0].split("_")[1],toHop)
         else:
             passThroughsBefore[(flow[0],flow[1])] = ("false",flow[0].split("_")[0],fromHop,flow[0].split("_")[1],toHop)
@@ -317,12 +330,25 @@ def buildHopTraff():
 
     for flow in nonAttackerFlowsBeforeAttack:
         fromHop = passThroughsBefore[(flow[0],flow[1])][2]
+        #target.write("\n passthroughbefore" + str(passThroughsBefore) +"\n nonattackerflowsbeforeattack: "+ str(nonAttackerFlowsBeforeAttack) + "\n flow 1 and 2 " + str(flow[0])+"---"+str(flow[1]) +"\n")
+        
         toHop = passThroughsBefore[(flow[0],flow[1])][4]
-        if (flow[0].split("_")[0],flow[0].split("_")[1]) not in nonAttackerRoutes:
-            dist = "*"
-        else: 
-            dist = nonAttackerRoutes[flow[0].split("_")[0],flow[0].split("_")[1]]
 
+        fromIP = flow[0].split("_")[0]
+        toIP = flow[0].split("_")[1] #may contain x.x.x.n format
+        ipRange = IPNetwork(toIP + "/" + netmask)
+        
+        #see if ip must be modified (nonAttackerRoutes may contain x.x.x.0 format if wired)
+        if IPAddress(toIP) in ipRange and (fromIP, toIP) not in nonAttackerRoutes:
+			toIP = ipRange[0]
+		
+		#check again with new ip value
+        if (fromIP, toIP) in nonAttackerRoutes: 
+            dist = nonAttackerRoutes[fromIP,toIP] 
+        else: 
+            dist = "*"
+
+        target.write("nonattackroutes: "+ str(nonAttackerRoutes)+"\n"+"RESULTS: " + str(toHop) + "---" + str(fromHop) +"---" + str(dist))
         if not fromHop == "*" and not toHop == "*" and not dist == "*": 
 
             type = flow[1]
@@ -451,7 +477,7 @@ def hasAltPath(fromNode,toNode,nodeToRemove):
     if not nx.has_path(temp,fromNode,toNode):
         return "false"
     return "true"
-    
+
 getAttackerPerspective()
 getNonAttackerPerspective()
 calcBeforeAttackAvgs()
@@ -462,7 +488,7 @@ getNonAttackerLossAfterAttack()
 
 calcPassThroughs()
 buildHopTraff()
-
+target.close() 
 print instance
 
 
