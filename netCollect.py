@@ -125,6 +125,3 @@ while 1:
 	processLines()
     lines.append(line)
 #        time.sleep(0) #sleep for a specified amount of time.
-
-
-

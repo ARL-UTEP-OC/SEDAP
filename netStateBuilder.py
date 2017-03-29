@@ -8,8 +8,14 @@ import networkx as nx
 
 nBeforeAttack = sys.argv[1]
 mAfterAttack = sys.argv[2]
-attackNodeNum = sys.argv[3]
-wireType = sys.argv[4]
+attackerFile = sys.argv[3] # Sould be in x_x_x_x format # NEED TO CHANGE CAPTURE FILES TO BE IP BASED
+attackNodeIP = attackerFile.replace(".","_")
+
+#if "wireless" in wireType:
+#	attackNodeIP = "10.0.0."+ attackNodeNum
+#else:
+#	attackNodeIP = str(int(attackNodeNum)+10) + ".0.0.2"
+
 
 #output: 
 #1. fromHop
@@ -60,8 +66,6 @@ gateways = {}
 #passThroughsDuring = {}
 #passThroughsAfter = {}
 
-attackNodeIP = ""
-
 #fromHop, toHop,#hopsDataTravels, traffType, PacketsSeenBeforeAttack
 #attack, numPackets deviation during attack, passthrough, deviationAfterAttack 
 #---pending---:
@@ -76,19 +80,17 @@ def getAttackerPerspective():
     global routes
     global gateways
     global attackNodeIP
+    global attackerFile
     global G
     
     statesNBeforeAttack = []  
     #need to open the attacker files first
-    attackerFile = open('n'+attackNodeNum+'.capture')
+    attackerFile = open(attackerFile + '.capture')
     lines = attackerFile.readlines()[2:-1]
     lineNum = 0
+
+
     #now populate the attacker's gateways:
-    if "wireless" in wireType:
-        attackNodeIP = "10.0.0."+ attackNodeNum
-    else:
-        attackNodeIP = str(int(attackNodeNum)+10) + ".0.0.2"
-#    print "Attacker: ", attackNodeIP
 
     for line in lines:
         lineNum = lineNum +1
@@ -140,46 +142,40 @@ def getNonAttackerPerspective(): #next open the non-attackers files and fill out
     global nonAttackerFlowsAfterAttack
     global nonAttackerRoutes
     global attackName
-    global attackNodeNum
     global G
     
     sysNonAttackerFiles = commands.getoutput("ls *.mgencapture")
     
     for sysNonAttackerFile in sysNonAttackerFiles.split("\n"):
         state = "before"
-        nodeNum = sysNonAttackerFile.split(".")[0].split("n")[1]
-        if "wireless" in wireType:
-            nodeFromFilename = "10.0.0."+nodeNum
-        else:
-            nodeFromFilename = str(int(nodeNum)+10) + ".0.0.2"
-#        print "Victim " , nodeFromFilename 
+        nodeFromFilename = sysNonAttackerFile.split(".")[0].replace("_",".")
         nonAttackerFiles.append(sysNonAttackerFile)
         nonAttackerFile = open(sysNonAttackerFile)
         fileStatesNBeforeAttack = []
         fileStatesDuringAttack = []
         fileStatesMAfterAttack = []
         numAttackLines = 0
-        lines = nonAttackerFile.readlines()[2:-1]
+        lines = nonAttackerFile.readlines()[2:-2] #exclude last line (may be corrupt).
 
         for line in lines:
+            elements = len(line.split(";"))
+            if elements < 8:
+                continue
             time = int(ast.literal_eval(line.split(";")[0]))
             flows = ast.literal_eval(line.split(";")[1])
 
             attackRunning = line.split(";")[6]
-
-            #nonAttackerFlowsBeforeAttack = {}
-            #nonAttackerFlowsDuringAttack = {}
-            #nonAttackerFlowsAfterAttack = {}
                 
             if state == "before":              
                 #get all network bypass n before attack from flows:
                 if attackRunning.startswith("no"):
-                    
+					
                     #populate routes and gateways:
                     nonAttackerRoutesSingle = ast.literal_eval(line.split(";")[7])
                     
                     for sRoute in nonAttackerRoutesSingle:
-                        nonAttackerRoutes[(nodeFromFilename,sRoute)] = nonAttackerRoutesSingle[sRoute][0]
+                        nonAttackerRoutes[(nodeFromFilename,sRoute)] = nonAttackerRoutesSingle[sRoute][0] 
+
                         for sRoute in nonAttackerRoutesSingle:
                             gateways[(nodeFromFilename,sRoute)] = nonAttackerRoutesSingle[sRoute][1]
                             if nonAttackerRoutesSingle[sRoute][1] != "0.0.0.0":
@@ -214,9 +210,6 @@ def getNonAttackerPerspective(): #next open the non-attackers files and fill out
                                 nonAttackerFlowsDuringAttack[flow] = (allFlows[flow][0],allFlows[flow][1],allFlows[flow][2],allFlows[flow][3],allFlows[flow][4],numAttackLines)
                             else:
                                 nonAttackerFlowsDuringAttack[flow] = (allFlows[flow][0]+nonAttackerFlowsDuringAttack[flow][0],allFlows[flow][1]+nonAttackerFlowsDuringAttack[flow][1],allFlows[flow][2]+nonAttackerFlowsDuringAttack[flow][2],allFlows[flow][3]+nonAttackerFlowsDuringAttack[flow][3],allFlows[flow][4],numAttackLines)
-                    #for flow in nonAttackerFlowsDuringAttack:
-                    #    print "During", flow,nonAttackerFlowsDuringAttack[flow],"len",len(nonAttackerFlowsDuringAttack[flow]),sysNonAttackerFile,numAttackLines
-                    #print "First LINe for After: ", line
             if state == "after":
                 
                 #now I need to calculate which I'm missing every second?
@@ -233,15 +226,13 @@ def getNonAttackerPerspective(): #next open the non-attackers files and fill out
                                     nonAttackerFlowsAfterAttack[flow] = allFlows[flow]
                                 else:
                                     nonAttackerFlowsAfterAttack[flow] = (allFlows[flow][0]+nonAttackerFlowsAfterAttack[flow][0],allFlows[flow][1]+nonAttackerFlowsAfterAttack[flow][1],allFlows[flow][2]+nonAttackerFlowsAfterAttack[flow][2],allFlows[flow][3]+nonAttackerFlowsAfterAttack[flow][3],allFlows[flow][4])
-#        if numAttackLines < 10:
-#            print "!!!!ERROR",attackNodeNum,attackName,sysNonAttackerFile
         
 def calcBeforeAttackAvgs():   
     global nonAttackerFlowsBeforeAttack
 
     for flow in nonAttackerFlowsBeforeAttack:
         nonAttackerFlowsBeforeAttack[flow] = (nonAttackerFlowsBeforeAttack[flow][0]/float(nBeforeAttack),nonAttackerFlowsBeforeAttack[flow][1]/float(nBeforeAttack),nonAttackerFlowsBeforeAttack[flow][2]/float(nBeforeAttack),nonAttackerFlowsBeforeAttack[flow][3]/float(nBeforeAttack),nonAttackerFlowsBeforeAttack[flow][4])
-    
+        
 def calcDuringAttackAvgs():
     global numAttackLines
     global nonAttackerFlowsDuringAttack
@@ -329,14 +320,15 @@ def buildHopTraff():
         toHop = passThroughsBefore[(flow[0],flow[1])][4]
         if (flow[0].split("_")[0],flow[0].split("_")[1]) not in nonAttackerRoutes:
             dist = "*"
-        else: dist =nonAttackerRoutes[flow[0].split("_")[0],flow[0].split("_")[1]]
+        else: 
+            dist = nonAttackerRoutes[flow[0].split("_")[0],flow[0].split("_")[1]]
 
-        if not fromHop == "*" and not toHop == "*" and not dist == "*":
+        if not fromHop == "*" and not toHop == "*" and not dist == "*": 
+
             type = flow[1]
             if type == "TCP" or type == "UDP":
-                #print "checking passthrough",flow[0].split("_")[0],attackNodeIP,flow[0].split("_")[1]
+
                 tmpPassthrough = bBetweenAandC(flow[0].split("_")[0],attackNodeIP,flow[0].split("_")[1])
-                #print tmpPassthrough
                 passThrough = passThroughsBefore[(flow[0],flow[1])][0]
                   
                 beforeDelay = nonAttackerFlowsBeforeAttack[flow][0]
@@ -407,10 +399,11 @@ def buildHopTraff():
                 if int(afterNumPackets) > 25:
                     afterLinkLost = "true"
                 else: afterLinkLost = "false"
-                instance += commands.getoutput("pwd").strip('\n')+","+str(attackNodeNum)+","+str(flow[0])+","+str(fromHop)+","+str(toHop)+","+str(type)+","+str(dist)+","+str(tmpPassthrough)+","+str(beforeDelay)+","+str(beforeMissed)+","+str(beforeOOO)+","+str(beforeNumPackets)+","+str(duringDelay)+","+str(duringMissed)+","+str(duringOOO)+","+str(duringNumPackets)+","+str(afterDelay)+","+str(afterMissed)+","+str(afterOOO)+","+str(afterNumPackets)+","+str(srcIsSpoofed)+","+str(destIsSpoofed)+","+str(hopsToSpoofed)+","+str(duringLinkLost)+","+str(afterLinkLost)+","+str(attackName) +","+str(hopsFromSpoofedToDest)+ ","+str(attackerCloserToDestThanSpoofed)+","+str(isSpoofedBetweenAttacker)+","+str(isDstBetweenSpoofedAndAttacker)+","+str(isSpoofedBetweenAttackergw)+","+str(isDstBetweenSpoofedAndAttackergw)+","+str(isAttackerBetweenSpoofedAndDst)+","+str(isAttackerBetweenSpoofedAndDstgw)+","+str(isSrcBetweenSpoofedAndDst)+","+str(isSrcBetweenSpoofedAndDstgw)+","+str(hasAltPath(flow[0].split("_")[0],flow[0].split("_")[1],attackNodeIP))
+
+                instance += commands.getoutput("pwd").strip('\n')+","+attackNodeIP+","+str(flow[0])+","+str(fromHop)+","+str(toHop)+","+str(type)+","+str(dist)+","+str(tmpPassthrough)+","+str(beforeDelay)+","+str(beforeMissed)+","+str(beforeOOO)+","+str(beforeNumPackets)+","+str(duringDelay)+","+str(duringMissed)+","+str(duringOOO)+","+str(duringNumPackets)+","+str(afterDelay)+","+str(afterMissed)+","+str(afterOOO)+","+str(afterNumPackets)+","+str(srcIsSpoofed)+","+str(destIsSpoofed)+","+str(hopsToSpoofed)+","+str(duringLinkLost)+","+str(afterLinkLost)+","+str(attackName) +","+str(hopsFromSpoofedToDest)+ ","+str(attackerCloserToDestThanSpoofed)+","+str(isSpoofedBetweenAttacker)+","+str(isDstBetweenSpoofedAndAttacker)+","+str(isSpoofedBetweenAttackergw)+","+str(isDstBetweenSpoofedAndAttackergw)+","+str(isAttackerBetweenSpoofedAndDst)+","+str(isAttackerBetweenSpoofedAndDstgw)+","+str(isSrcBetweenSpoofedAndDst)+","+str(isSrcBetweenSpoofedAndDstgw)+","+str(hasAltPath(flow[0].split("_")[0],flow[0].split("_")[1],attackNodeIP))
                 instance = instance.strip('\n')
                 instance += '\n'
-
+                
 def bBetweenAandC(a,b,c):
     global gateways
     done = "false"
@@ -448,6 +441,7 @@ def gatewaybBetweenAandC(a,b,c):
 
     
 def hasAltPath(fromNode,toNode,nodeToRemove):
+    return "true"
     global G
 
     if not nx.has_path(G,fromNode,toNode):

@@ -1,8 +1,3 @@
-#!/usr/bin/python
-
-# Generates .imn configurations to be passed in based on parameters given.
-# Currently capable of generating wired and wireless .imns
-
 import sys
 import os
 import commands
@@ -76,10 +71,9 @@ cd $SCRIPTDIR
 def insertMgen(node):
 
 	logPath = attackNodeNumber+"_"+startTime+"_"+duration+"_"+attackScriptPath+spoofNode
-	logPath+="_"+scenario+"_"+routingProtocol+"_"+wireTypeDir
+	logPath+="_"+scenario+"_"+routingProtocol+"_"+wireTypeDir+"_"+subnet
 	logPath = logPath.replace(".","_")
 	logPath = logPath.replace("/","_")
-	logPath += "_"+subnet
 	
 	mgenConfigs = """------
 mkdir """ + logPath + """
@@ -180,22 +174,16 @@ for node in range(1,maxNodes+1):
 	# Will insert services based on router or host
 	isRouter = True
 		
-	if not wired and inRange:
-		isRouter = True
+	#if not wired and inRange:
+	#	isRouter = True
 
-	elif wired:
-		if not inRange or nodeIsAttacker:
-			isRouter = True
-		else:
-			isRouter = False
+	#elif wired:
+	#	if not inRange or nodeIsAttacker:
+	#		isRouter = True
+	#	else:
+	#		isRouter = False
 
 	services = insertRoutingProtocol(isRouter)
 	subprocess.call(["./insertConfigs.sh", toFindService, services, str(node), path])
-
-
-toFindModel="""model host"""
-replaceModel="""model router"""
-
-subprocess.call(["./insertConfigs.sh", toFindModel, replaceModel, attackNodeNumber, path])
 
 subprocess.call(["./insertConfigs.sh", """------""", "", "0", path])

@@ -1,0 +1,2314 @@
+node n1 {
+    type router
+    model host
+    network-config {
+	hostname n1
+	!
+	interface eth0
+	 ip address 11.0.0.2/24
+	!
+    }
+    canvas c1
+    iconcoords {364.0 628.0}
+    labelcoords {364.0 660.0}
+    interface-peer {eth0 n11}
+    custom-config {
+	custom-config-id service:UserDefined:custom-post-config-commands.sh
+	custom-command custom-post-config-commands.sh
+	config {
+#!/bin/sh
+HN=`hostname`
+if [ `uname` = "FreeBSD" ]; then
+  SCRIPTDIR=/tmp/e0_$HN
+else SCRIPTDIR=/root/wired/
+fi
+cd $SCRIPTDIR
+mkdir 9_60_60_blackholeAttack_sh_wheel_OSPFv2_wired_255.255.255.128
+cd 9_60_60_blackholeAttack_sh_wheel_OSPFv2_wired_255.255.255.128
+
+#get ip of current
+hostnameLen=`expr length $HN`
+hostnameLen=`expr $hostnameLen - 1` 
+myIP="`expr substr $HN 2 $hostnameLen`.0.0.1" 
+
+#now insert attack script and mgen flush if node is attacker
+if [ `hostname` = n9 -o 9 = 0 ]
+then
+
+#start logging
+tshark -a duration:175 -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | /root/install/impactpredictionmodels_b1/impactpredictionmodels/netCollect.py /root/wired/9_60_60_blackholeAttack_sh_wheel_OSPFv2_wired_255.255.255.128 $myIP > $HN.capture &    
+
+mgen flush input /root/install/impactpredictionmodels_b1/impactpredictionmodels/flowGenerator/flows/flow`hostname`.mgn output /dev/null &
+
+(
+cat << 'EOF'
+#!/bin/bash
+
+startTime=$1
+pendingDuration=$2
+attackingNode=$3
+numberOfNodes=$4
+logPath=$5
+
+routingProtocol=`echo $logPath | cut -d'_' -f7 | cut -d 'v' -f1 | sed 's/./\L&/g'`
+subnet=`echo $logPath | cut -d '_' -f9`
+
+# Necessary, otherwise working directory is seen as logging directory instead of node
+cd "$SESSION_DIR/$NODE_NAME.conf"
+
+bringDownInterfaces()
+{
+sleep $pendingDuration
+for ((nodeToSpoof=1;nodeToSpoof <= numberOfNodes; nodeToSpoof++))
+	do
+		if [ $nodeToSpoof != $attackingNode ]
+			then
+				ifconfig "eth0:$nodeToSpoof" down
+		fi
+	done
+}
+
+identifyRoutingProtocol()
+{
+	# Now check the routing protocol running  
+	cd var.run.quagga/
+	routingProcotolsRunning=`ls -1 | grep -v zebra.pid | grep pid | wc -l`	
+	if [ "$routingProcotolsRunning" -ne 1 ]
+	then
+		echo "spoof_"$ipToSpoof "Error: Multiple Routing Procols Running $routingProcotolsRunning" > $logPath/attack.txt	
+		echo "Multiple routing protocols"
+		exit
+	fi
+	
+	#if ospf is used
+	if [[ $routingProtocol == *"ospf"* ]]
+	then
+		sleep 5
+		vtysh <<< $'configure terminal \n router ospf \n redistribute connected'
+		echo "sent vtysh cmd"
+	fi
+
+}
+
+
+bringUpInterfaces()
+{
+	for ((nodeToSpoof=1;nodeToSpoof <= numberOfNodes; nodeToSpoof++))
+	do
+		
+		if [ $nodeToSpoof != $attackingNode ]
+		then
+			#check for protocol
+			if [[ -n "$6" && "IPv6" -eq "$6" ]]
+				then
+				protocol="IPv6"
+				ipToSpoof="2001:"`expr 10 + $nodeToSpoof`"::2"	
+				ifconfig eth0:$nodeToSpoof inet6 add "$ipToSpoof/120" up
+			else
+				protocol="IPv4" 
+				ipToSpoof=`expr 10 + $nodeToSpoof`".0.0.2"
+				ifconfig eth0:$nodeToSpoof $ipToSpoof netmask $subnet up
+			fi
+			echo "$protocol" ":" "$ipToSpoof"
+			echo "HNA $ipToSpoof 32" >> $logPath/tmp.txt
+		fi
+	done	
+}
+
+echo "none" > $logPath/attack.txt
+echo "sleep startime:" "$startTime"
+sleep $startTime
+
+if [ $pendingDuration -gt 0 ]
+	then
+		echo "starting blackhole"
+		echo "blackHole" > $logPath/attack.txt
+
+		bringUpInterfaces
+		identifyRoutingProtocol
+		sleep $pendingDuration
+		bringDownInterfaces
+fi
+echo "none" > $logPath/attack.txt
+
+EOF
+) > attack.sh
+
+chmod 755 attack.sh
+
+./attack.sh 60 60 9 10 /root/wired/9_60_60_blackholeAttack_sh_wheel_OSPFv2_wired_255.255.255.128 
+
+else
+	echo `hostname` >> /root/wired/9_60_60_blackholeAttack_sh_wheel_OSPFv2_wired_255.255.255.128/check.txt
+	mgen flush input /root/install/impactpredictionmodels_b1/impactpredictionmodels/flowGenerator/flows/flow`hostname`.mgn | /root/install/impactpredictionmodels_b1/impactpredictionmodels/mgenCollect.py /root/wired/9_60_60_blackholeAttack_sh_wheel_OSPFv2_wired_255.255.255.128 > `hostname`.mgencapture &
+fi
+
+	}
+	}
+    custom-config {
+	custom-config-id service:UserDefined
+	custom-command UserDefined
+	config {
+	files=('custom-post-config-commands.sh', )
+	startidx=120
+	cmdup=('sh custom-post-config-commands.sh', )
+    }
+    }
+	services {DefaultRoute SSH UserDefined
+	}
+}
+
+node n2 {
+    type router
+    model host
+    network-config {
+	hostname n2
+	!
+	interface eth0
+	 ip address 12.0.0.2/24
+	!
+    }
+    canvas c1
+    iconcoords {600.0 70.0}
+    labelcoords {600.0 102.0}
+    interface-peer {eth0 n12}
+    custom-config {
+	custom-config-id service:UserDefined:custom-post-config-commands.sh
+	custom-command custom-post-config-commands.sh
+	config {
+#!/bin/sh
+HN=`hostname`
+if [ `uname` = "FreeBSD" ]; then
+  SCRIPTDIR=/tmp/e0_$HN
+else SCRIPTDIR=/root/wired/
+fi
+cd $SCRIPTDIR
+mkdir 9_60_60_blackholeAttack_sh_wheel_OSPFv2_wired_255.255.255.128
+cd 9_60_60_blackholeAttack_sh_wheel_OSPFv2_wired_255.255.255.128
+
+#get ip of current
+hostnameLen=`expr length $HN`
+hostnameLen=`expr $hostnameLen - 1` 
+myIP="`expr substr $HN 2 $hostnameLen`.0.0.1" 
+
+#now insert attack script and mgen flush if node is attacker
+if [ `hostname` = n9 -o 9 = 0 ]
+then
+
+#start logging
+tshark -a duration:175 -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | /root/install/impactpredictionmodels_b1/impactpredictionmodels/netCollect.py /root/wired/9_60_60_blackholeAttack_sh_wheel_OSPFv2_wired_255.255.255.128 $myIP > $HN.capture &    
+
+mgen flush input /root/install/impactpredictionmodels_b1/impactpredictionmodels/flowGenerator/flows/flow`hostname`.mgn output /dev/null &
+
+(
+cat << 'EOF'
+#!/bin/bash
+
+startTime=$1
+pendingDuration=$2
+attackingNode=$3
+numberOfNodes=$4
+logPath=$5
+
+routingProtocol=`echo $logPath | cut -d'_' -f7 | cut -d 'v' -f1 | sed 's/./\L&/g'`
+subnet=`echo $logPath | cut -d '_' -f9`
+
+# Necessary, otherwise working directory is seen as logging directory instead of node
+cd "$SESSION_DIR/$NODE_NAME.conf"
+
+bringDownInterfaces()
+{
+sleep $pendingDuration
+for ((nodeToSpoof=1;nodeToSpoof <= numberOfNodes; nodeToSpoof++))
+	do
+		if [ $nodeToSpoof != $attackingNode ]
+			then
+				ifconfig "eth0:$nodeToSpoof" down
+		fi
+	done
+}
+
+identifyRoutingProtocol()
+{
+	# Now check the routing protocol running  
+	cd var.run.quagga/
+	routingProcotolsRunning=`ls -1 | grep -v zebra.pid | grep pid | wc -l`	
+	if [ "$routingProcotolsRunning" -ne 1 ]
+	then
+		echo "spoof_"$ipToSpoof "Error: Multiple Routing Procols Running $routingProcotolsRunning" > $logPath/attack.txt	
+		echo "Multiple routing protocols"
+		exit
+	fi
+	
+	#if ospf is used
+	if [[ $routingProtocol == *"ospf"* ]]
+	then
+		sleep 5
+		vtysh <<< $'configure terminal \n router ospf \n redistribute connected'
+		echo "sent vtysh cmd"
+	fi
+
+}
+
+
+bringUpInterfaces()
+{
+	for ((nodeToSpoof=1;nodeToSpoof <= numberOfNodes; nodeToSpoof++))
+	do
+		
+		if [ $nodeToSpoof != $attackingNode ]
+		then
+			#check for protocol
+			if [[ -n "$6" && "IPv6" -eq "$6" ]]
+				then
+				protocol="IPv6"
+				ipToSpoof="2001:"`expr 10 + $nodeToSpoof`"::2"	
+				ifconfig eth0:$nodeToSpoof inet6 add "$ipToSpoof/120" up
+			else
+				protocol="IPv4" 
+				ipToSpoof=`expr 10 + $nodeToSpoof`".0.0.2"
+				ifconfig eth0:$nodeToSpoof $ipToSpoof netmask $subnet up
+			fi
+			echo "$protocol" ":" "$ipToSpoof"
+			echo "HNA $ipToSpoof 32" >> $logPath/tmp.txt
+		fi
+	done	
+}
+
+echo "none" > $logPath/attack.txt
+echo "sleep startime:" "$startTime"
+sleep $startTime
+
+if [ $pendingDuration -gt 0 ]
+	then
+		echo "starting blackhole"
+		echo "blackHole" > $logPath/attack.txt
+
+		bringUpInterfaces
+		identifyRoutingProtocol
+		sleep $pendingDuration
+		bringDownInterfaces
+fi
+echo "none" > $logPath/attack.txt
+
+EOF
+) > attack.sh
+
+chmod 755 attack.sh
+
+./attack.sh 60 60 9 10 /root/wired/9_60_60_blackholeAttack_sh_wheel_OSPFv2_wired_255.255.255.128 
+
+else
+	echo `hostname` >> /root/wired/9_60_60_blackholeAttack_sh_wheel_OSPFv2_wired_255.255.255.128/check.txt
+	mgen flush input /root/install/impactpredictionmodels_b1/impactpredictionmodels/flowGenerator/flows/flow`hostname`.mgn | /root/install/impactpredictionmodels_b1/impactpredictionmodels/mgenCollect.py /root/wired/9_60_60_blackholeAttack_sh_wheel_OSPFv2_wired_255.255.255.128 > `hostname`.mgencapture &
+fi
+
+	}
+	}
+    custom-config {
+	custom-config-id service:UserDefined
+	custom-command UserDefined
+	config {
+	files=('custom-post-config-commands.sh', )
+	startidx=120
+	cmdup=('sh custom-post-config-commands.sh', )
+    }
+    }
+	services {DefaultRoute SSH UserDefined
+	}
+}
+
+node n3 {
+    type router
+    model host
+    network-config {
+	hostname n3
+	!
+	interface eth0
+	 ip address 13.0.0.2/24
+	!
+    }
+    canvas c1
+    iconcoords {778.0 132.0}
+    labelcoords {778.0 164.0}
+    interface-peer {eth0 n13}
+    custom-config {
+	custom-config-id service:UserDefined:custom-post-config-commands.sh
+	custom-command custom-post-config-commands.sh
+	config {
+#!/bin/sh
+HN=`hostname`
+if [ `uname` = "FreeBSD" ]; then
+  SCRIPTDIR=/tmp/e0_$HN
+else SCRIPTDIR=/root/wired/
+fi
+cd $SCRIPTDIR
+mkdir 9_60_60_blackholeAttack_sh_wheel_OSPFv2_wired_255.255.255.128
+cd 9_60_60_blackholeAttack_sh_wheel_OSPFv2_wired_255.255.255.128
+
+#get ip of current
+hostnameLen=`expr length $HN`
+hostnameLen=`expr $hostnameLen - 1` 
+myIP="`expr substr $HN 2 $hostnameLen`.0.0.1" 
+
+#now insert attack script and mgen flush if node is attacker
+if [ `hostname` = n9 -o 9 = 0 ]
+then
+
+#start logging
+tshark -a duration:175 -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | /root/install/impactpredictionmodels_b1/impactpredictionmodels/netCollect.py /root/wired/9_60_60_blackholeAttack_sh_wheel_OSPFv2_wired_255.255.255.128 $myIP > $HN.capture &    
+
+mgen flush input /root/install/impactpredictionmodels_b1/impactpredictionmodels/flowGenerator/flows/flow`hostname`.mgn output /dev/null &
+
+(
+cat << 'EOF'
+#!/bin/bash
+
+startTime=$1
+pendingDuration=$2
+attackingNode=$3
+numberOfNodes=$4
+logPath=$5
+
+routingProtocol=`echo $logPath | cut -d'_' -f7 | cut -d 'v' -f1 | sed 's/./\L&/g'`
+subnet=`echo $logPath | cut -d '_' -f9`
+
+# Necessary, otherwise working directory is seen as logging directory instead of node
+cd "$SESSION_DIR/$NODE_NAME.conf"
+
+bringDownInterfaces()
+{
+sleep $pendingDuration
+for ((nodeToSpoof=1;nodeToSpoof <= numberOfNodes; nodeToSpoof++))
+	do
+		if [ $nodeToSpoof != $attackingNode ]
+			then
+				ifconfig "eth0:$nodeToSpoof" down
+		fi
+	done
+}
+
+identifyRoutingProtocol()
+{
+	# Now check the routing protocol running  
+	cd var.run.quagga/
+	routingProcotolsRunning=`ls -1 | grep -v zebra.pid | grep pid | wc -l`	
+	if [ "$routingProcotolsRunning" -ne 1 ]
+	then
+		echo "spoof_"$ipToSpoof "Error: Multiple Routing Procols Running $routingProcotolsRunning" > $logPath/attack.txt	
+		echo "Multiple routing protocols"
+		exit
+	fi
+	
+	#if ospf is used
+	if [[ $routingProtocol == *"ospf"* ]]
+	then
+		sleep 5
+		vtysh <<< $'configure terminal \n router ospf \n redistribute connected'
+		echo "sent vtysh cmd"
+	fi
+
+}
+
+
+bringUpInterfaces()
+{
+	for ((nodeToSpoof=1;nodeToSpoof <= numberOfNodes; nodeToSpoof++))
+	do
+		
+		if [ $nodeToSpoof != $attackingNode ]
+		then
+			#check for protocol
+			if [[ -n "$6" && "IPv6" -eq "$6" ]]
+				then
+				protocol="IPv6"
+				ipToSpoof="2001:"`expr 10 + $nodeToSpoof`"::2"	
+				ifconfig eth0:$nodeToSpoof inet6 add "$ipToSpoof/120" up
+			else
+				protocol="IPv4" 
+				ipToSpoof=`expr 10 + $nodeToSpoof`".0.0.2"
+				ifconfig eth0:$nodeToSpoof $ipToSpoof netmask $subnet up
+			fi
+			echo "$protocol" ":" "$ipToSpoof"
+			echo "HNA $ipToSpoof 32" >> $logPath/tmp.txt
+		fi
+	done	
+}
+
+echo "none" > $logPath/attack.txt
+echo "sleep startime:" "$startTime"
+sleep $startTime
+
+if [ $pendingDuration -gt 0 ]
+	then
+		echo "starting blackhole"
+		echo "blackHole" > $logPath/attack.txt
+
+		bringUpInterfaces
+		identifyRoutingProtocol
+		sleep $pendingDuration
+		bringDownInterfaces
+fi
+echo "none" > $logPath/attack.txt
+
+EOF
+) > attack.sh
+
+chmod 755 attack.sh
+
+./attack.sh 60 60 9 10 /root/wired/9_60_60_blackholeAttack_sh_wheel_OSPFv2_wired_255.255.255.128 
+
+else
+	echo `hostname` >> /root/wired/9_60_60_blackholeAttack_sh_wheel_OSPFv2_wired_255.255.255.128/check.txt
+	mgen flush input /root/install/impactpredictionmodels_b1/impactpredictionmodels/flowGenerator/flows/flow`hostname`.mgn | /root/install/impactpredictionmodels_b1/impactpredictionmodels/mgenCollect.py /root/wired/9_60_60_blackholeAttack_sh_wheel_OSPFv2_wired_255.255.255.128 > `hostname`.mgencapture &
+fi
+
+	}
+	}
+    custom-config {
+	custom-config-id service:UserDefined
+	custom-command UserDefined
+	config {
+	files=('custom-post-config-commands.sh', )
+	startidx=120
+	cmdup=('sh custom-post-config-commands.sh', )
+    }
+    }
+	services {DefaultRoute SSH UserDefined
+	}
+}
+
+node n4 {
+    type router
+    model host
+    network-config {
+	hostname n4
+	!
+	interface eth0
+	 ip address 14.0.0.2/24
+	!
+    }
+    canvas c1
+    iconcoords {866.0 272.0}
+    labelcoords {866.0 304.0}
+    interface-peer {eth0 n14}
+    custom-config {
+	custom-config-id service:UserDefined:custom-post-config-commands.sh
+	custom-command custom-post-config-commands.sh
+	config {
+#!/bin/sh
+HN=`hostname`
+if [ `uname` = "FreeBSD" ]; then
+  SCRIPTDIR=/tmp/e0_$HN
+else SCRIPTDIR=/root/wired/
+fi
+cd $SCRIPTDIR
+mkdir 9_60_60_blackholeAttack_sh_wheel_OSPFv2_wired_255.255.255.128
+cd 9_60_60_blackholeAttack_sh_wheel_OSPFv2_wired_255.255.255.128
+
+#get ip of current
+hostnameLen=`expr length $HN`
+hostnameLen=`expr $hostnameLen - 1` 
+myIP="`expr substr $HN 2 $hostnameLen`.0.0.1" 
+
+#now insert attack script and mgen flush if node is attacker
+if [ `hostname` = n9 -o 9 = 0 ]
+then
+
+#start logging
+tshark -a duration:175 -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | /root/install/impactpredictionmodels_b1/impactpredictionmodels/netCollect.py /root/wired/9_60_60_blackholeAttack_sh_wheel_OSPFv2_wired_255.255.255.128 $myIP > $HN.capture &    
+
+mgen flush input /root/install/impactpredictionmodels_b1/impactpredictionmodels/flowGenerator/flows/flow`hostname`.mgn output /dev/null &
+
+(
+cat << 'EOF'
+#!/bin/bash
+
+startTime=$1
+pendingDuration=$2
+attackingNode=$3
+numberOfNodes=$4
+logPath=$5
+
+routingProtocol=`echo $logPath | cut -d'_' -f7 | cut -d 'v' -f1 | sed 's/./\L&/g'`
+subnet=`echo $logPath | cut -d '_' -f9`
+
+# Necessary, otherwise working directory is seen as logging directory instead of node
+cd "$SESSION_DIR/$NODE_NAME.conf"
+
+bringDownInterfaces()
+{
+sleep $pendingDuration
+for ((nodeToSpoof=1;nodeToSpoof <= numberOfNodes; nodeToSpoof++))
+	do
+		if [ $nodeToSpoof != $attackingNode ]
+			then
+				ifconfig "eth0:$nodeToSpoof" down
+		fi
+	done
+}
+
+identifyRoutingProtocol()
+{
+	# Now check the routing protocol running  
+	cd var.run.quagga/
+	routingProcotolsRunning=`ls -1 | grep -v zebra.pid | grep pid | wc -l`	
+	if [ "$routingProcotolsRunning" -ne 1 ]
+	then
+		echo "spoof_"$ipToSpoof "Error: Multiple Routing Procols Running $routingProcotolsRunning" > $logPath/attack.txt	
+		echo "Multiple routing protocols"
+		exit
+	fi
+	
+	#if ospf is used
+	if [[ $routingProtocol == *"ospf"* ]]
+	then
+		sleep 5
+		vtysh <<< $'configure terminal \n router ospf \n redistribute connected'
+		echo "sent vtysh cmd"
+	fi
+
+}
+
+
+bringUpInterfaces()
+{
+	for ((nodeToSpoof=1;nodeToSpoof <= numberOfNodes; nodeToSpoof++))
+	do
+		
+		if [ $nodeToSpoof != $attackingNode ]
+		then
+			#check for protocol
+			if [[ -n "$6" && "IPv6" -eq "$6" ]]
+				then
+				protocol="IPv6"
+				ipToSpoof="2001:"`expr 10 + $nodeToSpoof`"::2"	
+				ifconfig eth0:$nodeToSpoof inet6 add "$ipToSpoof/120" up
+			else
+				protocol="IPv4" 
+				ipToSpoof=`expr 10 + $nodeToSpoof`".0.0.2"
+				ifconfig eth0:$nodeToSpoof $ipToSpoof netmask $subnet up
+			fi
+			echo "$protocol" ":" "$ipToSpoof"
+			echo "HNA $ipToSpoof 32" >> $logPath/tmp.txt
+		fi
+	done	
+}
+
+echo "none" > $logPath/attack.txt
+echo "sleep startime:" "$startTime"
+sleep $startTime
+
+if [ $pendingDuration -gt 0 ]
+	then
+		echo "starting blackhole"
+		echo "blackHole" > $logPath/attack.txt
+
+		bringUpInterfaces
+		identifyRoutingProtocol
+		sleep $pendingDuration
+		bringDownInterfaces
+fi
+echo "none" > $logPath/attack.txt
+
+EOF
+) > attack.sh
+
+chmod 755 attack.sh
+
+./attack.sh 60 60 9 10 /root/wired/9_60_60_blackholeAttack_sh_wheel_OSPFv2_wired_255.255.255.128 
+
+else
+	echo `hostname` >> /root/wired/9_60_60_blackholeAttack_sh_wheel_OSPFv2_wired_255.255.255.128/check.txt
+	mgen flush input /root/install/impactpredictionmodels_b1/impactpredictionmodels/flowGenerator/flows/flow`hostname`.mgn | /root/install/impactpredictionmodels_b1/impactpredictionmodels/mgenCollect.py /root/wired/9_60_60_blackholeAttack_sh_wheel_OSPFv2_wired_255.255.255.128 > `hostname`.mgencapture &
+fi
+
+	}
+	}
+    custom-config {
+	custom-config-id service:UserDefined
+	custom-command UserDefined
+	config {
+	files=('custom-post-config-commands.sh', )
+	startidx=120
+	cmdup=('sh custom-post-config-commands.sh', )
+    }
+    }
+	services {DefaultRoute SSH UserDefined
+	}
+}
+
+node n5 {
+    type router
+    model host
+    network-config {
+	hostname n5
+	!
+	interface eth0
+	 ip address 15.0.0.2/24
+	!
+    }
+    canvas c1
+    iconcoords {828.0 397.0}
+    labelcoords {828.0 429.0}
+    interface-peer {eth0 n15}
+    custom-config {
+	custom-config-id service:UserDefined:custom-post-config-commands.sh
+	custom-command custom-post-config-commands.sh
+	config {
+#!/bin/sh
+HN=`hostname`
+if [ `uname` = "FreeBSD" ]; then
+  SCRIPTDIR=/tmp/e0_$HN
+else SCRIPTDIR=/root/wired/
+fi
+cd $SCRIPTDIR
+mkdir 9_60_60_blackholeAttack_sh_wheel_OSPFv2_wired_255.255.255.128
+cd 9_60_60_blackholeAttack_sh_wheel_OSPFv2_wired_255.255.255.128
+
+#get ip of current
+hostnameLen=`expr length $HN`
+hostnameLen=`expr $hostnameLen - 1` 
+myIP="`expr substr $HN 2 $hostnameLen`.0.0.1" 
+
+#now insert attack script and mgen flush if node is attacker
+if [ `hostname` = n9 -o 9 = 0 ]
+then
+
+#start logging
+tshark -a duration:175 -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | /root/install/impactpredictionmodels_b1/impactpredictionmodels/netCollect.py /root/wired/9_60_60_blackholeAttack_sh_wheel_OSPFv2_wired_255.255.255.128 $myIP > $HN.capture &    
+
+mgen flush input /root/install/impactpredictionmodels_b1/impactpredictionmodels/flowGenerator/flows/flow`hostname`.mgn output /dev/null &
+
+(
+cat << 'EOF'
+#!/bin/bash
+
+startTime=$1
+pendingDuration=$2
+attackingNode=$3
+numberOfNodes=$4
+logPath=$5
+
+routingProtocol=`echo $logPath | cut -d'_' -f7 | cut -d 'v' -f1 | sed 's/./\L&/g'`
+subnet=`echo $logPath | cut -d '_' -f9`
+
+# Necessary, otherwise working directory is seen as logging directory instead of node
+cd "$SESSION_DIR/$NODE_NAME.conf"
+
+bringDownInterfaces()
+{
+sleep $pendingDuration
+for ((nodeToSpoof=1;nodeToSpoof <= numberOfNodes; nodeToSpoof++))
+	do
+		if [ $nodeToSpoof != $attackingNode ]
+			then
+				ifconfig "eth0:$nodeToSpoof" down
+		fi
+	done
+}
+
+identifyRoutingProtocol()
+{
+	# Now check the routing protocol running  
+	cd var.run.quagga/
+	routingProcotolsRunning=`ls -1 | grep -v zebra.pid | grep pid | wc -l`	
+	if [ "$routingProcotolsRunning" -ne 1 ]
+	then
+		echo "spoof_"$ipToSpoof "Error: Multiple Routing Procols Running $routingProcotolsRunning" > $logPath/attack.txt	
+		echo "Multiple routing protocols"
+		exit
+	fi
+	
+	#if ospf is used
+	if [[ $routingProtocol == *"ospf"* ]]
+	then
+		sleep 5
+		vtysh <<< $'configure terminal \n router ospf \n redistribute connected'
+		echo "sent vtysh cmd"
+	fi
+
+}
+
+
+bringUpInterfaces()
+{
+	for ((nodeToSpoof=1;nodeToSpoof <= numberOfNodes; nodeToSpoof++))
+	do
+		
+		if [ $nodeToSpoof != $attackingNode ]
+		then
+			#check for protocol
+			if [[ -n "$6" && "IPv6" -eq "$6" ]]
+				then
+				protocol="IPv6"
+				ipToSpoof="2001:"`expr 10 + $nodeToSpoof`"::2"	
+				ifconfig eth0:$nodeToSpoof inet6 add "$ipToSpoof/120" up
+			else
+				protocol="IPv4" 
+				ipToSpoof=`expr 10 + $nodeToSpoof`".0.0.2"
+				ifconfig eth0:$nodeToSpoof $ipToSpoof netmask $subnet up
+			fi
+			echo "$protocol" ":" "$ipToSpoof"
+			echo "HNA $ipToSpoof 32" >> $logPath/tmp.txt
+		fi
+	done	
+}
+
+echo "none" > $logPath/attack.txt
+echo "sleep startime:" "$startTime"
+sleep $startTime
+
+if [ $pendingDuration -gt 0 ]
+	then
+		echo "starting blackhole"
+		echo "blackHole" > $logPath/attack.txt
+
+		bringUpInterfaces
+		identifyRoutingProtocol
+		sleep $pendingDuration
+		bringDownInterfaces
+fi
+echo "none" > $logPath/attack.txt
+
+EOF
+) > attack.sh
+
+chmod 755 attack.sh
+
+./attack.sh 60 60 9 10 /root/wired/9_60_60_blackholeAttack_sh_wheel_OSPFv2_wired_255.255.255.128 
+
+else
+	echo `hostname` >> /root/wired/9_60_60_blackholeAttack_sh_wheel_OSPFv2_wired_255.255.255.128/check.txt
+	mgen flush input /root/install/impactpredictionmodels_b1/impactpredictionmodels/flowGenerator/flows/flow`hostname`.mgn | /root/install/impactpredictionmodels_b1/impactpredictionmodels/mgenCollect.py /root/wired/9_60_60_blackholeAttack_sh_wheel_OSPFv2_wired_255.255.255.128 > `hostname`.mgencapture &
+fi
+
+	}
+	}
+    custom-config {
+	custom-config-id service:UserDefined
+	custom-command UserDefined
+	config {
+	files=('custom-post-config-commands.sh', )
+	startidx=120
+	cmdup=('sh custom-post-config-commands.sh', )
+    }
+    }
+	services {DefaultRoute SSH UserDefined
+	}
+}
+
+node n6 {
+    type router
+    model host
+    network-config {
+	hostname n6
+	!
+	interface eth0
+	 ip address 16.0.0.2/24
+	!
+    }
+    canvas c1
+    iconcoords {534.0 560.0}
+    labelcoords {534.0 592.0}
+    interface-peer {eth0 n16}
+    custom-config {
+	custom-config-id service:UserDefined:custom-post-config-commands.sh
+	custom-command custom-post-config-commands.sh
+	config {
+#!/bin/sh
+HN=`hostname`
+if [ `uname` = "FreeBSD" ]; then
+  SCRIPTDIR=/tmp/e0_$HN
+else SCRIPTDIR=/root/wired/
+fi
+cd $SCRIPTDIR
+mkdir 9_60_60_blackholeAttack_sh_wheel_OSPFv2_wired_255.255.255.128
+cd 9_60_60_blackholeAttack_sh_wheel_OSPFv2_wired_255.255.255.128
+
+#get ip of current
+hostnameLen=`expr length $HN`
+hostnameLen=`expr $hostnameLen - 1` 
+myIP="`expr substr $HN 2 $hostnameLen`.0.0.1" 
+
+#now insert attack script and mgen flush if node is attacker
+if [ `hostname` = n9 -o 9 = 0 ]
+then
+
+#start logging
+tshark -a duration:175 -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | /root/install/impactpredictionmodels_b1/impactpredictionmodels/netCollect.py /root/wired/9_60_60_blackholeAttack_sh_wheel_OSPFv2_wired_255.255.255.128 $myIP > $HN.capture &    
+
+mgen flush input /root/install/impactpredictionmodels_b1/impactpredictionmodels/flowGenerator/flows/flow`hostname`.mgn output /dev/null &
+
+(
+cat << 'EOF'
+#!/bin/bash
+
+startTime=$1
+pendingDuration=$2
+attackingNode=$3
+numberOfNodes=$4
+logPath=$5
+
+routingProtocol=`echo $logPath | cut -d'_' -f7 | cut -d 'v' -f1 | sed 's/./\L&/g'`
+subnet=`echo $logPath | cut -d '_' -f9`
+
+# Necessary, otherwise working directory is seen as logging directory instead of node
+cd "$SESSION_DIR/$NODE_NAME.conf"
+
+bringDownInterfaces()
+{
+sleep $pendingDuration
+for ((nodeToSpoof=1;nodeToSpoof <= numberOfNodes; nodeToSpoof++))
+	do
+		if [ $nodeToSpoof != $attackingNode ]
+			then
+				ifconfig "eth0:$nodeToSpoof" down
+		fi
+	done
+}
+
+identifyRoutingProtocol()
+{
+	# Now check the routing protocol running  
+	cd var.run.quagga/
+	routingProcotolsRunning=`ls -1 | grep -v zebra.pid | grep pid | wc -l`	
+	if [ "$routingProcotolsRunning" -ne 1 ]
+	then
+		echo "spoof_"$ipToSpoof "Error: Multiple Routing Procols Running $routingProcotolsRunning" > $logPath/attack.txt	
+		echo "Multiple routing protocols"
+		exit
+	fi
+	
+	#if ospf is used
+	if [[ $routingProtocol == *"ospf"* ]]
+	then
+		sleep 5
+		vtysh <<< $'configure terminal \n router ospf \n redistribute connected'
+		echo "sent vtysh cmd"
+	fi
+
+}
+
+
+bringUpInterfaces()
+{
+	for ((nodeToSpoof=1;nodeToSpoof <= numberOfNodes; nodeToSpoof++))
+	do
+		
+		if [ $nodeToSpoof != $attackingNode ]
+		then
+			#check for protocol
+			if [[ -n "$6" && "IPv6" -eq "$6" ]]
+				then
+				protocol="IPv6"
+				ipToSpoof="2001:"`expr 10 + $nodeToSpoof`"::2"	
+				ifconfig eth0:$nodeToSpoof inet6 add "$ipToSpoof/120" up
+			else
+				protocol="IPv4" 
+				ipToSpoof=`expr 10 + $nodeToSpoof`".0.0.2"
+				ifconfig eth0:$nodeToSpoof $ipToSpoof netmask $subnet up
+			fi
+			echo "$protocol" ":" "$ipToSpoof"
+			echo "HNA $ipToSpoof 32" >> $logPath/tmp.txt
+		fi
+	done	
+}
+
+echo "none" > $logPath/attack.txt
+echo "sleep startime:" "$startTime"
+sleep $startTime
+
+if [ $pendingDuration -gt 0 ]
+	then
+		echo "starting blackhole"
+		echo "blackHole" > $logPath/attack.txt
+
+		bringUpInterfaces
+		identifyRoutingProtocol
+		sleep $pendingDuration
+		bringDownInterfaces
+fi
+echo "none" > $logPath/attack.txt
+
+EOF
+) > attack.sh
+
+chmod 755 attack.sh
+
+./attack.sh 60 60 9 10 /root/wired/9_60_60_blackholeAttack_sh_wheel_OSPFv2_wired_255.255.255.128 
+
+else
+	echo `hostname` >> /root/wired/9_60_60_blackholeAttack_sh_wheel_OSPFv2_wired_255.255.255.128/check.txt
+	mgen flush input /root/install/impactpredictionmodels_b1/impactpredictionmodels/flowGenerator/flows/flow`hostname`.mgn | /root/install/impactpredictionmodels_b1/impactpredictionmodels/mgenCollect.py /root/wired/9_60_60_blackholeAttack_sh_wheel_OSPFv2_wired_255.255.255.128 > `hostname`.mgencapture &
+fi
+
+	}
+	}
+    custom-config {
+	custom-config-id service:UserDefined
+	custom-command UserDefined
+	config {
+	files=('custom-post-config-commands.sh', )
+	startidx=120
+	cmdup=('sh custom-post-config-commands.sh', )
+    }
+    }
+	services {DefaultRoute SSH UserDefined
+	}
+}
+
+node n7 {
+    type router
+    model host
+    network-config {
+	hostname n7
+	!
+	interface eth0
+	 ip address 17.0.0.2/24
+	!
+    }
+    canvas c1
+    iconcoords {177.0 493.0}
+    labelcoords {177.0 525.0}
+    interface-peer {eth0 n17}
+    custom-config {
+	custom-config-id service:UserDefined:custom-post-config-commands.sh
+	custom-command custom-post-config-commands.sh
+	config {
+#!/bin/sh
+HN=`hostname`
+if [ `uname` = "FreeBSD" ]; then
+  SCRIPTDIR=/tmp/e0_$HN
+else SCRIPTDIR=/root/wired/
+fi
+cd $SCRIPTDIR
+mkdir 9_60_60_blackholeAttack_sh_wheel_OSPFv2_wired_255.255.255.128
+cd 9_60_60_blackholeAttack_sh_wheel_OSPFv2_wired_255.255.255.128
+
+#get ip of current
+hostnameLen=`expr length $HN`
+hostnameLen=`expr $hostnameLen - 1` 
+myIP="`expr substr $HN 2 $hostnameLen`.0.0.1" 
+
+#now insert attack script and mgen flush if node is attacker
+if [ `hostname` = n9 -o 9 = 0 ]
+then
+
+#start logging
+tshark -a duration:175 -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | /root/install/impactpredictionmodels_b1/impactpredictionmodels/netCollect.py /root/wired/9_60_60_blackholeAttack_sh_wheel_OSPFv2_wired_255.255.255.128 $myIP > $HN.capture &    
+
+mgen flush input /root/install/impactpredictionmodels_b1/impactpredictionmodels/flowGenerator/flows/flow`hostname`.mgn output /dev/null &
+
+(
+cat << 'EOF'
+#!/bin/bash
+
+startTime=$1
+pendingDuration=$2
+attackingNode=$3
+numberOfNodes=$4
+logPath=$5
+
+routingProtocol=`echo $logPath | cut -d'_' -f7 | cut -d 'v' -f1 | sed 's/./\L&/g'`
+subnet=`echo $logPath | cut -d '_' -f9`
+
+# Necessary, otherwise working directory is seen as logging directory instead of node
+cd "$SESSION_DIR/$NODE_NAME.conf"
+
+bringDownInterfaces()
+{
+sleep $pendingDuration
+for ((nodeToSpoof=1;nodeToSpoof <= numberOfNodes; nodeToSpoof++))
+	do
+		if [ $nodeToSpoof != $attackingNode ]
+			then
+				ifconfig "eth0:$nodeToSpoof" down
+		fi
+	done
+}
+
+identifyRoutingProtocol()
+{
+	# Now check the routing protocol running  
+	cd var.run.quagga/
+	routingProcotolsRunning=`ls -1 | grep -v zebra.pid | grep pid | wc -l`	
+	if [ "$routingProcotolsRunning" -ne 1 ]
+	then
+		echo "spoof_"$ipToSpoof "Error: Multiple Routing Procols Running $routingProcotolsRunning" > $logPath/attack.txt	
+		echo "Multiple routing protocols"
+		exit
+	fi
+	
+	#if ospf is used
+	if [[ $routingProtocol == *"ospf"* ]]
+	then
+		sleep 5
+		vtysh <<< $'configure terminal \n router ospf \n redistribute connected'
+		echo "sent vtysh cmd"
+	fi
+
+}
+
+
+bringUpInterfaces()
+{
+	for ((nodeToSpoof=1;nodeToSpoof <= numberOfNodes; nodeToSpoof++))
+	do
+		
+		if [ $nodeToSpoof != $attackingNode ]
+		then
+			#check for protocol
+			if [[ -n "$6" && "IPv6" -eq "$6" ]]
+				then
+				protocol="IPv6"
+				ipToSpoof="2001:"`expr 10 + $nodeToSpoof`"::2"	
+				ifconfig eth0:$nodeToSpoof inet6 add "$ipToSpoof/120" up
+			else
+				protocol="IPv4" 
+				ipToSpoof=`expr 10 + $nodeToSpoof`".0.0.2"
+				ifconfig eth0:$nodeToSpoof $ipToSpoof netmask $subnet up
+			fi
+			echo "$protocol" ":" "$ipToSpoof"
+			echo "HNA $ipToSpoof 32" >> $logPath/tmp.txt
+		fi
+	done	
+}
+
+echo "none" > $logPath/attack.txt
+echo "sleep startime:" "$startTime"
+sleep $startTime
+
+if [ $pendingDuration -gt 0 ]
+	then
+		echo "starting blackhole"
+		echo "blackHole" > $logPath/attack.txt
+
+		bringUpInterfaces
+		identifyRoutingProtocol
+		sleep $pendingDuration
+		bringDownInterfaces
+fi
+echo "none" > $logPath/attack.txt
+
+EOF
+) > attack.sh
+
+chmod 755 attack.sh
+
+./attack.sh 60 60 9 10 /root/wired/9_60_60_blackholeAttack_sh_wheel_OSPFv2_wired_255.255.255.128 
+
+else
+	echo `hostname` >> /root/wired/9_60_60_blackholeAttack_sh_wheel_OSPFv2_wired_255.255.255.128/check.txt
+	mgen flush input /root/install/impactpredictionmodels_b1/impactpredictionmodels/flowGenerator/flows/flow`hostname`.mgn | /root/install/impactpredictionmodels_b1/impactpredictionmodels/mgenCollect.py /root/wired/9_60_60_blackholeAttack_sh_wheel_OSPFv2_wired_255.255.255.128 > `hostname`.mgencapture &
+fi
+
+	}
+	}
+    custom-config {
+	custom-config-id service:UserDefined
+	custom-command UserDefined
+	config {
+	files=('custom-post-config-commands.sh', )
+	startidx=120
+	cmdup=('sh custom-post-config-commands.sh', )
+    }
+    }
+	services {DefaultRoute SSH UserDefined
+	}
+}
+
+node n8 {
+    type router
+    model host
+    network-config {
+	hostname n8
+	!
+	interface eth0
+	 ip address 18.0.0.2/24
+	!
+    }
+    canvas c1
+    iconcoords {58.0 390.0}
+    labelcoords {58.0 422.0}
+    interface-peer {eth0 n18}
+    custom-config {
+	custom-config-id service:UserDefined:custom-post-config-commands.sh
+	custom-command custom-post-config-commands.sh
+	config {
+#!/bin/sh
+HN=`hostname`
+if [ `uname` = "FreeBSD" ]; then
+  SCRIPTDIR=/tmp/e0_$HN
+else SCRIPTDIR=/root/wired/
+fi
+cd $SCRIPTDIR
+mkdir 9_60_60_blackholeAttack_sh_wheel_OSPFv2_wired_255.255.255.128
+cd 9_60_60_blackholeAttack_sh_wheel_OSPFv2_wired_255.255.255.128
+
+#get ip of current
+hostnameLen=`expr length $HN`
+hostnameLen=`expr $hostnameLen - 1` 
+myIP="`expr substr $HN 2 $hostnameLen`.0.0.1" 
+
+#now insert attack script and mgen flush if node is attacker
+if [ `hostname` = n9 -o 9 = 0 ]
+then
+
+#start logging
+tshark -a duration:175 -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | /root/install/impactpredictionmodels_b1/impactpredictionmodels/netCollect.py /root/wired/9_60_60_blackholeAttack_sh_wheel_OSPFv2_wired_255.255.255.128 $myIP > $HN.capture &    
+
+mgen flush input /root/install/impactpredictionmodels_b1/impactpredictionmodels/flowGenerator/flows/flow`hostname`.mgn output /dev/null &
+
+(
+cat << 'EOF'
+#!/bin/bash
+
+startTime=$1
+pendingDuration=$2
+attackingNode=$3
+numberOfNodes=$4
+logPath=$5
+
+routingProtocol=`echo $logPath | cut -d'_' -f7 | cut -d 'v' -f1 | sed 's/./\L&/g'`
+subnet=`echo $logPath | cut -d '_' -f9`
+
+# Necessary, otherwise working directory is seen as logging directory instead of node
+cd "$SESSION_DIR/$NODE_NAME.conf"
+
+bringDownInterfaces()
+{
+sleep $pendingDuration
+for ((nodeToSpoof=1;nodeToSpoof <= numberOfNodes; nodeToSpoof++))
+	do
+		if [ $nodeToSpoof != $attackingNode ]
+			then
+				ifconfig "eth0:$nodeToSpoof" down
+		fi
+	done
+}
+
+identifyRoutingProtocol()
+{
+	# Now check the routing protocol running  
+	cd var.run.quagga/
+	routingProcotolsRunning=`ls -1 | grep -v zebra.pid | grep pid | wc -l`	
+	if [ "$routingProcotolsRunning" -ne 1 ]
+	then
+		echo "spoof_"$ipToSpoof "Error: Multiple Routing Procols Running $routingProcotolsRunning" > $logPath/attack.txt	
+		echo "Multiple routing protocols"
+		exit
+	fi
+	
+	#if ospf is used
+	if [[ $routingProtocol == *"ospf"* ]]
+	then
+		sleep 5
+		vtysh <<< $'configure terminal \n router ospf \n redistribute connected'
+		echo "sent vtysh cmd"
+	fi
+
+}
+
+
+bringUpInterfaces()
+{
+	for ((nodeToSpoof=1;nodeToSpoof <= numberOfNodes; nodeToSpoof++))
+	do
+		
+		if [ $nodeToSpoof != $attackingNode ]
+		then
+			#check for protocol
+			if [[ -n "$6" && "IPv6" -eq "$6" ]]
+				then
+				protocol="IPv6"
+				ipToSpoof="2001:"`expr 10 + $nodeToSpoof`"::2"	
+				ifconfig eth0:$nodeToSpoof inet6 add "$ipToSpoof/120" up
+			else
+				protocol="IPv4" 
+				ipToSpoof=`expr 10 + $nodeToSpoof`".0.0.2"
+				ifconfig eth0:$nodeToSpoof $ipToSpoof netmask $subnet up
+			fi
+			echo "$protocol" ":" "$ipToSpoof"
+			echo "HNA $ipToSpoof 32" >> $logPath/tmp.txt
+		fi
+	done	
+}
+
+echo "none" > $logPath/attack.txt
+echo "sleep startime:" "$startTime"
+sleep $startTime
+
+if [ $pendingDuration -gt 0 ]
+	then
+		echo "starting blackhole"
+		echo "blackHole" > $logPath/attack.txt
+
+		bringUpInterfaces
+		identifyRoutingProtocol
+		sleep $pendingDuration
+		bringDownInterfaces
+fi
+echo "none" > $logPath/attack.txt
+
+EOF
+) > attack.sh
+
+chmod 755 attack.sh
+
+./attack.sh 60 60 9 10 /root/wired/9_60_60_blackholeAttack_sh_wheel_OSPFv2_wired_255.255.255.128 
+
+else
+	echo `hostname` >> /root/wired/9_60_60_blackholeAttack_sh_wheel_OSPFv2_wired_255.255.255.128/check.txt
+	mgen flush input /root/install/impactpredictionmodels_b1/impactpredictionmodels/flowGenerator/flows/flow`hostname`.mgn | /root/install/impactpredictionmodels_b1/impactpredictionmodels/mgenCollect.py /root/wired/9_60_60_blackholeAttack_sh_wheel_OSPFv2_wired_255.255.255.128 > `hostname`.mgencapture &
+fi
+
+	}
+	}
+    custom-config {
+	custom-config-id service:UserDefined
+	custom-command UserDefined
+	config {
+	files=('custom-post-config-commands.sh', )
+	startidx=120
+	cmdup=('sh custom-post-config-commands.sh', )
+    }
+    }
+	services {DefaultRoute SSH UserDefined
+	}
+}
+
+node n9 {
+    type router
+    model router
+    network-config {
+	hostname n9
+	!
+	interface eth0
+	 ip address 19.0.0.2/24
+	!
+    }
+    canvas c1
+    iconcoords {70.0 198.0}
+    labelcoords {70.0 230.0}
+    interface-peer {eth0 n19}
+    custom-config {
+	custom-config-id service:UserDefined:custom-post-config-commands.sh
+	custom-command custom-post-config-commands.sh
+	config {
+#!/bin/sh
+HN=`hostname`
+if [ `uname` = "FreeBSD" ]; then
+  SCRIPTDIR=/tmp/e0_$HN
+else SCRIPTDIR=/root/wired/
+fi
+cd $SCRIPTDIR
+mkdir 9_60_60_blackholeAttack_sh_wheel_OSPFv2_wired_255.255.255.128
+cd 9_60_60_blackholeAttack_sh_wheel_OSPFv2_wired_255.255.255.128
+
+#get ip of current
+hostnameLen=`expr length $HN`
+hostnameLen=`expr $hostnameLen - 1` 
+myIP="`expr substr $HN 2 $hostnameLen`.0.0.1" 
+
+#now insert attack script and mgen flush if node is attacker
+if [ `hostname` = n9 -o 9 = 0 ]
+then
+
+#start logging
+tshark -a duration:175 -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | /root/install/impactpredictionmodels_b1/impactpredictionmodels/netCollect.py /root/wired/9_60_60_blackholeAttack_sh_wheel_OSPFv2_wired_255.255.255.128 $myIP > $HN.capture &    
+
+mgen flush input /root/install/impactpredictionmodels_b1/impactpredictionmodels/flowGenerator/flows/flow`hostname`.mgn output /dev/null &
+
+(
+cat << 'EOF'
+#!/bin/bash
+
+startTime=$1
+pendingDuration=$2
+attackingNode=$3
+numberOfNodes=$4
+logPath=$5
+
+routingProtocol=`echo $logPath | cut -d'_' -f7 | cut -d 'v' -f1 | sed 's/./\L&/g'`
+subnet=`echo $logPath | cut -d '_' -f9`
+
+# Necessary, otherwise working directory is seen as logging directory instead of node
+cd "$SESSION_DIR/$NODE_NAME.conf"
+
+bringDownInterfaces()
+{
+sleep $pendingDuration
+for ((nodeToSpoof=1;nodeToSpoof <= numberOfNodes; nodeToSpoof++))
+	do
+		if [ $nodeToSpoof != $attackingNode ]
+			then
+				ifconfig "eth0:$nodeToSpoof" down
+		fi
+	done
+}
+
+identifyRoutingProtocol()
+{
+	# Now check the routing protocol running  
+	cd var.run.quagga/
+	routingProcotolsRunning=`ls -1 | grep -v zebra.pid | grep pid | wc -l`	
+	if [ "$routingProcotolsRunning" -ne 1 ]
+	then
+		echo "spoof_"$ipToSpoof "Error: Multiple Routing Procols Running $routingProcotolsRunning" > $logPath/attack.txt	
+		echo "Multiple routing protocols"
+		exit
+	fi
+	
+	#if ospf is used
+	if [[ $routingProtocol == *"ospf"* ]]
+	then
+		sleep 5
+		vtysh <<< $'configure terminal \n router ospf \n redistribute connected'
+		echo "sent vtysh cmd"
+	fi
+
+}
+
+
+bringUpInterfaces()
+{
+	for ((nodeToSpoof=1;nodeToSpoof <= numberOfNodes; nodeToSpoof++))
+	do
+		
+		if [ $nodeToSpoof != $attackingNode ]
+		then
+			#check for protocol
+			if [[ -n "$6" && "IPv6" -eq "$6" ]]
+				then
+				protocol="IPv6"
+				ipToSpoof="2001:"`expr 10 + $nodeToSpoof`"::2"	
+				ifconfig eth0:$nodeToSpoof inet6 add "$ipToSpoof/120" up
+			else
+				protocol="IPv4" 
+				ipToSpoof=`expr 10 + $nodeToSpoof`".0.0.2"
+				ifconfig eth0:$nodeToSpoof $ipToSpoof netmask $subnet up
+			fi
+			echo "$protocol" ":" "$ipToSpoof"
+			echo "HNA $ipToSpoof 32" >> $logPath/tmp.txt
+		fi
+	done	
+}
+
+echo "none" > $logPath/attack.txt
+echo "sleep startime:" "$startTime"
+sleep $startTime
+
+if [ $pendingDuration -gt 0 ]
+	then
+		echo "starting blackhole"
+		echo "blackHole" > $logPath/attack.txt
+
+		bringUpInterfaces
+		identifyRoutingProtocol
+		sleep $pendingDuration
+		bringDownInterfaces
+fi
+echo "none" > $logPath/attack.txt
+
+EOF
+) > attack.sh
+
+chmod 755 attack.sh
+
+./attack.sh 60 60 9 10 /root/wired/9_60_60_blackholeAttack_sh_wheel_OSPFv2_wired_255.255.255.128 
+
+else
+	echo `hostname` >> /root/wired/9_60_60_blackholeAttack_sh_wheel_OSPFv2_wired_255.255.255.128/check.txt
+	mgen flush input /root/install/impactpredictionmodels_b1/impactpredictionmodels/flowGenerator/flows/flow`hostname`.mgn | /root/install/impactpredictionmodels_b1/impactpredictionmodels/mgenCollect.py /root/wired/9_60_60_blackholeAttack_sh_wheel_OSPFv2_wired_255.255.255.128 > `hostname`.mgencapture &
+fi
+
+	}
+	}
+    custom-config {
+	custom-config-id service:UserDefined
+	custom-command UserDefined
+	config {
+	files=('custom-post-config-commands.sh', )
+	startidx=120
+	cmdup=('sh custom-post-config-commands.sh', )
+    }
+    }
+	services {OSPFv2 zebra vtysh IPForward UserDefined
+	}
+}
+
+node n10 {
+    type router
+    model host
+    network-config {
+	hostname n10
+	!
+	interface eth0
+	 ip address 20.0.0.2/24
+	!
+    }
+    canvas c1
+    iconcoords {285.0 64.0}
+    labelcoords {285.0 96.0}
+    interface-peer {eth0 n20}
+    custom-config {
+	custom-config-id service:UserDefined:custom-post-config-commands.sh
+	custom-command custom-post-config-commands.sh
+	config {
+#!/bin/sh
+HN=`hostname`
+if [ `uname` = "FreeBSD" ]; then
+  SCRIPTDIR=/tmp/e0_$HN
+else SCRIPTDIR=/root/wired/
+fi
+cd $SCRIPTDIR
+mkdir 9_60_60_blackholeAttack_sh_wheel_OSPFv2_wired_255.255.255.128
+cd 9_60_60_blackholeAttack_sh_wheel_OSPFv2_wired_255.255.255.128
+
+#get ip of current
+hostnameLen=`expr length $HN`
+hostnameLen=`expr $hostnameLen - 1` 
+myIP="`expr substr $HN 2 $hostnameLen`.0.0.1" 
+
+#now insert attack script and mgen flush if node is attacker
+if [ `hostname` = n9 -o 9 = 0 ]
+then
+
+#start logging
+tshark -a duration:175 -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | /root/install/impactpredictionmodels_b1/impactpredictionmodels/netCollect.py /root/wired/9_60_60_blackholeAttack_sh_wheel_OSPFv2_wired_255.255.255.128 $myIP > $HN.capture &    
+
+mgen flush input /root/install/impactpredictionmodels_b1/impactpredictionmodels/flowGenerator/flows/flow`hostname`.mgn output /dev/null &
+
+(
+cat << 'EOF'
+#!/bin/bash
+
+startTime=$1
+pendingDuration=$2
+attackingNode=$3
+numberOfNodes=$4
+logPath=$5
+
+routingProtocol=`echo $logPath | cut -d'_' -f7 | cut -d 'v' -f1 | sed 's/./\L&/g'`
+subnet=`echo $logPath | cut -d '_' -f9`
+
+# Necessary, otherwise working directory is seen as logging directory instead of node
+cd "$SESSION_DIR/$NODE_NAME.conf"
+
+bringDownInterfaces()
+{
+sleep $pendingDuration
+for ((nodeToSpoof=1;nodeToSpoof <= numberOfNodes; nodeToSpoof++))
+	do
+		if [ $nodeToSpoof != $attackingNode ]
+			then
+				ifconfig "eth0:$nodeToSpoof" down
+		fi
+	done
+}
+
+identifyRoutingProtocol()
+{
+	# Now check the routing protocol running  
+	cd var.run.quagga/
+	routingProcotolsRunning=`ls -1 | grep -v zebra.pid | grep pid | wc -l`	
+	if [ "$routingProcotolsRunning" -ne 1 ]
+	then
+		echo "spoof_"$ipToSpoof "Error: Multiple Routing Procols Running $routingProcotolsRunning" > $logPath/attack.txt	
+		echo "Multiple routing protocols"
+		exit
+	fi
+	
+	#if ospf is used
+	if [[ $routingProtocol == *"ospf"* ]]
+	then
+		sleep 5
+		vtysh <<< $'configure terminal \n router ospf \n redistribute connected'
+		echo "sent vtysh cmd"
+	fi
+
+}
+
+
+bringUpInterfaces()
+{
+	for ((nodeToSpoof=1;nodeToSpoof <= numberOfNodes; nodeToSpoof++))
+	do
+		
+		if [ $nodeToSpoof != $attackingNode ]
+		then
+			#check for protocol
+			if [[ -n "$6" && "IPv6" -eq "$6" ]]
+				then
+				protocol="IPv6"
+				ipToSpoof="2001:"`expr 10 + $nodeToSpoof`"::2"	
+				ifconfig eth0:$nodeToSpoof inet6 add "$ipToSpoof/120" up
+			else
+				protocol="IPv4" 
+				ipToSpoof=`expr 10 + $nodeToSpoof`".0.0.2"
+				ifconfig eth0:$nodeToSpoof $ipToSpoof netmask $subnet up
+			fi
+			echo "$protocol" ":" "$ipToSpoof"
+			echo "HNA $ipToSpoof 32" >> $logPath/tmp.txt
+		fi
+	done	
+}
+
+echo "none" > $logPath/attack.txt
+echo "sleep startime:" "$startTime"
+sleep $startTime
+
+if [ $pendingDuration -gt 0 ]
+	then
+		echo "starting blackhole"
+		echo "blackHole" > $logPath/attack.txt
+
+		bringUpInterfaces
+		identifyRoutingProtocol
+		sleep $pendingDuration
+		bringDownInterfaces
+fi
+echo "none" > $logPath/attack.txt
+
+EOF
+) > attack.sh
+
+chmod 755 attack.sh
+
+./attack.sh 60 60 9 10 /root/wired/9_60_60_blackholeAttack_sh_wheel_OSPFv2_wired_255.255.255.128 
+
+else
+	echo `hostname` >> /root/wired/9_60_60_blackholeAttack_sh_wheel_OSPFv2_wired_255.255.255.128/check.txt
+	mgen flush input /root/install/impactpredictionmodels_b1/impactpredictionmodels/flowGenerator/flows/flow`hostname`.mgn | /root/install/impactpredictionmodels_b1/impactpredictionmodels/mgenCollect.py /root/wired/9_60_60_blackholeAttack_sh_wheel_OSPFv2_wired_255.255.255.128 > `hostname`.mgencapture &
+fi
+
+	}
+	}
+    custom-config {
+	custom-config-id service:UserDefined
+	custom-command UserDefined
+	config {
+	files=('custom-post-config-commands.sh', )
+	startidx=120
+	cmdup=('sh custom-post-config-commands.sh', )
+    }
+    }
+	services {DefaultRoute SSH UserDefined
+	}
+}
+
+node n11 {
+    type router
+    model router
+    network-config {
+	hostname n11
+	!
+	interface eth9
+	 ip address 11.0.0.1/24
+	!
+	interface eth8
+	 ip address 10.0.17.1/24
+	!
+	interface eth7
+	 ip address 10.0.16.1/24
+	!
+	interface eth6
+	 ip address 10.0.15.1/24
+	!
+	interface eth5
+	 ip address 10.0.14.1/24
+	!
+	interface eth4
+	 ip address 10.0.13.1/24
+	!
+	interface eth3
+	 ip address 10.0.12.1/24
+	!
+	interface eth2
+	 ip address 10.0.11.1/24
+	!
+	interface eth1
+	 ip address 10.0.10.1/24
+	!
+	interface eth0
+	 ip address 10.0.9.1/24
+	!
+    }
+    canvas c1
+    iconcoords {455.0 318.0}
+    labelcoords {455.0 350.0}
+    interface-peer {eth0 n12}
+    interface-peer {eth1 n13}
+    interface-peer {eth2 n14}
+    interface-peer {eth3 n15}
+    interface-peer {eth4 n16}
+    interface-peer {eth5 n17}
+    interface-peer {eth6 n18}
+    interface-peer {eth7 n19}
+    interface-peer {eth8 n20}
+    interface-peer {eth9 n1}
+    custom-config {
+	custom-config-id service:UserDefined:custom-post-config-commands.sh
+	custom-command custom-post-config-commands.sh
+	config {
+#!/bin/sh
+HN=`hostname`
+if [ `uname` = "FreeBSD" ]; then
+  SCRIPTDIR=/tmp/e0_$HN
+else SCRIPTDIR=/root/wired/
+fi
+cd $SCRIPTDIR
+
+	}
+	}
+    custom-config {
+	custom-config-id service:UserDefined
+	custom-command UserDefined
+	config {
+	files=('custom-post-config-commands.sh', )
+	startidx=120
+	cmdup=('sh custom-post-config-commands.sh', )
+    }
+    }
+	services {OSPFv2 zebra vtysh IPForward UserDefined
+	}
+}
+
+node n12 {
+    type router
+    model router
+    network-config {
+	hostname n12
+	!
+	interface eth3
+	 ip address 12.0.0.1/24
+	!
+	interface eth2
+	 ip address 10.0.9.2/24
+	!
+	interface eth1
+	 ip address 10.0.8.2/24
+	!
+	interface eth0
+	 ip address 10.0.0.1/24
+	!
+    }
+    canvas c1
+    iconcoords {466.0 101.0}
+    labelcoords {466.0 133.0}
+    interface-peer {eth0 n13}
+    interface-peer {eth1 n20}
+    interface-peer {eth2 n11}
+    interface-peer {eth3 n2}
+    custom-config {
+	custom-config-id service:UserDefined:custom-post-config-commands.sh
+	custom-command custom-post-config-commands.sh
+	config {
+#!/bin/sh
+HN=`hostname`
+if [ `uname` = "FreeBSD" ]; then
+  SCRIPTDIR=/tmp/e0_$HN
+else SCRIPTDIR=/root/wired/
+fi
+cd $SCRIPTDIR
+
+	}
+	}
+    custom-config {
+	custom-config-id service:UserDefined
+	custom-command UserDefined
+	config {
+	files=('custom-post-config-commands.sh', )
+	startidx=120
+	cmdup=('sh custom-post-config-commands.sh', )
+    }
+    }
+	services {OSPFv2 zebra vtysh IPForward UserDefined
+	}
+}
+
+node n13 {
+    type router
+    model router
+    network-config {
+	hostname n13
+	!
+	interface eth3
+	 ip address 13.0.0.1/24
+	!
+	interface eth2
+	 ip address 10.0.10.2/24
+	!
+	interface eth1
+	 ip address 10.0.1.1/24
+	!
+	interface eth0
+	 ip address 10.0.0.2/24
+	!
+    }
+    canvas c1
+    iconcoords {639.0 166.0}
+    labelcoords {639.0 198.0}
+    interface-peer {eth0 n12}
+    interface-peer {eth1 n14}
+    interface-peer {eth2 n11}
+    interface-peer {eth3 n3}
+    custom-config {
+	custom-config-id service:UserDefined:custom-post-config-commands.sh
+	custom-command custom-post-config-commands.sh
+	config {
+#!/bin/sh
+HN=`hostname`
+if [ `uname` = "FreeBSD" ]; then
+  SCRIPTDIR=/tmp/e0_$HN
+else SCRIPTDIR=/root/wired/
+fi
+cd $SCRIPTDIR
+
+	}
+	}
+    custom-config {
+	custom-config-id service:UserDefined
+	custom-command UserDefined
+	config {
+	files=('custom-post-config-commands.sh', )
+	startidx=120
+	cmdup=('sh custom-post-config-commands.sh', )
+    }
+    }
+	services {OSPFv2 zebra vtysh IPForward UserDefined
+	}
+}
+
+node n14 {
+    type router
+    model router
+    network-config {
+	hostname n14
+	!
+	interface eth3
+	 ip address 14.0.0.1/24
+	!
+	interface eth2
+	 ip address 10.0.11.2/24
+	!
+	interface eth1
+	 ip address 10.0.2.1/24
+	!
+	interface eth0
+	 ip address 10.0.1.2/24
+	!
+    }
+    canvas c1
+    iconcoords {724.0 249.0}
+    labelcoords {724.0 281.0}
+    interface-peer {eth0 n13}
+    interface-peer {eth1 n15}
+    interface-peer {eth2 n11}
+    interface-peer {eth3 n4}
+    custom-config {
+	custom-config-id service:UserDefined:custom-post-config-commands.sh
+	custom-command custom-post-config-commands.sh
+	config {
+#!/bin/sh
+HN=`hostname`
+if [ `uname` = "FreeBSD" ]; then
+  SCRIPTDIR=/tmp/e0_$HN
+else SCRIPTDIR=/root/wired/
+fi
+cd $SCRIPTDIR
+
+	}
+	}
+    custom-config {
+	custom-config-id service:UserDefined
+	custom-command UserDefined
+	config {
+	files=('custom-post-config-commands.sh', )
+	startidx=120
+	cmdup=('sh custom-post-config-commands.sh', )
+    }
+    }
+	services {OSPFv2 zebra vtysh IPForward UserDefined
+	}
+}
+
+node n15 {
+    type router
+    model router
+    network-config {
+	hostname n15
+	!
+	interface eth3
+	 ip address 15.0.0.1/24
+	!
+	interface eth2
+	 ip address 10.0.12.2/24
+	!
+	interface eth1
+	 ip address 10.0.3.1/24
+	!
+	interface eth0
+	 ip address 10.0.2.2/24
+	!
+    }
+    canvas c1
+    iconcoords {688.0 369.0}
+    labelcoords {688.0 401.0}
+    interface-peer {eth0 n14}
+    interface-peer {eth1 n16}
+    interface-peer {eth2 n11}
+    interface-peer {eth3 n5}
+    custom-config {
+	custom-config-id service:UserDefined:custom-post-config-commands.sh
+	custom-command custom-post-config-commands.sh
+	config {
+#!/bin/sh
+HN=`hostname`
+if [ `uname` = "FreeBSD" ]; then
+  SCRIPTDIR=/tmp/e0_$HN
+else SCRIPTDIR=/root/wired/
+fi
+cd $SCRIPTDIR
+
+	}
+	}
+    custom-config {
+	custom-config-id service:UserDefined
+	custom-command UserDefined
+	config {
+	files=('custom-post-config-commands.sh', )
+	startidx=120
+	cmdup=('sh custom-post-config-commands.sh', )
+    }
+    }
+	services {OSPFv2 zebra vtysh IPForward UserDefined
+	}
+}
+
+node n16 {
+    type router
+    model router
+    network-config {
+	hostname n16
+	!
+	interface eth3
+	 ip address 16.0.0.1/24
+	!
+	interface eth2
+	 ip address 10.0.13.2/24
+	!
+	interface eth1
+	 ip address 10.0.4.1/24
+	!
+	interface eth0
+	 ip address 10.0.3.2/24
+	!
+    }
+    canvas c1
+    iconcoords {534.0 478.0}
+    labelcoords {534.0 510.0}
+    interface-peer {eth0 n15}
+    interface-peer {eth1 n17}
+    interface-peer {eth2 n11}
+    interface-peer {eth3 n6}
+    custom-config {
+	custom-config-id service:UserDefined:custom-post-config-commands.sh
+	custom-command custom-post-config-commands.sh
+	config {
+#!/bin/sh
+HN=`hostname`
+if [ `uname` = "FreeBSD" ]; then
+  SCRIPTDIR=/tmp/e0_$HN
+else SCRIPTDIR=/root/wired/
+fi
+cd $SCRIPTDIR
+
+	}
+	}
+    custom-config {
+	custom-config-id service:UserDefined
+	custom-command UserDefined
+	config {
+	files=('custom-post-config-commands.sh', )
+	startidx=120
+	cmdup=('sh custom-post-config-commands.sh', )
+    }
+    }
+	services {OSPFv2 zebra vtysh IPForward UserDefined
+	}
+}
+
+node n17 {
+    type router
+    model router
+    network-config {
+	hostname n17
+	!
+	interface eth3
+	 ip address 17.0.0.1/24
+	!
+	interface eth2
+	 ip address 10.0.14.2/24
+	!
+	interface eth1
+	 ip address 10.0.5.1/24
+	!
+	interface eth0
+	 ip address 10.0.4.2/24
+	!
+    }
+    canvas c1
+    iconcoords {316.0 457.0}
+    labelcoords {316.0 489.0}
+    interface-peer {eth0 n16}
+    interface-peer {eth1 n18}
+    interface-peer {eth2 n11}
+    interface-peer {eth3 n7}
+    custom-config {
+	custom-config-id service:UserDefined:custom-post-config-commands.sh
+	custom-command custom-post-config-commands.sh
+	config {
+#!/bin/sh
+HN=`hostname`
+if [ `uname` = "FreeBSD" ]; then
+  SCRIPTDIR=/tmp/e0_$HN
+else SCRIPTDIR=/root/wired/
+fi
+cd $SCRIPTDIR
+
+	}
+	}
+    custom-config {
+	custom-config-id service:UserDefined
+	custom-command UserDefined
+	config {
+	files=('custom-post-config-commands.sh', )
+	startidx=120
+	cmdup=('sh custom-post-config-commands.sh', )
+    }
+    }
+	services {OSPFv2 zebra vtysh IPForward UserDefined
+	}
+}
+
+node n18 {
+    type router
+    model router
+    network-config {
+	hostname n18
+	!
+	interface eth3
+	 ip address 18.0.0.1/24
+	!
+	interface eth2
+	 ip address 10.0.15.2/24
+	!
+	interface eth1
+	 ip address 10.0.6.1/24
+	!
+	interface eth0
+	 ip address 10.0.5.2/24
+	!
+    }
+    canvas c1
+    iconcoords {199.0 364.0}
+    labelcoords {199.0 396.0}
+    interface-peer {eth0 n17}
+    interface-peer {eth1 n19}
+    interface-peer {eth2 n11}
+    interface-peer {eth3 n8}
+    custom-config {
+	custom-config-id service:UserDefined:custom-post-config-commands.sh
+	custom-command custom-post-config-commands.sh
+	config {
+#!/bin/sh
+HN=`hostname`
+if [ `uname` = "FreeBSD" ]; then
+  SCRIPTDIR=/tmp/e0_$HN
+else SCRIPTDIR=/root/wired/
+fi
+cd $SCRIPTDIR
+
+	}
+	}
+    custom-config {
+	custom-config-id service:UserDefined
+	custom-command UserDefined
+	config {
+	files=('custom-post-config-commands.sh', )
+	startidx=120
+	cmdup=('sh custom-post-config-commands.sh', )
+    }
+    }
+	services {OSPFv2 zebra vtysh IPForward UserDefined
+	}
+}
+
+node n19 {
+    type router
+    model router
+    network-config {
+	hostname n19
+	!
+	interface eth3
+	 ip address 19.0.0.1/24
+	!
+	interface eth2
+	 ip address 10.0.16.2/24
+	!
+	interface eth1
+	 ip address 10.0.7.1/24
+	!
+	interface eth0
+	 ip address 10.0.6.2/24
+	!
+    }
+    canvas c1
+    iconcoords {201.0 235.0}
+    labelcoords {201.0 267.0}
+    interface-peer {eth0 n18}
+    interface-peer {eth1 n20}
+    interface-peer {eth2 n11}
+    interface-peer {eth3 n9}
+    custom-config {
+	custom-config-id service:UserDefined:custom-post-config-commands.sh
+	custom-command custom-post-config-commands.sh
+	config {
+#!/bin/sh
+HN=`hostname`
+if [ `uname` = "FreeBSD" ]; then
+  SCRIPTDIR=/tmp/e0_$HN
+else SCRIPTDIR=/root/wired/
+fi
+cd $SCRIPTDIR
+
+	}
+	}
+    custom-config {
+	custom-config-id service:UserDefined
+	custom-command UserDefined
+	config {
+	files=('custom-post-config-commands.sh', )
+	startidx=120
+	cmdup=('sh custom-post-config-commands.sh', )
+    }
+    }
+	services {OSPFv2 zebra vtysh IPForward UserDefined
+	}
+}
+
+node n20 {
+    type router
+    model router
+    network-config {
+	hostname n20
+	!
+	interface eth3
+	 ip address 20.0.0.1/24
+	!
+	interface eth2
+	 ip address 10.0.17.2/24
+	!
+	interface eth1
+	 ip address 10.0.8.1/24
+	!
+	interface eth0
+	 ip address 10.0.7.2/24
+	!
+    }
+    canvas c1
+    iconcoords {287.0 151.0}
+    labelcoords {287.0 183.0}
+    interface-peer {eth0 n19}
+    interface-peer {eth1 n12}
+    interface-peer {eth2 n11}
+    interface-peer {eth3 n10}
+    custom-config {
+	custom-config-id service:UserDefined:custom-post-config-commands.sh
+	custom-command custom-post-config-commands.sh
+	config {
+#!/bin/sh
+HN=`hostname`
+if [ `uname` = "FreeBSD" ]; then
+  SCRIPTDIR=/tmp/e0_$HN
+else SCRIPTDIR=/root/wired/
+fi
+cd $SCRIPTDIR
+
+	}
+	}
+    custom-config {
+	custom-config-id service:UserDefined
+	custom-command UserDefined
+	config {
+	files=('custom-post-config-commands.sh', )
+	startidx=120
+	cmdup=('sh custom-post-config-commands.sh', )
+    }
+    }
+	services {OSPFv2 zebra vtysh IPForward UserDefined
+	}
+}
+
+link l1 {
+    nodes {n12 n13}
+    bandwidth 0
+}
+
+link l2 {
+    nodes {n13 n14}
+    bandwidth 0
+}
+
+link l3 {
+    nodes {n14 n15}
+    bandwidth 0
+}
+
+link l4 {
+    nodes {n15 n16}
+    bandwidth 0
+}
+
+link l5 {
+    nodes {n16 n17}
+    bandwidth 0
+}
+
+link l6 {
+    nodes {n17 n18}
+    bandwidth 0
+}
+
+link l7 {
+    nodes {n18 n19}
+    bandwidth 0
+}
+
+link l8 {
+    nodes {n19 n20}
+    bandwidth 0
+}
+
+link l9 {
+    nodes {n20 n12}
+    bandwidth 0
+}
+
+link l10 {
+    nodes {n11 n12}
+    bandwidth 0
+}
+
+link l11 {
+    nodes {n11 n13}
+    bandwidth 0
+}
+
+link l12 {
+    nodes {n11 n14}
+    bandwidth 0
+}
+
+link l13 {
+    nodes {n11 n15}
+    bandwidth 0
+}
+
+link l14 {
+    nodes {n11 n16}
+    bandwidth 0
+}
+
+link l15 {
+    nodes {n11 n17}
+    bandwidth 0
+}
+
+link l16 {
+    nodes {n11 n18}
+    bandwidth 0
+}
+
+link l17 {
+    nodes {n11 n19}
+    bandwidth 0
+}
+
+link l18 {
+    nodes {n11 n20}
+    bandwidth 0
+}
+
+link l19 {
+    nodes {n11 n1}
+    bandwidth 0
+}
+
+link l20 {
+    nodes {n12 n2}
+    bandwidth 0
+}
+
+link l21 {
+    nodes {n13 n3}
+    bandwidth 0
+}
+
+link l22 {
+    nodes {n14 n4}
+    bandwidth 0
+}
+
+link l23 {
+    nodes {n15 n5}
+    bandwidth 0
+}
+
+link l24 {
+    nodes {n16 n6}
+    bandwidth 0
+}
+
+link l25 {
+    nodes {n17 n7}
+    bandwidth 0
+}
+
+link l26 {
+    nodes {n18 n8}
+    bandwidth 0
+}
+
+link l27 {
+    nodes {n19 n9}
+    bandwidth 0
+}
+
+link l28 {
+    nodes {n20 n10}
+    bandwidth 0
+}
+
+canvas c1 {
+    name {Canvas1}
+}
+
+option global {
+    interface_names no
+    ip_addresses yes
+    ipv6_addresses no
+    node_labels yes
+    link_labels yes
+    show_api no
+    background_images no
+    annotations yes
+    grid yes
+    traffic_start 0
+}
+
+option session {
+}
+

@@ -38,10 +38,6 @@ print protocolPattern
 
 ### end of reading configuration
 
-#numNodes = int(sys.argv[1])
-#wireType = sys.argv[2]
-#portStart = 12000
-
 # outFlowPattern specifies which nodes to send to relative to the current node: Example [-1, +1, +2] means send to previous, next and next next
 # Note: node 1's previous node is node N, where N = number of nodes
 #outFlowPattern = [-1, 1, 2, 3,4,5,6,7,8]

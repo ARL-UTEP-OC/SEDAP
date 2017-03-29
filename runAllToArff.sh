@@ -7,12 +7,12 @@
 # Note: Generated res.arffs are currently used for scenario integrity 
 # validation within the cleaScenarios.sh script.
 
+# NOTE: WEKA rules may have to change based on attackNodeNum->attackNodeIP (0_0_0_0 FORMAT) ********8
+
 arffDir=$1
-wireType=$2
 scriptDir=`pwd`
 
 cd $arffDir
-
 
 if [ -f all.arff ]; then
     rm all.arff
@@ -22,7 +22,7 @@ fi
 #instance += str(flow[0])+","+str(fromHop)+","+str(toHop)+","+str(type)+","+str(dist)+","+str(passThrough)+","+str(beforeDelay)+","+str(beforeMissed)+","+str(beforeOOO)+","+str(beforeNumPackets)+","+str(duringDelay)+","+str(duringMissed)+","+str(duringOOO)+","+str(duringNumPackets)+","+str(afterDelay)+","+str(afterMissed)+","+str(afterOOO)+","+str(afterNumPackets)+","+destIsSpoofed+","+str(attackName)
 echo "@relation manet" > all.arff
 echo "@attribute path string" >> all.arff
-echo "@attribute attackNodeNum {1,2,3,4,5,6,7,8,9,10}" >> all.arff
+echo "@attribute attackNodeIP string" >> all.arff
 echo "@attribute description string" >> all.arff
 echo "@attribute fromHop {1,2,3,4,5,6,7,8,9,10}" >> all.arff
 echo "@attribute toHop {1,2,3,4,5,6,7,8,9,10}" >> all.arff
@@ -61,20 +61,13 @@ echo "@attribute altPathWithoutAttacker {true, false}" >> all.arff
 echo "@data" >> "all.arff"
 
 #traverse through each directory within the current directory
-echo `pwd`
 for dir in `ls -d */`; do
 	
 	if [[ $dir == *"_sh"* ]]
 	then
 		cd $dir
 		echo "inside $dir"
-		attackNum=`echo $dir | cut -d'_' -f1` #will change to f2 if ID parameter is insterted
-		
-		#if [[ $wireType == *"wired"* ]]
-		#then
-		#	fullDir=`pwd`
-		#	$scriptDir/successfulAttack.py
-		#else
+
 		echo "@relation manet" > res.arff
 		echo "@attribute path string" >> res.arff
 		echo "@attribute attackNodeNum {1,2,3,4,5,6,7,8,9,10}" >> res.arff
@@ -115,10 +108,10 @@ for dir in `ls -d */`; do
 		echo "@attribute altPathWithoutAttacker {true, false}" >> res.arff
 		echo "@data" >> res.arff
 
-		$scriptDir/netStateBuilder.py 30 30 $attackNum $wireType >> res.arff
-		#echo "$dir" >> ../all.arff
-		$scriptDir/netStateBuilder.py 30 30 $attackNum $wireType >> ../all.arff
-	#fi
+		attackerIP=`ls | grep capture | grep -v mgen | cut -d'.' -f1`
+		$scriptDir/netStateBuilder.py 30 30 $attackerIP >> res.arff
+		$scriptDir/netStateBuilder.py 30 30 $attackerIP >> ../all.arff
+
 		cd ../
 	fi
 done

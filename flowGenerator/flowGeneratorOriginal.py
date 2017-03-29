@@ -30,7 +30,7 @@ portPattern = [0, 1, 2]
 #add a protocolPattern, where 0 is udp and 1 is tcp
 #protocolPattern = ["TCP","TCP","TCP","UDP","UDP","UDP","UDP","UDP","UDP"]
 #protocolPattern = ["TCP","TCP","TCP","TCP","UDP","UDP","UDP","UDP","UDP","UDP","UDP","UDP"]
-protocolPattern = ["TCP","TCP","TCP","TCP","TCP","TCP","TCP","TCP","TCP","TCP","TCP","TCP"]
+protocolPattern = ["UDP","UDP","UDP","UDP","UDP","UDP","UDP","UDP","UDP","UDP","UDP","UDP"]
 
 # outFlowHash and inFlowHash are hash tables to store all send and listen communications specifying nodes and ports involved
 outFlowHash = {}
@@ -66,7 +66,7 @@ except:
     pass
 index = 1
 for hashkey in outFlowHash:
-	f = open("flows/flown" + str(hashkey) + ".mgn-o", 'w')
+	f = open("flows/flown" + str(hashkey) + ".mgn", 'w')
 	f.write("#flow " + str(hashkey) + "\n")
 	sendingTo = outFlowHash[hashkey]
 	listeningTo = inFlowHash[hashkey]
