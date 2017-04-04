@@ -1,6 +1,6 @@
 node n1 {
     type router
-    model host
+    model router
     network-config {
 	hostname n1
 	!
@@ -18,7 +18,7 @@ node n1 {
 
 node n2 {
     type router
-    model host
+    model router
     network-config {
 	hostname n2
 	!
@@ -36,7 +36,7 @@ node n2 {
 
 node n3 {
     type router
-    model host
+    model router
     network-config {
 	hostname n3
 	!
@@ -54,7 +54,7 @@ node n3 {
 
 node n4 {
     type router
-    model host
+    model router
     network-config {
 	hostname n4
 	!
@@ -72,7 +72,7 @@ node n4 {
 
 node n5 {
     type router
-    model host
+    model router
     network-config {
 	hostname n5
 	!
@@ -90,7 +90,7 @@ node n5 {
 
 node n6 {
     type router
-    model host
+    model router
     network-config {
 	hostname n6
 	!
@@ -108,7 +108,7 @@ node n6 {
 
 node n7 {
     type router
-    model host
+    model router
     network-config {
 	hostname n7
 	!
@@ -126,7 +126,7 @@ node n7 {
 
 node n8 {
     type router
-    model host
+    model router
     network-config {
 	hostname n8
 	!
@@ -144,7 +144,7 @@ node n8 {
 
 node n9 {
     type router
-    model host
+    model router
     network-config {
 	hostname n9
 	!
@@ -162,7 +162,7 @@ node n9 {
 
 node n10 {
     type router
-    model host
+    model router
     network-config {
 	hostname n10
 	!

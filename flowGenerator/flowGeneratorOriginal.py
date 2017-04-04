@@ -30,7 +30,7 @@ portPattern = [0, 1, 2]
 #add a protocolPattern, where 0 is udp and 1 is tcp
 #protocolPattern = ["TCP","TCP","TCP","UDP","UDP","UDP","UDP","UDP","UDP"]
 #protocolPattern = ["TCP","TCP","TCP","TCP","UDP","UDP","UDP","UDP","UDP","UDP","UDP","UDP"]
-protocolPattern = ["UDP","UDP","UDP","UDP","UDP","UDP","UDP","UDP","UDP","UDP","UDP","UDP"]
+protocolPattern = ["TCP","UDP","UDP"]
 
 # outFlowHash and inFlowHash are hash tables to store all send and listen communications specifying nodes and ports involved
 outFlowHash = {}

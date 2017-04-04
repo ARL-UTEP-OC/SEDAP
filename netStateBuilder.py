@@ -84,39 +84,41 @@ def getAttackerPerspective():
     global G
     global target
     statesNBeforeAttack = []  
+    
     #need to open the attacker files first
     attackerFile = open(attackerFile + '.capture')
     lines = attackerFile.readlines()[2:-1]
     lineNum = 0
 
-
+    attackOccured = False
     #now populate the attacker's gateways:
-
     for line in lines:
         lineNum = lineNum +1
         time = int(ast.literal_eval(line.split(";")[0]))
         flows = ast.literal_eval(line.split(";")[1])
-        target.write("FLOWS: "+str(flows))
+
         routesPrev = routes
-        routes = ast.literal_eval(line.split(";")[2]) # NO ROUTES BEING GIVEN! ---------- SHOULD BE TAKEN CARE OF BY MAKING ALL ROUTERS
+        routes = ast.literal_eval(line.split(";")[2])
         attackRunning = line.split(";")[3]
-        target.write("\n"+str(routes)+"\n")
 
         #get all network bypass n before attack from flows:
-        if attackRunning.startswith("no") and lineNum < len(lines):
+        if attackRunning.startswith("no"):
             if len(statesNBeforeAttack) > int(nBeforeAttack):
                 statesNBeforeAttack.pop()
             statesNBeforeAttack.append(flows)
         else :
             routes = routesPrev
             attackName = attackRunning.strip()
+
             for sRoute in routes:
                 if (attackNodeIP,sRoute) not in gateways:
                     gateways[(attackNodeIP,sRoute)] = routes[sRoute][1]
                 if routes[sRoute][1] != "0.0.0.0":
                     G.add_edge(attackNodeIP,routes[sRoute][1])
-        if lineNum == len(lines):
-            attackName = "down"
+            		#make sure within bounds of text file
+            if lineNum == len(lines):
+                attackName = "down"
+            target.write("\n RoutesFINAL: " +str(routes)+"\n")
             break
         
     #get the union of all paths seen
@@ -130,8 +132,6 @@ def getAttackerPerspective():
                 tmpFlow = (tmpFlow[0],"TCP")
             if tmpFlow not in attackerPathsSeen:
                 attackerPathsSeen[tmpFlow] = allFlows[flow]
-            #else:
-                #print "old",flow
 
 def getNonAttackerPerspective(): #next open the non-attackers files and fill out parameters
     global numAttackLines
@@ -143,7 +143,6 @@ def getNonAttackerPerspective(): #next open the non-attackers files and fill out
     global nonAttackerFlowsDuringAttack
     global nonAttackerFlowsAfterAttack
     global nonAttackerRoutes
-    global attackName
     global G
     
     sysNonAttackerFiles = commands.getoutput("ls *.mgencapture")
@@ -248,8 +247,7 @@ def calcAfterAttackAvgs():
 
     for flow in nonAttackerFlowsAfterAttack:
         nonAttackerFlowsAfterAttack[flow] = (nonAttackerFlowsAfterAttack[flow][0]/float(mAfterAttack),nonAttackerFlowsAfterAttack[flow][1]/float(mAfterAttack),nonAttackerFlowsAfterAttack[flow][2]/float(mAfterAttack),nonAttackerFlowsAfterAttack[flow][3]/float(mAfterAttack),nonAttackerFlowsAfterAttack[flow][4])
-
-    
+  
 def getNonAttackerLossDuringAttack():
     #during - before
     #first get avgs of all
@@ -285,27 +283,35 @@ def calcPassThroughs():
     global attackerPathsSeen
     global passThroughsBefore
     global target
-    for flow in nonAttackerFlowsBeforeAttack:
+    target.write("\n nonattacker flows: "+str(nonAttackerFlowsBeforeAttack))
+    for flow in nonAttackerFlowsBeforeAttack:#iterate through nonattackflows and look for IPs seen within routes
         fromHop = "*"
         toHop = "*"
+        
+        #may need to change to x.x.x.0 format if gateways are wired----------------------
         toIP = flow[0].split("_")[1]
         fromIP = flow[0].split("_")[0]
+        
+        #based on IP and netmask, find ranges --------------------------------
         ipToRange = IPNetwork(toIP + "/" + netmask)
         ipFromRange = IPNetwork(fromIP + "/" + netmask)
-        
-        target.write("nonattacker flows: "+str(nonAttackerFlowsBeforeAttack))
-        
-        #if fromIP not in routes and IPAddress(fromIP) in ipFromRange:
-         #   fromHop = ipToRange[0]  #Not changing for wired scenarios------------------------------------------------
-        if fromIP in routes:
-            fromHop = routes[fromIP][0]
-        target.write("\n toip:" +toIP + "\n") 
+
+		#validate if reassignment is needed for x.x.x.o format---------------------------
         if toIP not in routes and IPAddress(toIP) in ipToRange:
-            toIP = ipFromRange[0]
+            toIP = str(ipToRange[0])
+        if fromIP not in routes and IPAddress(fromIP) in ipFromRange:
+            fromIP = str(ipFromRange[0])
+
         if toIP in routes:
             toHop = routes[toIP][0]
-        target.write("\n fromhop: "+ fromHop +" tohop: " + toHop + "\n" + "routes: " + str(routes))    
-        if (flow[0],flow[1]) in attackerPathsSeen: # CHECK ALL THREE IN TEST.TXT!---------------------
+        if fromIP in routes:
+            fromHop = routes[fromIP][0]
+            
+        target.write("\n fromip:" +fromIP + "\n")
+        target.write("\n toip:" +toIP + "\n") 
+        target.write("\n fromhop: "+ fromHop +" tohop: " + toHop + "\n")    
+        
+        if (flow[0],flow[1]) in attackerPathsSeen: 
             passThroughsBefore[(flow[0],flow[1])] = ("true",flow[0].split("_")[0],fromHop,flow[0].split("_")[1],toHop)
         else:
             passThroughsBefore[(flow[0],flow[1])] = ("false",flow[0].split("_")[0],fromHop,flow[0].split("_")[1],toHop)
@@ -336,11 +342,16 @@ def buildHopTraff():
 
         fromIP = flow[0].split("_")[0]
         toIP = flow[0].split("_")[1] #may contain x.x.x.n format
-        ipRange = IPNetwork(toIP + "/" + netmask)
         
-        #see if ip must be modified (nonAttackerRoutes may contain x.x.x.0 format if wired)
-        if IPAddress(toIP) in ipRange and (fromIP, toIP) not in nonAttackerRoutes:
-			toIP = ipRange[0]
+        #based on IP and netmask, find ranges ------------------------------------------------
+        ipToRange = IPNetwork(toIP + "/" + netmask)
+        ipFromRange = IPNetwork(fromIP + "/" + netmask)
+
+		#validate if reassignment is needed for x.x.x.o format--------------------------------
+        if (fromIP, toIP) not in nonAttackerRoutes and IPAddress(toIP) in ipToRange:
+            toIP = str(ipToRange[0])
+        if (fromIP, toIP) not in nonAttackerRoutes and IPAddress(fromIP) in ipFromRange:
+            fromIP = str(ipFromRange[0])
 		
 		#check again with new ip value
         if (fromIP, toIP) in nonAttackerRoutes: 
@@ -386,7 +397,9 @@ def buildHopTraff():
                 isAttackerBetweenSpoofedAndDstgw = "false"
                 isSrcBetweenSpoofedAndDst = "false"
                 isSrcBetweenSpoofedAndDstgw = "false"
+                target.write("\n attack name: " +str(attackName)+"\n")
                 if "spoof" in attackName:
+                    target.write("\n attack name: " +str(attackName)+"\n")
                     if flow[0].split("_")[1] == attackName.split("_")[1]:
                         destIsSpoofed = "true"
                         
@@ -434,13 +447,13 @@ def bBetweenAandC(a,b,c):
     global gateways
     done = "false"
     mysrc = a
-#    print a,b,c,"hop to ",mysrc,",",c
+
     if mysrc == b:
         return "true"
     while "true":
         if (mysrc,c) in gateways:
             mysrc = gateways[(mysrc,c)]
-#            print "hop to ",mysrc,",",c
+
             if mysrc == "0.0.0.0":
                 return "false"
             if mysrc == b:
@@ -451,21 +464,19 @@ def gatewaybBetweenAandC(a,b,c):
     global gateways
     done = "false"
     mysrc = a
-#    print a,b,c,"hop to ",mysrc,",",c
+
     if mysrc == b or ((mysrc,b) in gateways and gateways[(mysrc,b)] == "0.0.0.0"):
         return "true"
     while "true":
         if (mysrc,c) in gateways:
             mysrc = gateways[(mysrc,c)]
-#            print "hop to ",mysrc,",",c
+
             if mysrc == "0.0.0.0":
                 return "false"
             if mysrc == b or ((mysrc,b) in gateways and gateways[(mysrc,b)] == "0.0.0.0"):
                 return "true"
         else: return "false"
-
-
-    
+   
 def hasAltPath(fromNode,toNode,nodeToRemove):
     return "true"
     global G

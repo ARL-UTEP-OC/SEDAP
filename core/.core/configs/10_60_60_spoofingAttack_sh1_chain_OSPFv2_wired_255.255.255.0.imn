@@ -13,6 +13,133 @@ node n1 {
     labelcoords {47.0 249.0}
     interface-peer {eth0 n11}
     custom-config {
+	custom-config-id service:UserDefined:custom-post-config-commands.sh
+	custom-command custom-post-config-commands.sh
+	config {
+#!/bin/sh
+HN=`hostname`
+if [ `uname` = "FreeBSD" ]; then
+  SCRIPTDIR=/tmp/e0_$HN
+else SCRIPTDIR=/root/wired/
+fi
+cd $SCRIPTDIR
+mkdir 10_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.255.0
+cd 10_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.255.0
+
+#get ip of current (defaults to FIRST IP)
+ipRange=`hostname -I`
+myIP=`echo $ipRange | cut -d' ' -f1`
+ipFileName=`echo $myIP | tr . _`
+
+#now insert attack script and mgen flush if node is attacker
+if [ `hostname` = n10 -o 10 = 0 ]
+then
+
+#start logging
+tshark -a duration:175 -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | /root/install/impactFix/impactpredictionmodels/netCollect.py /root/wired/10_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.255.0 $myIP > $ipFileName.capture &    
+
+mgen flush input /root/install/impactFix/impactpredictionmodels/flowGenerator/flows/flow`hostname`.mgn output /dev/null &
+
+(
+cat << 'EOF'
+#!/bin/bash 
+startTime=$1
+pendingDuration=$2
+# Node is incremented by 10 based on scenario IP configuration
+nodeToSpoof=`expr $3 + 10`
+logPath=$4
+
+# Parse routing protocol and convert to lowercase
+routingProtocol=`echo $logPath | cut -d'_' -f7 | cut -d 'v' -f1 | sed 's/./\L&/g'`
+subnet=`echo $logPath | cut -d '_' -f9`
+
+cd "$SESSION_DIR/$NODE_NAME.conf"
+
+echo "none" > $logPath/attack.txt
+echo "sleep startime:" "$startTime"
+sleep $startTime
+
+#check for protocol
+#if [[ $routingProtocol == *"ospf"* && -n "$5" && "IPv6" -eq "$5" ]]
+#then
+#	protocol="IPv6"
+#	ipToSpoof="2001:""$nodeToSpoof""::1"	
+	#start ospfv3
+	##????
+#	ifconfig eth0:1 inet6 add "$ipToSpoof/120" up
+#else
+protocol="IPv4" 
+ipToSpoof="$nodeToSpoof.0.0.2"
+
+cd "$SESSION_DIR/$NODE_NAME.conf"
+
+sh quaggaboot.sh zebra
+sh quaggaboot.sh "$routingProtocol"d
+sh quaggaboot.sh vtysh
+
+echo ifconfig eth0:1 $ipToSpoof netmask $subnet up
+ifconfig eth0:1 $ipToSpoof netmask $subnet up
+
+#fi
+echo "$protocol" ":" "$ipToSpoof"
+echo "starting spoof"
+echo "spoof_"$ipToSpoof > $logPath/attack.txt
+
+# Now check the routing protocol running  
+cd var.run.quagga/
+routingProcotolsRunning=`ls -1 | grep -v zebra.pid | grep pid | wc -l`	
+if [ "$routingProcotolsRunning" -ne 1 ]
+then
+	echo "spoof_"$ipToSpoof "Error: Multiple Routing Procols Running -> $routingProcotolsRunning" > $logPath/attack.txt	
+	echo "Multiple routing protocols"
+	exit
+fi
+
+#if ospf is used
+if [[ $routingProtocol == *"ospf"* ]]
+then
+	vtysh <<< $'configure terminal \n router ospf \n redistribute connected'
+	echo "sent vtysh cmd"
+fi
+
+# attack duration
+sleep $pendingDuration
+#stop quagga
+killall vtysh
+killall "$routingProtocol"d
+killall zebra
+
+ifconfig "eth0:1" down
+echo "eth0:1 down"
+
+echo "none" > $logPath/attack.txt
+
+
+
+EOF
+) > attack.sh
+
+chmod 755 attack.sh
+
+./attack.sh 60 60 1 /root/wired/10_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.255.0 
+
+else
+	#echo `hostname` >> /root/wired/10_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.255.0/check.txt
+	mgen flush input /root/install/impactFix/impactpredictionmodels/flowGenerator/flows/flow`hostname`.mgn | /root/install/impactFix/impactpredictionmodels/mgenCollect.py /root/wired/10_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.255.0 > $ipFileName.mgencapture &
+fi
+
+	}
+	}
+    custom-config {
+	custom-config-id service:UserDefined
+	custom-command UserDefined
+	config {
+	files=('custom-post-config-commands.sh', )
+	startidx=120
+	cmdup=('sh custom-post-config-commands.sh', )
+    }
+    }
+	services {OSPFv2 zebra vtysh IPForward DefaultRoute SSH UserDefined
  	}
 }
 
@@ -31,6 +158,133 @@ node n2 {
     labelcoords {272.0 119.0}
     interface-peer {eth0 n12}
     custom-config {
+	custom-config-id service:UserDefined:custom-post-config-commands.sh
+	custom-command custom-post-config-commands.sh
+	config {
+#!/bin/sh
+HN=`hostname`
+if [ `uname` = "FreeBSD" ]; then
+  SCRIPTDIR=/tmp/e0_$HN
+else SCRIPTDIR=/root/wired/
+fi
+cd $SCRIPTDIR
+mkdir 10_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.255.0
+cd 10_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.255.0
+
+#get ip of current (defaults to FIRST IP)
+ipRange=`hostname -I`
+myIP=`echo $ipRange | cut -d' ' -f1`
+ipFileName=`echo $myIP | tr . _`
+
+#now insert attack script and mgen flush if node is attacker
+if [ `hostname` = n10 -o 10 = 0 ]
+then
+
+#start logging
+tshark -a duration:175 -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | /root/install/impactFix/impactpredictionmodels/netCollect.py /root/wired/10_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.255.0 $myIP > $ipFileName.capture &    
+
+mgen flush input /root/install/impactFix/impactpredictionmodels/flowGenerator/flows/flow`hostname`.mgn output /dev/null &
+
+(
+cat << 'EOF'
+#!/bin/bash 
+startTime=$1
+pendingDuration=$2
+# Node is incremented by 10 based on scenario IP configuration
+nodeToSpoof=`expr $3 + 10`
+logPath=$4
+
+# Parse routing protocol and convert to lowercase
+routingProtocol=`echo $logPath | cut -d'_' -f7 | cut -d 'v' -f1 | sed 's/./\L&/g'`
+subnet=`echo $logPath | cut -d '_' -f9`
+
+cd "$SESSION_DIR/$NODE_NAME.conf"
+
+echo "none" > $logPath/attack.txt
+echo "sleep startime:" "$startTime"
+sleep $startTime
+
+#check for protocol
+#if [[ $routingProtocol == *"ospf"* && -n "$5" && "IPv6" -eq "$5" ]]
+#then
+#	protocol="IPv6"
+#	ipToSpoof="2001:""$nodeToSpoof""::1"	
+	#start ospfv3
+	##????
+#	ifconfig eth0:1 inet6 add "$ipToSpoof/120" up
+#else
+protocol="IPv4" 
+ipToSpoof="$nodeToSpoof.0.0.2"
+
+cd "$SESSION_DIR/$NODE_NAME.conf"
+
+sh quaggaboot.sh zebra
+sh quaggaboot.sh "$routingProtocol"d
+sh quaggaboot.sh vtysh
+
+echo ifconfig eth0:1 $ipToSpoof netmask $subnet up
+ifconfig eth0:1 $ipToSpoof netmask $subnet up
+
+#fi
+echo "$protocol" ":" "$ipToSpoof"
+echo "starting spoof"
+echo "spoof_"$ipToSpoof > $logPath/attack.txt
+
+# Now check the routing protocol running  
+cd var.run.quagga/
+routingProcotolsRunning=`ls -1 | grep -v zebra.pid | grep pid | wc -l`	
+if [ "$routingProcotolsRunning" -ne 1 ]
+then
+	echo "spoof_"$ipToSpoof "Error: Multiple Routing Procols Running -> $routingProcotolsRunning" > $logPath/attack.txt	
+	echo "Multiple routing protocols"
+	exit
+fi
+
+#if ospf is used
+if [[ $routingProtocol == *"ospf"* ]]
+then
+	vtysh <<< $'configure terminal \n router ospf \n redistribute connected'
+	echo "sent vtysh cmd"
+fi
+
+# attack duration
+sleep $pendingDuration
+#stop quagga
+killall vtysh
+killall "$routingProtocol"d
+killall zebra
+
+ifconfig "eth0:1" down
+echo "eth0:1 down"
+
+echo "none" > $logPath/attack.txt
+
+
+
+EOF
+) > attack.sh
+
+chmod 755 attack.sh
+
+./attack.sh 60 60 1 /root/wired/10_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.255.0 
+
+else
+	#echo `hostname` >> /root/wired/10_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.255.0/check.txt
+	mgen flush input /root/install/impactFix/impactpredictionmodels/flowGenerator/flows/flow`hostname`.mgn | /root/install/impactFix/impactpredictionmodels/mgenCollect.py /root/wired/10_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.255.0 > $ipFileName.mgencapture &
+fi
+
+	}
+	}
+    custom-config {
+	custom-config-id service:UserDefined
+	custom-command UserDefined
+	config {
+	files=('custom-post-config-commands.sh', )
+	startidx=120
+	cmdup=('sh custom-post-config-commands.sh', )
+    }
+    }
+	services {OSPFv2 zebra vtysh IPForward DefaultRoute SSH UserDefined
  	}
 }
 
@@ -49,6 +303,133 @@ node n3 {
     labelcoords {481.0 83.0}
     interface-peer {eth0 n13}
     custom-config {
+	custom-config-id service:UserDefined:custom-post-config-commands.sh
+	custom-command custom-post-config-commands.sh
+	config {
+#!/bin/sh
+HN=`hostname`
+if [ `uname` = "FreeBSD" ]; then
+  SCRIPTDIR=/tmp/e0_$HN
+else SCRIPTDIR=/root/wired/
+fi
+cd $SCRIPTDIR
+mkdir 10_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.255.0
+cd 10_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.255.0
+
+#get ip of current (defaults to FIRST IP)
+ipRange=`hostname -I`
+myIP=`echo $ipRange | cut -d' ' -f1`
+ipFileName=`echo $myIP | tr . _`
+
+#now insert attack script and mgen flush if node is attacker
+if [ `hostname` = n10 -o 10 = 0 ]
+then
+
+#start logging
+tshark -a duration:175 -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | /root/install/impactFix/impactpredictionmodels/netCollect.py /root/wired/10_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.255.0 $myIP > $ipFileName.capture &    
+
+mgen flush input /root/install/impactFix/impactpredictionmodels/flowGenerator/flows/flow`hostname`.mgn output /dev/null &
+
+(
+cat << 'EOF'
+#!/bin/bash 
+startTime=$1
+pendingDuration=$2
+# Node is incremented by 10 based on scenario IP configuration
+nodeToSpoof=`expr $3 + 10`
+logPath=$4
+
+# Parse routing protocol and convert to lowercase
+routingProtocol=`echo $logPath | cut -d'_' -f7 | cut -d 'v' -f1 | sed 's/./\L&/g'`
+subnet=`echo $logPath | cut -d '_' -f9`
+
+cd "$SESSION_DIR/$NODE_NAME.conf"
+
+echo "none" > $logPath/attack.txt
+echo "sleep startime:" "$startTime"
+sleep $startTime
+
+#check for protocol
+#if [[ $routingProtocol == *"ospf"* && -n "$5" && "IPv6" -eq "$5" ]]
+#then
+#	protocol="IPv6"
+#	ipToSpoof="2001:""$nodeToSpoof""::1"	
+	#start ospfv3
+	##????
+#	ifconfig eth0:1 inet6 add "$ipToSpoof/120" up
+#else
+protocol="IPv4" 
+ipToSpoof="$nodeToSpoof.0.0.2"
+
+cd "$SESSION_DIR/$NODE_NAME.conf"
+
+sh quaggaboot.sh zebra
+sh quaggaboot.sh "$routingProtocol"d
+sh quaggaboot.sh vtysh
+
+echo ifconfig eth0:1 $ipToSpoof netmask $subnet up
+ifconfig eth0:1 $ipToSpoof netmask $subnet up
+
+#fi
+echo "$protocol" ":" "$ipToSpoof"
+echo "starting spoof"
+echo "spoof_"$ipToSpoof > $logPath/attack.txt
+
+# Now check the routing protocol running  
+cd var.run.quagga/
+routingProcotolsRunning=`ls -1 | grep -v zebra.pid | grep pid | wc -l`	
+if [ "$routingProcotolsRunning" -ne 1 ]
+then
+	echo "spoof_"$ipToSpoof "Error: Multiple Routing Procols Running -> $routingProcotolsRunning" > $logPath/attack.txt	
+	echo "Multiple routing protocols"
+	exit
+fi
+
+#if ospf is used
+if [[ $routingProtocol == *"ospf"* ]]
+then
+	vtysh <<< $'configure terminal \n router ospf \n redistribute connected'
+	echo "sent vtysh cmd"
+fi
+
+# attack duration
+sleep $pendingDuration
+#stop quagga
+killall vtysh
+killall "$routingProtocol"d
+killall zebra
+
+ifconfig "eth0:1" down
+echo "eth0:1 down"
+
+echo "none" > $logPath/attack.txt
+
+
+
+EOF
+) > attack.sh
+
+chmod 755 attack.sh
+
+./attack.sh 60 60 1 /root/wired/10_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.255.0 
+
+else
+	#echo `hostname` >> /root/wired/10_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.255.0/check.txt
+	mgen flush input /root/install/impactFix/impactpredictionmodels/flowGenerator/flows/flow`hostname`.mgn | /root/install/impactFix/impactpredictionmodels/mgenCollect.py /root/wired/10_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.255.0 > $ipFileName.mgencapture &
+fi
+
+	}
+	}
+    custom-config {
+	custom-config-id service:UserDefined
+	custom-command UserDefined
+	config {
+	files=('custom-post-config-commands.sh', )
+	startidx=120
+	cmdup=('sh custom-post-config-commands.sh', )
+    }
+    }
+	services {OSPFv2 zebra vtysh IPForward DefaultRoute SSH UserDefined
  	}
 }
 
@@ -67,6 +448,133 @@ node n4 {
     labelcoords {733.0 201.0}
     interface-peer {eth0 n14}
     custom-config {
+	custom-config-id service:UserDefined:custom-post-config-commands.sh
+	custom-command custom-post-config-commands.sh
+	config {
+#!/bin/sh
+HN=`hostname`
+if [ `uname` = "FreeBSD" ]; then
+  SCRIPTDIR=/tmp/e0_$HN
+else SCRIPTDIR=/root/wired/
+fi
+cd $SCRIPTDIR
+mkdir 10_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.255.0
+cd 10_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.255.0
+
+#get ip of current (defaults to FIRST IP)
+ipRange=`hostname -I`
+myIP=`echo $ipRange | cut -d' ' -f1`
+ipFileName=`echo $myIP | tr . _`
+
+#now insert attack script and mgen flush if node is attacker
+if [ `hostname` = n10 -o 10 = 0 ]
+then
+
+#start logging
+tshark -a duration:175 -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | /root/install/impactFix/impactpredictionmodels/netCollect.py /root/wired/10_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.255.0 $myIP > $ipFileName.capture &    
+
+mgen flush input /root/install/impactFix/impactpredictionmodels/flowGenerator/flows/flow`hostname`.mgn output /dev/null &
+
+(
+cat << 'EOF'
+#!/bin/bash 
+startTime=$1
+pendingDuration=$2
+# Node is incremented by 10 based on scenario IP configuration
+nodeToSpoof=`expr $3 + 10`
+logPath=$4
+
+# Parse routing protocol and convert to lowercase
+routingProtocol=`echo $logPath | cut -d'_' -f7 | cut -d 'v' -f1 | sed 's/./\L&/g'`
+subnet=`echo $logPath | cut -d '_' -f9`
+
+cd "$SESSION_DIR/$NODE_NAME.conf"
+
+echo "none" > $logPath/attack.txt
+echo "sleep startime:" "$startTime"
+sleep $startTime
+
+#check for protocol
+#if [[ $routingProtocol == *"ospf"* && -n "$5" && "IPv6" -eq "$5" ]]
+#then
+#	protocol="IPv6"
+#	ipToSpoof="2001:""$nodeToSpoof""::1"	
+	#start ospfv3
+	##????
+#	ifconfig eth0:1 inet6 add "$ipToSpoof/120" up
+#else
+protocol="IPv4" 
+ipToSpoof="$nodeToSpoof.0.0.2"
+
+cd "$SESSION_DIR/$NODE_NAME.conf"
+
+sh quaggaboot.sh zebra
+sh quaggaboot.sh "$routingProtocol"d
+sh quaggaboot.sh vtysh
+
+echo ifconfig eth0:1 $ipToSpoof netmask $subnet up
+ifconfig eth0:1 $ipToSpoof netmask $subnet up
+
+#fi
+echo "$protocol" ":" "$ipToSpoof"
+echo "starting spoof"
+echo "spoof_"$ipToSpoof > $logPath/attack.txt
+
+# Now check the routing protocol running  
+cd var.run.quagga/
+routingProcotolsRunning=`ls -1 | grep -v zebra.pid | grep pid | wc -l`	
+if [ "$routingProcotolsRunning" -ne 1 ]
+then
+	echo "spoof_"$ipToSpoof "Error: Multiple Routing Procols Running -> $routingProcotolsRunning" > $logPath/attack.txt	
+	echo "Multiple routing protocols"
+	exit
+fi
+
+#if ospf is used
+if [[ $routingProtocol == *"ospf"* ]]
+then
+	vtysh <<< $'configure terminal \n router ospf \n redistribute connected'
+	echo "sent vtysh cmd"
+fi
+
+# attack duration
+sleep $pendingDuration
+#stop quagga
+killall vtysh
+killall "$routingProtocol"d
+killall zebra
+
+ifconfig "eth0:1" down
+echo "eth0:1 down"
+
+echo "none" > $logPath/attack.txt
+
+
+
+EOF
+) > attack.sh
+
+chmod 755 attack.sh
+
+./attack.sh 60 60 1 /root/wired/10_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.255.0 
+
+else
+	#echo `hostname` >> /root/wired/10_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.255.0/check.txt
+	mgen flush input /root/install/impactFix/impactpredictionmodels/flowGenerator/flows/flow`hostname`.mgn | /root/install/impactFix/impactpredictionmodels/mgenCollect.py /root/wired/10_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.255.0 > $ipFileName.mgencapture &
+fi
+
+	}
+	}
+    custom-config {
+	custom-config-id service:UserDefined
+	custom-command UserDefined
+	config {
+	files=('custom-post-config-commands.sh', )
+	startidx=120
+	cmdup=('sh custom-post-config-commands.sh', )
+    }
+    }
+	services {OSPFv2 zebra vtysh IPForward DefaultRoute SSH UserDefined
  	}
 }
 
@@ -85,6 +593,133 @@ node n5 {
     labelcoords {774.0 372.0}
     interface-peer {eth0 n15}
      custom-config {
+	custom-config-id service:UserDefined:custom-post-config-commands.sh
+	custom-command custom-post-config-commands.sh
+	config {
+#!/bin/sh
+HN=`hostname`
+if [ `uname` = "FreeBSD" ]; then
+  SCRIPTDIR=/tmp/e0_$HN
+else SCRIPTDIR=/root/wired/
+fi
+cd $SCRIPTDIR
+mkdir 10_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.255.0
+cd 10_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.255.0
+
+#get ip of current (defaults to FIRST IP)
+ipRange=`hostname -I`
+myIP=`echo $ipRange | cut -d' ' -f1`
+ipFileName=`echo $myIP | tr . _`
+
+#now insert attack script and mgen flush if node is attacker
+if [ `hostname` = n10 -o 10 = 0 ]
+then
+
+#start logging
+tshark -a duration:175 -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | /root/install/impactFix/impactpredictionmodels/netCollect.py /root/wired/10_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.255.0 $myIP > $ipFileName.capture &    
+
+mgen flush input /root/install/impactFix/impactpredictionmodels/flowGenerator/flows/flow`hostname`.mgn output /dev/null &
+
+(
+cat << 'EOF'
+#!/bin/bash 
+startTime=$1
+pendingDuration=$2
+# Node is incremented by 10 based on scenario IP configuration
+nodeToSpoof=`expr $3 + 10`
+logPath=$4
+
+# Parse routing protocol and convert to lowercase
+routingProtocol=`echo $logPath | cut -d'_' -f7 | cut -d 'v' -f1 | sed 's/./\L&/g'`
+subnet=`echo $logPath | cut -d '_' -f9`
+
+cd "$SESSION_DIR/$NODE_NAME.conf"
+
+echo "none" > $logPath/attack.txt
+echo "sleep startime:" "$startTime"
+sleep $startTime
+
+#check for protocol
+#if [[ $routingProtocol == *"ospf"* && -n "$5" && "IPv6" -eq "$5" ]]
+#then
+#	protocol="IPv6"
+#	ipToSpoof="2001:""$nodeToSpoof""::1"	
+	#start ospfv3
+	##????
+#	ifconfig eth0:1 inet6 add "$ipToSpoof/120" up
+#else
+protocol="IPv4" 
+ipToSpoof="$nodeToSpoof.0.0.2"
+
+cd "$SESSION_DIR/$NODE_NAME.conf"
+
+sh quaggaboot.sh zebra
+sh quaggaboot.sh "$routingProtocol"d
+sh quaggaboot.sh vtysh
+
+echo ifconfig eth0:1 $ipToSpoof netmask $subnet up
+ifconfig eth0:1 $ipToSpoof netmask $subnet up
+
+#fi
+echo "$protocol" ":" "$ipToSpoof"
+echo "starting spoof"
+echo "spoof_"$ipToSpoof > $logPath/attack.txt
+
+# Now check the routing protocol running  
+cd var.run.quagga/
+routingProcotolsRunning=`ls -1 | grep -v zebra.pid | grep pid | wc -l`	
+if [ "$routingProcotolsRunning" -ne 1 ]
+then
+	echo "spoof_"$ipToSpoof "Error: Multiple Routing Procols Running -> $routingProcotolsRunning" > $logPath/attack.txt	
+	echo "Multiple routing protocols"
+	exit
+fi
+
+#if ospf is used
+if [[ $routingProtocol == *"ospf"* ]]
+then
+	vtysh <<< $'configure terminal \n router ospf \n redistribute connected'
+	echo "sent vtysh cmd"
+fi
+
+# attack duration
+sleep $pendingDuration
+#stop quagga
+killall vtysh
+killall "$routingProtocol"d
+killall zebra
+
+ifconfig "eth0:1" down
+echo "eth0:1 down"
+
+echo "none" > $logPath/attack.txt
+
+
+
+EOF
+) > attack.sh
+
+chmod 755 attack.sh
+
+./attack.sh 60 60 1 /root/wired/10_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.255.0 
+
+else
+	#echo `hostname` >> /root/wired/10_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.255.0/check.txt
+	mgen flush input /root/install/impactFix/impactpredictionmodels/flowGenerator/flows/flow`hostname`.mgn | /root/install/impactFix/impactpredictionmodels/mgenCollect.py /root/wired/10_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.255.0 > $ipFileName.mgencapture &
+fi
+
+	}
+	}
+    custom-config {
+	custom-config-id service:UserDefined
+	custom-command UserDefined
+	config {
+	files=('custom-post-config-commands.sh', )
+	startidx=120
+	cmdup=('sh custom-post-config-commands.sh', )
+    }
+    }
+	services {OSPFv2 zebra vtysh IPForward DefaultRoute SSH UserDefined
  	}
 }
 
@@ -103,6 +738,133 @@ node n6 {
     labelcoords {737.0 476.0}
     interface-peer {eth0 n16}
     custom-config {
+	custom-config-id service:UserDefined:custom-post-config-commands.sh
+	custom-command custom-post-config-commands.sh
+	config {
+#!/bin/sh
+HN=`hostname`
+if [ `uname` = "FreeBSD" ]; then
+  SCRIPTDIR=/tmp/e0_$HN
+else SCRIPTDIR=/root/wired/
+fi
+cd $SCRIPTDIR
+mkdir 10_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.255.0
+cd 10_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.255.0
+
+#get ip of current (defaults to FIRST IP)
+ipRange=`hostname -I`
+myIP=`echo $ipRange | cut -d' ' -f1`
+ipFileName=`echo $myIP | tr . _`
+
+#now insert attack script and mgen flush if node is attacker
+if [ `hostname` = n10 -o 10 = 0 ]
+then
+
+#start logging
+tshark -a duration:175 -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | /root/install/impactFix/impactpredictionmodels/netCollect.py /root/wired/10_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.255.0 $myIP > $ipFileName.capture &    
+
+mgen flush input /root/install/impactFix/impactpredictionmodels/flowGenerator/flows/flow`hostname`.mgn output /dev/null &
+
+(
+cat << 'EOF'
+#!/bin/bash 
+startTime=$1
+pendingDuration=$2
+# Node is incremented by 10 based on scenario IP configuration
+nodeToSpoof=`expr $3 + 10`
+logPath=$4
+
+# Parse routing protocol and convert to lowercase
+routingProtocol=`echo $logPath | cut -d'_' -f7 | cut -d 'v' -f1 | sed 's/./\L&/g'`
+subnet=`echo $logPath | cut -d '_' -f9`
+
+cd "$SESSION_DIR/$NODE_NAME.conf"
+
+echo "none" > $logPath/attack.txt
+echo "sleep startime:" "$startTime"
+sleep $startTime
+
+#check for protocol
+#if [[ $routingProtocol == *"ospf"* && -n "$5" && "IPv6" -eq "$5" ]]
+#then
+#	protocol="IPv6"
+#	ipToSpoof="2001:""$nodeToSpoof""::1"	
+	#start ospfv3
+	##????
+#	ifconfig eth0:1 inet6 add "$ipToSpoof/120" up
+#else
+protocol="IPv4" 
+ipToSpoof="$nodeToSpoof.0.0.2"
+
+cd "$SESSION_DIR/$NODE_NAME.conf"
+
+sh quaggaboot.sh zebra
+sh quaggaboot.sh "$routingProtocol"d
+sh quaggaboot.sh vtysh
+
+echo ifconfig eth0:1 $ipToSpoof netmask $subnet up
+ifconfig eth0:1 $ipToSpoof netmask $subnet up
+
+#fi
+echo "$protocol" ":" "$ipToSpoof"
+echo "starting spoof"
+echo "spoof_"$ipToSpoof > $logPath/attack.txt
+
+# Now check the routing protocol running  
+cd var.run.quagga/
+routingProcotolsRunning=`ls -1 | grep -v zebra.pid | grep pid | wc -l`	
+if [ "$routingProcotolsRunning" -ne 1 ]
+then
+	echo "spoof_"$ipToSpoof "Error: Multiple Routing Procols Running -> $routingProcotolsRunning" > $logPath/attack.txt	
+	echo "Multiple routing protocols"
+	exit
+fi
+
+#if ospf is used
+if [[ $routingProtocol == *"ospf"* ]]
+then
+	vtysh <<< $'configure terminal \n router ospf \n redistribute connected'
+	echo "sent vtysh cmd"
+fi
+
+# attack duration
+sleep $pendingDuration
+#stop quagga
+killall vtysh
+killall "$routingProtocol"d
+killall zebra
+
+ifconfig "eth0:1" down
+echo "eth0:1 down"
+
+echo "none" > $logPath/attack.txt
+
+
+
+EOF
+) > attack.sh
+
+chmod 755 attack.sh
+
+./attack.sh 60 60 1 /root/wired/10_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.255.0 
+
+else
+	#echo `hostname` >> /root/wired/10_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.255.0/check.txt
+	mgen flush input /root/install/impactFix/impactpredictionmodels/flowGenerator/flows/flow`hostname`.mgn | /root/install/impactFix/impactpredictionmodels/mgenCollect.py /root/wired/10_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.255.0 > $ipFileName.mgencapture &
+fi
+
+	}
+	}
+    custom-config {
+	custom-config-id service:UserDefined
+	custom-command UserDefined
+	config {
+	files=('custom-post-config-commands.sh', )
+	startidx=120
+	cmdup=('sh custom-post-config-commands.sh', )
+    }
+    }
+	services {OSPFv2 zebra vtysh IPForward DefaultRoute SSH UserDefined
  	}
 }
 
@@ -121,6 +883,133 @@ node n7 {
     labelcoords {523.0 626.0}
     interface-peer {eth0 n17}
     custom-config {
+	custom-config-id service:UserDefined:custom-post-config-commands.sh
+	custom-command custom-post-config-commands.sh
+	config {
+#!/bin/sh
+HN=`hostname`
+if [ `uname` = "FreeBSD" ]; then
+  SCRIPTDIR=/tmp/e0_$HN
+else SCRIPTDIR=/root/wired/
+fi
+cd $SCRIPTDIR
+mkdir 10_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.255.0
+cd 10_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.255.0
+
+#get ip of current (defaults to FIRST IP)
+ipRange=`hostname -I`
+myIP=`echo $ipRange | cut -d' ' -f1`
+ipFileName=`echo $myIP | tr . _`
+
+#now insert attack script and mgen flush if node is attacker
+if [ `hostname` = n10 -o 10 = 0 ]
+then
+
+#start logging
+tshark -a duration:175 -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | /root/install/impactFix/impactpredictionmodels/netCollect.py /root/wired/10_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.255.0 $myIP > $ipFileName.capture &    
+
+mgen flush input /root/install/impactFix/impactpredictionmodels/flowGenerator/flows/flow`hostname`.mgn output /dev/null &
+
+(
+cat << 'EOF'
+#!/bin/bash 
+startTime=$1
+pendingDuration=$2
+# Node is incremented by 10 based on scenario IP configuration
+nodeToSpoof=`expr $3 + 10`
+logPath=$4
+
+# Parse routing protocol and convert to lowercase
+routingProtocol=`echo $logPath | cut -d'_' -f7 | cut -d 'v' -f1 | sed 's/./\L&/g'`
+subnet=`echo $logPath | cut -d '_' -f9`
+
+cd "$SESSION_DIR/$NODE_NAME.conf"
+
+echo "none" > $logPath/attack.txt
+echo "sleep startime:" "$startTime"
+sleep $startTime
+
+#check for protocol
+#if [[ $routingProtocol == *"ospf"* && -n "$5" && "IPv6" -eq "$5" ]]
+#then
+#	protocol="IPv6"
+#	ipToSpoof="2001:""$nodeToSpoof""::1"	
+	#start ospfv3
+	##????
+#	ifconfig eth0:1 inet6 add "$ipToSpoof/120" up
+#else
+protocol="IPv4" 
+ipToSpoof="$nodeToSpoof.0.0.2"
+
+cd "$SESSION_DIR/$NODE_NAME.conf"
+
+sh quaggaboot.sh zebra
+sh quaggaboot.sh "$routingProtocol"d
+sh quaggaboot.sh vtysh
+
+echo ifconfig eth0:1 $ipToSpoof netmask $subnet up
+ifconfig eth0:1 $ipToSpoof netmask $subnet up
+
+#fi
+echo "$protocol" ":" "$ipToSpoof"
+echo "starting spoof"
+echo "spoof_"$ipToSpoof > $logPath/attack.txt
+
+# Now check the routing protocol running  
+cd var.run.quagga/
+routingProcotolsRunning=`ls -1 | grep -v zebra.pid | grep pid | wc -l`	
+if [ "$routingProcotolsRunning" -ne 1 ]
+then
+	echo "spoof_"$ipToSpoof "Error: Multiple Routing Procols Running -> $routingProcotolsRunning" > $logPath/attack.txt	
+	echo "Multiple routing protocols"
+	exit
+fi
+
+#if ospf is used
+if [[ $routingProtocol == *"ospf"* ]]
+then
+	vtysh <<< $'configure terminal \n router ospf \n redistribute connected'
+	echo "sent vtysh cmd"
+fi
+
+# attack duration
+sleep $pendingDuration
+#stop quagga
+killall vtysh
+killall "$routingProtocol"d
+killall zebra
+
+ifconfig "eth0:1" down
+echo "eth0:1 down"
+
+echo "none" > $logPath/attack.txt
+
+
+
+EOF
+) > attack.sh
+
+chmod 755 attack.sh
+
+./attack.sh 60 60 1 /root/wired/10_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.255.0 
+
+else
+	#echo `hostname` >> /root/wired/10_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.255.0/check.txt
+	mgen flush input /root/install/impactFix/impactpredictionmodels/flowGenerator/flows/flow`hostname`.mgn | /root/install/impactFix/impactpredictionmodels/mgenCollect.py /root/wired/10_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.255.0 > $ipFileName.mgencapture &
+fi
+
+	}
+	}
+    custom-config {
+	custom-config-id service:UserDefined
+	custom-command UserDefined
+	config {
+	files=('custom-post-config-commands.sh', )
+	startidx=120
+	cmdup=('sh custom-post-config-commands.sh', )
+    }
+    }
+	services {OSPFv2 zebra vtysh IPForward DefaultRoute SSH UserDefined
  	}
 }
 
@@ -139,6 +1028,133 @@ node n8 {
     labelcoords {304.0 634.0}
     interface-peer {eth0 n18}
     custom-config {
+	custom-config-id service:UserDefined:custom-post-config-commands.sh
+	custom-command custom-post-config-commands.sh
+	config {
+#!/bin/sh
+HN=`hostname`
+if [ `uname` = "FreeBSD" ]; then
+  SCRIPTDIR=/tmp/e0_$HN
+else SCRIPTDIR=/root/wired/
+fi
+cd $SCRIPTDIR
+mkdir 10_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.255.0
+cd 10_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.255.0
+
+#get ip of current (defaults to FIRST IP)
+ipRange=`hostname -I`
+myIP=`echo $ipRange | cut -d' ' -f1`
+ipFileName=`echo $myIP | tr . _`
+
+#now insert attack script and mgen flush if node is attacker
+if [ `hostname` = n10 -o 10 = 0 ]
+then
+
+#start logging
+tshark -a duration:175 -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | /root/install/impactFix/impactpredictionmodels/netCollect.py /root/wired/10_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.255.0 $myIP > $ipFileName.capture &    
+
+mgen flush input /root/install/impactFix/impactpredictionmodels/flowGenerator/flows/flow`hostname`.mgn output /dev/null &
+
+(
+cat << 'EOF'
+#!/bin/bash 
+startTime=$1
+pendingDuration=$2
+# Node is incremented by 10 based on scenario IP configuration
+nodeToSpoof=`expr $3 + 10`
+logPath=$4
+
+# Parse routing protocol and convert to lowercase
+routingProtocol=`echo $logPath | cut -d'_' -f7 | cut -d 'v' -f1 | sed 's/./\L&/g'`
+subnet=`echo $logPath | cut -d '_' -f9`
+
+cd "$SESSION_DIR/$NODE_NAME.conf"
+
+echo "none" > $logPath/attack.txt
+echo "sleep startime:" "$startTime"
+sleep $startTime
+
+#check for protocol
+#if [[ $routingProtocol == *"ospf"* && -n "$5" && "IPv6" -eq "$5" ]]
+#then
+#	protocol="IPv6"
+#	ipToSpoof="2001:""$nodeToSpoof""::1"	
+	#start ospfv3
+	##????
+#	ifconfig eth0:1 inet6 add "$ipToSpoof/120" up
+#else
+protocol="IPv4" 
+ipToSpoof="$nodeToSpoof.0.0.2"
+
+cd "$SESSION_DIR/$NODE_NAME.conf"
+
+sh quaggaboot.sh zebra
+sh quaggaboot.sh "$routingProtocol"d
+sh quaggaboot.sh vtysh
+
+echo ifconfig eth0:1 $ipToSpoof netmask $subnet up
+ifconfig eth0:1 $ipToSpoof netmask $subnet up
+
+#fi
+echo "$protocol" ":" "$ipToSpoof"
+echo "starting spoof"
+echo "spoof_"$ipToSpoof > $logPath/attack.txt
+
+# Now check the routing protocol running  
+cd var.run.quagga/
+routingProcotolsRunning=`ls -1 | grep -v zebra.pid | grep pid | wc -l`	
+if [ "$routingProcotolsRunning" -ne 1 ]
+then
+	echo "spoof_"$ipToSpoof "Error: Multiple Routing Procols Running -> $routingProcotolsRunning" > $logPath/attack.txt	
+	echo "Multiple routing protocols"
+	exit
+fi
+
+#if ospf is used
+if [[ $routingProtocol == *"ospf"* ]]
+then
+	vtysh <<< $'configure terminal \n router ospf \n redistribute connected'
+	echo "sent vtysh cmd"
+fi
+
+# attack duration
+sleep $pendingDuration
+#stop quagga
+killall vtysh
+killall "$routingProtocol"d
+killall zebra
+
+ifconfig "eth0:1" down
+echo "eth0:1 down"
+
+echo "none" > $logPath/attack.txt
+
+
+
+EOF
+) > attack.sh
+
+chmod 755 attack.sh
+
+./attack.sh 60 60 1 /root/wired/10_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.255.0 
+
+else
+	#echo `hostname` >> /root/wired/10_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.255.0/check.txt
+	mgen flush input /root/install/impactFix/impactpredictionmodels/flowGenerator/flows/flow`hostname`.mgn | /root/install/impactFix/impactpredictionmodels/mgenCollect.py /root/wired/10_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.255.0 > $ipFileName.mgencapture &
+fi
+
+	}
+	}
+    custom-config {
+	custom-config-id service:UserDefined
+	custom-command UserDefined
+	config {
+	files=('custom-post-config-commands.sh', )
+	startidx=120
+	cmdup=('sh custom-post-config-commands.sh', )
+    }
+    }
+	services {OSPFv2 zebra vtysh IPForward DefaultRoute SSH UserDefined
  	}
 }
 
@@ -157,6 +1173,133 @@ node n9 {
     labelcoords {81.0 520.0}
     interface-peer {eth0 n19}
     custom-config {
+	custom-config-id service:UserDefined:custom-post-config-commands.sh
+	custom-command custom-post-config-commands.sh
+	config {
+#!/bin/sh
+HN=`hostname`
+if [ `uname` = "FreeBSD" ]; then
+  SCRIPTDIR=/tmp/e0_$HN
+else SCRIPTDIR=/root/wired/
+fi
+cd $SCRIPTDIR
+mkdir 10_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.255.0
+cd 10_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.255.0
+
+#get ip of current (defaults to FIRST IP)
+ipRange=`hostname -I`
+myIP=`echo $ipRange | cut -d' ' -f1`
+ipFileName=`echo $myIP | tr . _`
+
+#now insert attack script and mgen flush if node is attacker
+if [ `hostname` = n10 -o 10 = 0 ]
+then
+
+#start logging
+tshark -a duration:175 -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | /root/install/impactFix/impactpredictionmodels/netCollect.py /root/wired/10_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.255.0 $myIP > $ipFileName.capture &    
+
+mgen flush input /root/install/impactFix/impactpredictionmodels/flowGenerator/flows/flow`hostname`.mgn output /dev/null &
+
+(
+cat << 'EOF'
+#!/bin/bash 
+startTime=$1
+pendingDuration=$2
+# Node is incremented by 10 based on scenario IP configuration
+nodeToSpoof=`expr $3 + 10`
+logPath=$4
+
+# Parse routing protocol and convert to lowercase
+routingProtocol=`echo $logPath | cut -d'_' -f7 | cut -d 'v' -f1 | sed 's/./\L&/g'`
+subnet=`echo $logPath | cut -d '_' -f9`
+
+cd "$SESSION_DIR/$NODE_NAME.conf"
+
+echo "none" > $logPath/attack.txt
+echo "sleep startime:" "$startTime"
+sleep $startTime
+
+#check for protocol
+#if [[ $routingProtocol == *"ospf"* && -n "$5" && "IPv6" -eq "$5" ]]
+#then
+#	protocol="IPv6"
+#	ipToSpoof="2001:""$nodeToSpoof""::1"	
+	#start ospfv3
+	##????
+#	ifconfig eth0:1 inet6 add "$ipToSpoof/120" up
+#else
+protocol="IPv4" 
+ipToSpoof="$nodeToSpoof.0.0.2"
+
+cd "$SESSION_DIR/$NODE_NAME.conf"
+
+sh quaggaboot.sh zebra
+sh quaggaboot.sh "$routingProtocol"d
+sh quaggaboot.sh vtysh
+
+echo ifconfig eth0:1 $ipToSpoof netmask $subnet up
+ifconfig eth0:1 $ipToSpoof netmask $subnet up
+
+#fi
+echo "$protocol" ":" "$ipToSpoof"
+echo "starting spoof"
+echo "spoof_"$ipToSpoof > $logPath/attack.txt
+
+# Now check the routing protocol running  
+cd var.run.quagga/
+routingProcotolsRunning=`ls -1 | grep -v zebra.pid | grep pid | wc -l`	
+if [ "$routingProcotolsRunning" -ne 1 ]
+then
+	echo "spoof_"$ipToSpoof "Error: Multiple Routing Procols Running -> $routingProcotolsRunning" > $logPath/attack.txt	
+	echo "Multiple routing protocols"
+	exit
+fi
+
+#if ospf is used
+if [[ $routingProtocol == *"ospf"* ]]
+then
+	vtysh <<< $'configure terminal \n router ospf \n redistribute connected'
+	echo "sent vtysh cmd"
+fi
+
+# attack duration
+sleep $pendingDuration
+#stop quagga
+killall vtysh
+killall "$routingProtocol"d
+killall zebra
+
+ifconfig "eth0:1" down
+echo "eth0:1 down"
+
+echo "none" > $logPath/attack.txt
+
+
+
+EOF
+) > attack.sh
+
+chmod 755 attack.sh
+
+./attack.sh 60 60 1 /root/wired/10_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.255.0 
+
+else
+	#echo `hostname` >> /root/wired/10_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.255.0/check.txt
+	mgen flush input /root/install/impactFix/impactpredictionmodels/flowGenerator/flows/flow`hostname`.mgn | /root/install/impactFix/impactpredictionmodels/mgenCollect.py /root/wired/10_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.255.0 > $ipFileName.mgencapture &
+fi
+
+	}
+	}
+    custom-config {
+	custom-config-id service:UserDefined
+	custom-command UserDefined
+	config {
+	files=('custom-post-config-commands.sh', )
+	startidx=120
+	cmdup=('sh custom-post-config-commands.sh', )
+    }
+    }
+	services {OSPFv2 zebra vtysh IPForward DefaultRoute SSH UserDefined
  	}
 }
 
@@ -175,6 +1318,133 @@ node n10 {
     labelcoords {59.0 386.0}
     interface-peer {eth0 n20}
     custom-config {
+	custom-config-id service:UserDefined:custom-post-config-commands.sh
+	custom-command custom-post-config-commands.sh
+	config {
+#!/bin/sh
+HN=`hostname`
+if [ `uname` = "FreeBSD" ]; then
+  SCRIPTDIR=/tmp/e0_$HN
+else SCRIPTDIR=/root/wired/
+fi
+cd $SCRIPTDIR
+mkdir 10_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.255.0
+cd 10_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.255.0
+
+#get ip of current (defaults to FIRST IP)
+ipRange=`hostname -I`
+myIP=`echo $ipRange | cut -d' ' -f1`
+ipFileName=`echo $myIP | tr . _`
+
+#now insert attack script and mgen flush if node is attacker
+if [ `hostname` = n10 -o 10 = 0 ]
+then
+
+#start logging
+tshark -a duration:175 -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | /root/install/impactFix/impactpredictionmodels/netCollect.py /root/wired/10_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.255.0 $myIP > $ipFileName.capture &    
+
+mgen flush input /root/install/impactFix/impactpredictionmodels/flowGenerator/flows/flow`hostname`.mgn output /dev/null &
+
+(
+cat << 'EOF'
+#!/bin/bash 
+startTime=$1
+pendingDuration=$2
+# Node is incremented by 10 based on scenario IP configuration
+nodeToSpoof=`expr $3 + 10`
+logPath=$4
+
+# Parse routing protocol and convert to lowercase
+routingProtocol=`echo $logPath | cut -d'_' -f7 | cut -d 'v' -f1 | sed 's/./\L&/g'`
+subnet=`echo $logPath | cut -d '_' -f9`
+
+cd "$SESSION_DIR/$NODE_NAME.conf"
+
+echo "none" > $logPath/attack.txt
+echo "sleep startime:" "$startTime"
+sleep $startTime
+
+#check for protocol
+#if [[ $routingProtocol == *"ospf"* && -n "$5" && "IPv6" -eq "$5" ]]
+#then
+#	protocol="IPv6"
+#	ipToSpoof="2001:""$nodeToSpoof""::1"	
+	#start ospfv3
+	##????
+#	ifconfig eth0:1 inet6 add "$ipToSpoof/120" up
+#else
+protocol="IPv4" 
+ipToSpoof="$nodeToSpoof.0.0.2"
+
+cd "$SESSION_DIR/$NODE_NAME.conf"
+
+sh quaggaboot.sh zebra
+sh quaggaboot.sh "$routingProtocol"d
+sh quaggaboot.sh vtysh
+
+echo ifconfig eth0:1 $ipToSpoof netmask $subnet up
+ifconfig eth0:1 $ipToSpoof netmask $subnet up
+
+#fi
+echo "$protocol" ":" "$ipToSpoof"
+echo "starting spoof"
+echo "spoof_"$ipToSpoof > $logPath/attack.txt
+
+# Now check the routing protocol running  
+cd var.run.quagga/
+routingProcotolsRunning=`ls -1 | grep -v zebra.pid | grep pid | wc -l`	
+if [ "$routingProcotolsRunning" -ne 1 ]
+then
+	echo "spoof_"$ipToSpoof "Error: Multiple Routing Procols Running -> $routingProcotolsRunning" > $logPath/attack.txt	
+	echo "Multiple routing protocols"
+	exit
+fi
+
+#if ospf is used
+if [[ $routingProtocol == *"ospf"* ]]
+then
+	vtysh <<< $'configure terminal \n router ospf \n redistribute connected'
+	echo "sent vtysh cmd"
+fi
+
+# attack duration
+sleep $pendingDuration
+#stop quagga
+killall vtysh
+killall "$routingProtocol"d
+killall zebra
+
+ifconfig "eth0:1" down
+echo "eth0:1 down"
+
+echo "none" > $logPath/attack.txt
+
+
+
+EOF
+) > attack.sh
+
+chmod 755 attack.sh
+
+./attack.sh 60 60 1 /root/wired/10_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.255.0 
+
+else
+	#echo `hostname` >> /root/wired/10_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.255.0/check.txt
+	mgen flush input /root/install/impactFix/impactpredictionmodels/flowGenerator/flows/flow`hostname`.mgn | /root/install/impactFix/impactpredictionmodels/mgenCollect.py /root/wired/10_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.255.0 > $ipFileName.mgencapture &
+fi
+
+	}
+	}
+    custom-config {
+	custom-config-id service:UserDefined
+	custom-command UserDefined
+	config {
+	files=('custom-post-config-commands.sh', )
+	startidx=120
+	cmdup=('sh custom-post-config-commands.sh', )
+    }
+    }
+	services {OSPFv2 zebra vtysh IPForward UserDefined
  	}
 }
 
@@ -197,6 +1467,29 @@ node n11 {
     interface-peer {eth0 n12}
     interface-peer {eth1 n1}
     custom-config {
+	custom-config-id service:UserDefined:custom-post-config-commands.sh
+	custom-command custom-post-config-commands.sh
+	config {
+#!/bin/sh
+HN=`hostname`
+if [ `uname` = "FreeBSD" ]; then
+  SCRIPTDIR=/tmp/e0_$HN
+else SCRIPTDIR=/root/wired/
+fi
+cd $SCRIPTDIR
+
+	}
+	}
+    custom-config {
+	custom-config-id service:UserDefined
+	custom-command UserDefined
+	config {
+	files=('custom-post-config-commands.sh', )
+	startidx=120
+	cmdup=('sh custom-post-config-commands.sh', )
+    }
+    }
+	services {OSPFv2 zebra vtysh IPForward UserDefined
  	}
 }
 
@@ -223,6 +1516,29 @@ node n12 {
     interface-peer {eth1 n13}
     interface-peer {eth2 n2}
     custom-config {
+	custom-config-id service:UserDefined:custom-post-config-commands.sh
+	custom-command custom-post-config-commands.sh
+	config {
+#!/bin/sh
+HN=`hostname`
+if [ `uname` = "FreeBSD" ]; then
+  SCRIPTDIR=/tmp/e0_$HN
+else SCRIPTDIR=/root/wired/
+fi
+cd $SCRIPTDIR
+
+	}
+	}
+    custom-config {
+	custom-config-id service:UserDefined
+	custom-command UserDefined
+	config {
+	files=('custom-post-config-commands.sh', )
+	startidx=120
+	cmdup=('sh custom-post-config-commands.sh', )
+    }
+    }
+	services {OSPFv2 zebra vtysh IPForward UserDefined
  	}
 }
 
@@ -249,6 +1565,29 @@ node n13 {
     interface-peer {eth1 n14}
     interface-peer {eth2 n3}
     custom-config {
+	custom-config-id service:UserDefined:custom-post-config-commands.sh
+	custom-command custom-post-config-commands.sh
+	config {
+#!/bin/sh
+HN=`hostname`
+if [ `uname` = "FreeBSD" ]; then
+  SCRIPTDIR=/tmp/e0_$HN
+else SCRIPTDIR=/root/wired/
+fi
+cd $SCRIPTDIR
+
+	}
+	}
+    custom-config {
+	custom-config-id service:UserDefined
+	custom-command UserDefined
+	config {
+	files=('custom-post-config-commands.sh', )
+	startidx=120
+	cmdup=('sh custom-post-config-commands.sh', )
+    }
+    }
+	services {OSPFv2 zebra vtysh IPForward UserDefined
  	}
 }
 
@@ -275,6 +1614,29 @@ node n14 {
     interface-peer {eth1 n15}
     interface-peer {eth2 n4}
     custom-config {
+	custom-config-id service:UserDefined:custom-post-config-commands.sh
+	custom-command custom-post-config-commands.sh
+	config {
+#!/bin/sh
+HN=`hostname`
+if [ `uname` = "FreeBSD" ]; then
+  SCRIPTDIR=/tmp/e0_$HN
+else SCRIPTDIR=/root/wired/
+fi
+cd $SCRIPTDIR
+
+	}
+	}
+    custom-config {
+	custom-config-id service:UserDefined
+	custom-command UserDefined
+	config {
+	files=('custom-post-config-commands.sh', )
+	startidx=120
+	cmdup=('sh custom-post-config-commands.sh', )
+    }
+    }
+	services {OSPFv2 zebra vtysh IPForward UserDefined
  	}
 }
 
@@ -301,6 +1663,29 @@ node n15 {
     interface-peer {eth1 n16}
     interface-peer {eth2 n5}
     custom-config {
+	custom-config-id service:UserDefined:custom-post-config-commands.sh
+	custom-command custom-post-config-commands.sh
+	config {
+#!/bin/sh
+HN=`hostname`
+if [ `uname` = "FreeBSD" ]; then
+  SCRIPTDIR=/tmp/e0_$HN
+else SCRIPTDIR=/root/wired/
+fi
+cd $SCRIPTDIR
+
+	}
+	}
+    custom-config {
+	custom-config-id service:UserDefined
+	custom-command UserDefined
+	config {
+	files=('custom-post-config-commands.sh', )
+	startidx=120
+	cmdup=('sh custom-post-config-commands.sh', )
+    }
+    }
+	services {OSPFv2 zebra vtysh IPForward UserDefined
  	}
 }
 
@@ -327,6 +1712,29 @@ node n16 {
     interface-peer {eth1 n17}
     interface-peer {eth2 n6}
     custom-config {
+	custom-config-id service:UserDefined:custom-post-config-commands.sh
+	custom-command custom-post-config-commands.sh
+	config {
+#!/bin/sh
+HN=`hostname`
+if [ `uname` = "FreeBSD" ]; then
+  SCRIPTDIR=/tmp/e0_$HN
+else SCRIPTDIR=/root/wired/
+fi
+cd $SCRIPTDIR
+
+	}
+	}
+    custom-config {
+	custom-config-id service:UserDefined
+	custom-command UserDefined
+	config {
+	files=('custom-post-config-commands.sh', )
+	startidx=120
+	cmdup=('sh custom-post-config-commands.sh', )
+    }
+    }
+	services {OSPFv2 zebra vtysh IPForward UserDefined
  	}
 }
 
@@ -353,6 +1761,29 @@ node n17 {
     interface-peer {eth1 n18}
     interface-peer {eth2 n7}
     custom-config {
+	custom-config-id service:UserDefined:custom-post-config-commands.sh
+	custom-command custom-post-config-commands.sh
+	config {
+#!/bin/sh
+HN=`hostname`
+if [ `uname` = "FreeBSD" ]; then
+  SCRIPTDIR=/tmp/e0_$HN
+else SCRIPTDIR=/root/wired/
+fi
+cd $SCRIPTDIR
+
+	}
+	}
+    custom-config {
+	custom-config-id service:UserDefined
+	custom-command UserDefined
+	config {
+	files=('custom-post-config-commands.sh', )
+	startidx=120
+	cmdup=('sh custom-post-config-commands.sh', )
+    }
+    }
+	services {OSPFv2 zebra vtysh IPForward UserDefined
  	}
 }
 
@@ -379,6 +1810,29 @@ node n18 {
     interface-peer {eth1 n19}
     interface-peer {eth2 n8}
     custom-config {
+	custom-config-id service:UserDefined:custom-post-config-commands.sh
+	custom-command custom-post-config-commands.sh
+	config {
+#!/bin/sh
+HN=`hostname`
+if [ `uname` = "FreeBSD" ]; then
+  SCRIPTDIR=/tmp/e0_$HN
+else SCRIPTDIR=/root/wired/
+fi
+cd $SCRIPTDIR
+
+	}
+	}
+    custom-config {
+	custom-config-id service:UserDefined
+	custom-command UserDefined
+	config {
+	files=('custom-post-config-commands.sh', )
+	startidx=120
+	cmdup=('sh custom-post-config-commands.sh', )
+    }
+    }
+	services {OSPFv2 zebra vtysh IPForward UserDefined
  	}
 }
 
@@ -405,6 +1859,29 @@ node n19 {
     interface-peer {eth1 n20}
     interface-peer {eth2 n9}
     custom-config {
+	custom-config-id service:UserDefined:custom-post-config-commands.sh
+	custom-command custom-post-config-commands.sh
+	config {
+#!/bin/sh
+HN=`hostname`
+if [ `uname` = "FreeBSD" ]; then
+  SCRIPTDIR=/tmp/e0_$HN
+else SCRIPTDIR=/root/wired/
+fi
+cd $SCRIPTDIR
+
+	}
+	}
+    custom-config {
+	custom-config-id service:UserDefined
+	custom-command UserDefined
+	config {
+	files=('custom-post-config-commands.sh', )
+	startidx=120
+	cmdup=('sh custom-post-config-commands.sh', )
+    }
+    }
+	services {OSPFv2 zebra vtysh IPForward UserDefined
  	}
 }
 
@@ -427,6 +1904,29 @@ node n20 {
     interface-peer {eth0 n19}
     interface-peer {eth1 n10}
     custom-config {
+	custom-config-id service:UserDefined:custom-post-config-commands.sh
+	custom-command custom-post-config-commands.sh
+	config {
+#!/bin/sh
+HN=`hostname`
+if [ `uname` = "FreeBSD" ]; then
+  SCRIPTDIR=/tmp/e0_$HN
+else SCRIPTDIR=/root/wired/
+fi
+cd $SCRIPTDIR
+
+	}
+	}
+    custom-config {
+	custom-config-id service:UserDefined
+	custom-command UserDefined
+	config {
+	files=('custom-post-config-commands.sh', )
+	startidx=120
+	cmdup=('sh custom-post-config-commands.sh', )
+    }
+    }
+	services {OSPFv2 zebra vtysh IPForward UserDefined
  	}
 }
 

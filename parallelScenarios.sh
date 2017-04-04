@@ -27,7 +27,7 @@ do
 	imnName="$nodeNum"_"$startTime"_60_"$attack"_"$scenario"_"$protocol"_"$wireType"
 	imnName=${imnName//\./_}
 	imnName+=_"$subnet"
-
+	echo "PARALLEL"
 	#check for existance of scenario to avoid unnecessary overwriting
 	if [[ ! -d /$mainDir/$imnName ]]					
 	then
@@ -35,7 +35,7 @@ do
 		path=core/.core/configs/$imnName.imn
 		cat staticScenarios/"$wireType"_scenarios/"$scenario".imn > $path
 		./imnGenerator.py $startTime 60 10 $nodeNum $attack $scenario $protocol $wireType $path $subnet
-		
+
 		#start core with the specified file and sleep for one second
 		#core-gui --batch $path
 		core-gui --start $path &

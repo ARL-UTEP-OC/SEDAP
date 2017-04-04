@@ -22,12 +22,12 @@ fi
 #instance += str(flow[0])+","+str(fromHop)+","+str(toHop)+","+str(type)+","+str(dist)+","+str(passThrough)+","+str(beforeDelay)+","+str(beforeMissed)+","+str(beforeOOO)+","+str(beforeNumPackets)+","+str(duringDelay)+","+str(duringMissed)+","+str(duringOOO)+","+str(duringNumPackets)+","+str(afterDelay)+","+str(afterMissed)+","+str(afterOOO)+","+str(afterNumPackets)+","+destIsSpoofed+","+str(attackName)
 echo "@relation manet" > all.arff
 echo "@attribute path string" >> all.arff
-echo "@attribute attackNodeIP string" >> all.arff
+echo "@attribute attackNodeIP string" >> all.arff #@attribute attackNodeNum string
 echo "@attribute description string" >> all.arff
-echo "@attribute fromHop {1,2,3,4,5,6,7,8,9,10}" >> all.arff
-echo "@attribute toHop {1,2,3,4,5,6,7,8,9,10}" >> all.arff
+echo "@attribute fromHop numeric" >> all.arff #echo "@attribute fromHop {1,2,3,4,5,6,7,8,9,10}" >> all.arff
+echo "@attribute toHop numeric" >> all.arff #echo "@attribute toHop {1,2,3,4,5,6,7,8,9,10}" >> all.arff
 echo "@attribute type {TCP,UDP}" >> all.arff
-echo "@attribute distance {1,2,3,4,5,6,7,8,9,10}" >> all.arff
+echo "@attribute distance numeric" >> all.arff #echo "@attribute distance {1,2,3,4,5,6,7,8,9,10}" >> all.arff
 echo "@attribute passthrough {true, false}" >> all.arff
 echo "@attribute beforeDelay numeric" >> all.arff
 echo "@attribute beforeMissed numeric" >> all.arff
@@ -43,7 +43,7 @@ echo "@attribute afterOOO numeric" >> all.arff
 echo "@attribute afterNumPackets numeric" >> all.arff
 echo "@attribute srcSpoofed {true, false}" >> all.arff
 echo "@attribute destSpoofed {true, false}" >> all.arff
-echo "@attribute hopsToSpoofed {0,1,2,3,4,5,6,7,8,9,10}" >> all.arff
+echo "@attribute hopsToSpoofed numeric" >> all.arff #echo "@attribute hopsToSpoofed {0,1,2,3,4,5,6,7,8,9,10}" >> all.arff
 echo "@attribute duringLinkLost {true, false}" >> all.arff
 echo "@attribute afterLinkLost {true, false}" >> all.arff
 echo "@attribute attackName string" >> all.arff
@@ -70,12 +70,12 @@ for dir in `ls -d */`; do
 
 		echo "@relation manet" > res.arff
 		echo "@attribute path string" >> res.arff
-		echo "@attribute attackNodeNum {1,2,3,4,5,6,7,8,9,10}" >> res.arff
+		echo "@attribute attackNodeIP string" >> res.arff
 		echo "@attribute description string" >> res.arff
-		echo "@attribute fromHop {1,2,3,4,5,6,7,8,9,10}" >> res.arff
-		echo "@attribute toHop {1,2,3,4,5,6,7,8,9,10}" >> res.arff
+		echo "@attribute fromHop numeric" >> res.arff
+		echo "@attribute toHop numeric" >> res.arff
 		echo "@attribute type {TCP,UDP}" >> res.arff
-		echo "@attribute distance {1,2,3,4,5,6,7,8,9,10}" >> res.arff
+		echo "@attribute distance numeric" >> res.arff
 		echo "@attribute passthrough {true, false}" >> res.arff
 		echo "@attribute beforeDelay numeric" >> res.arff
 		echo "@attribute beforeMissed numeric" >> res.arff
@@ -91,7 +91,7 @@ for dir in `ls -d */`; do
 		echo "@attribute afterNumPackets numeric" >> res.arff
 		echo "@attribute srcSpoofed {true, false}" >> res.arff
 		echo "@attribute destSpoofed {true, false}" >> res.arff
-		echo "@attribute hopsToSpoofed {0,1,2,3,4,5,6,7,8,9,10}" >> res.arff
+		echo "@attribute hopsToSpoofed numeric" >> res.arff
 		echo "@attribute duringLinkLost {true, false}" >> res.arff
 		echo "@attribute afterLinkLost {true, false}" >> res.arff
 		echo "@attribute attackName string" >> res.arff
@@ -110,11 +110,9 @@ for dir in `ls -d */`; do
 
 		attackerIP=`ls | grep capture | grep -v mgen | cut -d'.' -f1`
 		netmask=`pwd | cut -d '_' -f9`
-		echo $netmask
 		$scriptDir/netStateBuilder.py 30 30 $attackerIP $netmask>> res.arff
 		$scriptDir/netStateBuilder.py 30 30 $attackerIP $netmask>> ../all.arff
 
 		cd ../
-		break
 	fi
 done

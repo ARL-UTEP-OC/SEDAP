@@ -28,8 +28,8 @@ then
 fi
 
 #---------- Begin: Initialization of files to be read -----------#
-#cd "$scriptDir/flowGenerator"
-#./flowGenerator.py 10 $wireType #Script and number of nodes may be changed
+cd "$scriptDir/flowGenerator"
+./flowGeneratorOriginal.py 10 $wireType #Script and number of nodes may be changed
 cd $scriptDir
 ./generateScenarios.sh $wireType
 
@@ -50,24 +50,24 @@ until [ $scenarioFolders -ge $permutations ]; do
 	./parallelScenarios.sh $imnTextFile $maxProcs $wireType $gui
 	
 	cd $scriptDir
-	#./cleanScenarios.sh $writingDir
+	./cleanScenarios.sh $writingDir
 	
 	permutations=`cat $imnTextFile | wc -l`
-	echo $permutations
 	scenarioFolders=`ls $writingDir | grep "_sh" | wc -l`
-	echo $scenarioFolders
+
 done
 
 # called to copy directories to appropriate locations for tar
 cd $scriptDir
-#./organizeDirectories.sh $writingDir
+./organizeDirectories.sh $writingDir
 
-#cd $writingDir
+cd $writingDir
 # Removing for accurate file to be generated for each attack
 if [ -f all.arff ]; then
     rm $writingDir/all.arff
 fi
 
+# Filter by current protocols being used. NOTE: May need to add BGP and others if used
 protocolDirectories=`ls $writingDir | grep -v "_sh" | grep -iE 'OLSR|OSPF|RIP'`
 
 for protocolDir in $protocolDirectories

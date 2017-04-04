@@ -1,3 +1,8 @@
+#!/usr/bin/python
+
+# Generates .imn configurations to be passed in based on parameters given.
+# Currently capable of generating wired and wireless .imns
+
 import sys
 import os
 import commands
@@ -6,7 +11,7 @@ import subprocess
 startTime = sys.argv[1]
 duration = sys.argv[2]
 numNodes = int(sys.argv[3])
-attackNodeNumber = sys.argv[4]
+attackNodeNumber = sys.argv[4] # will later be based on IP
 attackScriptPath = sys.argv[5]
 scenario = sys.argv[6]
 routingProtocol= sys.argv[7]
@@ -71,36 +76,26 @@ cd $SCRIPTDIR
 def insertMgen(node):
 
 	logPath = attackNodeNumber+"_"+startTime+"_"+duration+"_"+attackScriptPath+spoofNode
-	logPath+="_"+scenario+"_"+routingProtocol+"_"+wireTypeDir+"_"+subnet
+	logPath+="_"+scenario+"_"+routingProtocol+"_"+wireTypeDir
 	logPath = logPath.replace(".","_")
 	logPath = logPath.replace("/","_")
+	logPath += "_"+subnet
 	
 	mgenConfigs = """------
 mkdir """ + logPath + """
 cd """ + logPath +"""
 
-#get ip of current
-hostnameLen=`expr length $HN`
-hostnameLen=`expr $hostnameLen - 1` """
-	if wired:
-		mgenConfigs += """
-nodeNumber="`expr substr $HN 2 $hostnameLen`" 
-nodeNumber=$(( $nodeNumber + 10))
-myIP=$nodeNumber".0.0.2"
-echo $myIP >> /root/IPs.txt 
-"""
-	else:
-		mgenConfigs += """
-myIP="10.0.0.`expr substr $HN 2 $hostnameLen`" 
-"""
+#get ip of current (defaults to FIRST IP)
+ipRange=`hostname -I`
+myIP=`echo $ipRange | cut -d' ' -f1`
+ipFileName=`echo $myIP | tr . _`
 
-	mgenConfigs += """
 #now insert attack script and mgen flush if node is attacker
 if [ `hostname` = n""" + attackNodeNumber + """ -o """ + attackNodeNumber + """ = 0 ]
 then
 
 #start logging
-tshark -a duration:175 -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | """ + workingDirectory + """/netCollect.py """ + rootDirectory + logPath + """ $myIP > $HN.capture &    
+tshark -a duration:175 -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | """ + workingDirectory + """/netCollect.py """ + rootDirectory + logPath + """ $myIP > $ipFileName.capture &    
 
 mgen flush input """ + workingDirectory + """/flowGenerator/flows/flow`hostname`.mgn output /dev/null &
 
@@ -119,25 +114,23 @@ chmod 755 attack.sh
 	mgenConfigs+=" " + rootDirectory + logPath + """ 
 
 else
-	echo `hostname` >> """ + rootDirectory + logPath +"""/check.txt
-	mgen flush input """ + workingDirectory + """/flowGenerator/flows/flow`hostname`.mgn | """ + workingDirectory + """/mgenCollect.py """ + rootDirectory + logPath + """ > `hostname`.mgencapture &
+	#echo `hostname` >> """ + rootDirectory + logPath +"""/check.txt
+	mgen flush input """ + workingDirectory + """/flowGenerator/flows/flow`hostname`.mgn | """ + workingDirectory + """/mgenCollect.py """ + rootDirectory + logPath + """ > $ipFileName.mgencapture &
 fi
 ------"""
 	return mgenConfigs
 
 def insertRoutingProtocol(router):
+		
+	serviceString = routingProtocol
 	
-	if router is True:
+	if "OLSR" in routingProtocol:
+		serviceString += "_Mod IPForward"
 		
-		serviceString = routingProtocol
-		
-		if "OLSR" in routingProtocol:
-			serviceString += " IPForward"
-			
-		else:
-			serviceString += " zebra vtysh IPForward"
 	else:
-		serviceString = "DefaultRoute SSH"
+		serviceString += " zebra vtysh IPForward"
+	if not router:
+		serviceString += "DefaultRoute SSH"
 	
 	service ="""------
     }
@@ -174,14 +167,14 @@ for node in range(1,maxNodes+1):
 	# Will insert services based on router or host
 	isRouter = True
 		
-	#if not wired and inRange:
-	#	isRouter = True
+	if not wired and inRange:
+		isRouter = True
 
-	#elif wired:
-	#	if not inRange or nodeIsAttacker:
-	#		isRouter = True
-	#	else:
-	#		isRouter = False
+	elif wired:
+		if not inRange or nodeIsAttacker:
+			isRouter = True
+		else:
+			isRouter = False
 
 	services = insertRoutingProtocol(isRouter)
 	subprocess.call(["./insertConfigs.sh", toFindService, services, str(node), path])
