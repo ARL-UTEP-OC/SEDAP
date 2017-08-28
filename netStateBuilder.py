@@ -14,6 +14,8 @@ attackerFilenName = sys.argv[3] # Sould be in x_x_x_x format
 netmask = sys.argv[4]
 attackNodeIP = attackerFilenName.replace("_",".")
 
+#will eventually be read in from the JSON file
+#wired = sys.argv[5]
 
 #output: 
 #1. fromHop
@@ -254,8 +256,8 @@ def getNonAttackerLossDuringAttack():
         if flow in nonAttackerFlowsDuringAttack: 
             nonAttackerLossDuringAttack[flow] = (nonAttackerFlowsBeforeAttack[flow][0]-nonAttackerFlowsDuringAttack[flow][0],nonAttackerFlowsBeforeAttack[flow][1]-nonAttackerFlowsDuringAttack[flow][1],nonAttackerFlowsBeforeAttack[flow][2]-nonAttackerFlowsDuringAttack[flow][2],nonAttackerFlowsBeforeAttack[flow][3]-nonAttackerFlowsDuringAttack[flow][3],nonAttackerFlowsBeforeAttack[flow][4])
         else:
-            nonAttackerLossDuringAttack[flow] = nonAttackerFlowsBeforeAttack[flow] 
-
+			nonAttackerLossDuringAttack[flow] = nonAttackerFlowsBeforeAttack[flow]
+			            
 def getNonAttackerLossAfterAttack():
     #after - before
     #first get avgs of all
@@ -426,11 +428,13 @@ def buildHopTraff():
                 duringDelay = nonAttackerLossDuringAttack[flow][0]
                 duringMissed = nonAttackerLossDuringAttack[flow][1]
                 duringOOO = nonAttackerLossDuringAttack[flow][2]
+                #print "DURING",flow,nonAttackerLossDuringAttack[flow][3]
                 duringNumPackets = nonAttackerLossDuringAttack[flow][3]
                 
                 afterDelay = nonAttackerLossAfterAttack[flow][0]
                 afterMissed = nonAttackerLossAfterAttack[flow][1]
                 afterOOO = nonAttackerLossAfterAttack[flow][2]
+                #print "AFTER",flow,nonAttackerLossAfterAttack[flow][3]
                 afterNumPackets = nonAttackerLossAfterAttack[flow][3]
 
                 srcIsSpoofed = "false"
@@ -480,11 +484,12 @@ def buildHopTraff():
                     
                     isSrcBetweenSpoofedAndDst = bBetweenAandC(attackName.split("_")[1],flow[0].split("_")[0],flow[0].split("_")[1])
                     isSrcBetweenSpoofedAndDstgw = gatewaybBetweenAandC(attackName.split("_")[1],flow[0].split("_")[0],flow[0].split("_")[1])
-                 
-                if int(duringNumPackets) > 25: #if a fifth of the packets are lost, count it as lost flow
+                #print "duringNumPacket",duringNumPackets
+                if int(duringNumPackets) > 0: #if a fifth of the packets are lost, count it as lost flow
                     duringLinkLost = "true"
                 else: duringLinkLost = "false"
-                if int(afterNumPackets) > 25:
+                #print "afterNumPacket",afterNumPackets
+                if int(afterNumPackets) > 0:
                     afterLinkLost = "true"
                 else: afterLinkLost = "false"
 
@@ -528,13 +533,19 @@ def gatewaybBetweenAandC(a,b,c):
    
 def hasAltPath(fromNode,toNode,nodeToRemove):
     global G
+    
+    print "removing node:",fromNode, toNode, nodeToRemove
 
     if not nx.has_path(G,fromNode,toNode):
+        print "returning false no path"
         return "false"
     temp = G.copy()
+
     temp.remove_node(nodeToRemove)
     if not nx.has_path(temp,fromNode,toNode):
+        print "returning false after remove"
         return "false"
+    print "returning true"
     return "true"
 
 def findIpRouter(toSubnet, toIP):

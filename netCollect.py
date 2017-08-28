@@ -38,7 +38,7 @@ def processLines():
 
     getAttackRunning()
     #writeDataExists()
-    #print str((currTime-startTime))+";"+ str(flows) + ";" + str(routes)+";"+str(attackRunning)
+    print str((currTime-startTime))+";"+ str(flows) + ";" + str(routes)+";"+str(attackRunning)
     #print "Lines",lines
 
     lines = []
@@ -98,7 +98,7 @@ def getTraffTypeCounts():
             if srcIP not in myIPs and dstIP not in myIPs: # seems to be avoiding all traffic related to ALL interface IPs. WILL OTHERS BREAK IF RAN AGAIN? WILL IT GET ANY TRAFFIC IF ITS SUPPOSED TO BE A "HOST?"
                 flow = srcIP + "_" + dstIP #port?
 
-                print flow##################################################
+#                print flow##################################################
 
                 hopsToSrc = "*"
                 hopsToDst = "*"
