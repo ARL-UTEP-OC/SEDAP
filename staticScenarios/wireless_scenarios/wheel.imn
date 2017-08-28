@@ -220,7 +220,6 @@ node n11 {
     interface-peer {e8 n9}
     interface-peer {e9 n10}
 	custom-config {
-	}
 	custom-config-id basic_range
 	custom-command {3 3 9 9 9}
 	config {

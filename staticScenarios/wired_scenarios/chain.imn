@@ -84,7 +84,7 @@ node n5 {
     iconcoords {774.0 340.0}
     labelcoords {774.0 372.0}
     interface-peer {eth0 n15}
-     custom-config {
+    custom-config {
  	}
 }
 

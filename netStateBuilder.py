@@ -10,9 +10,9 @@ from netaddr import IPNetwork, IPAddress
 
 nBeforeAttack = sys.argv[1]
 mAfterAttack = sys.argv[2]
-attackerFile = sys.argv[3] # Sould be in x_x_x_x format 
+attackerFilenName = sys.argv[3] # Sould be in x_x_x_x format 
 netmask = sys.argv[4]
-attackNodeIP = attackerFile.replace(".","_")
+attackNodeIP = attackerFilenName.replace("_",".")
 
 
 #output: 
@@ -64,13 +64,9 @@ gateways = {}
 #passThroughsDuring = {}
 #passThroughsAfter = {}
 
-#fromHop, toHop,#hopsDataTravels, traffType, PacketsSeenBeforeAttack
-#attack, numPackets deviation during attack, passthrough, deviationAfterAttack 
 #---pending---:
 #recoverTime
 #iDstSpoofed, isSrcAttacker, secondsUntilHit
-target = open("/root/Desktop/test.txt", 'w')
-
 
 
 def getAttackerPerspective():
@@ -82,11 +78,10 @@ def getAttackerPerspective():
     global attackNodeIP
     global attackerFile
     global G
-    global target
     statesNBeforeAttack = []  
     
     #need to open the attacker files first
-    attackerFile = open(attackerFile + '.capture')
+    attackerFile = open(attackerFilenName + '.capture')
     lines = attackerFile.readlines()[2:-1]
     lineNum = 0
 
@@ -118,7 +113,6 @@ def getAttackerPerspective():
             		#make sure within bounds of text file
             if lineNum == len(lines):
                 attackName = "down"
-            target.write("\n RoutesFINAL: " +str(routes)+"\n")
             break
         
     #get the union of all paths seen
@@ -282,34 +276,54 @@ def calcPassThroughs():
     global nonAttackerFlowsBeforeAttack
     global attackerPathsSeen
     global passThroughsBefore
-    global target
-    target.write("\n nonattacker flows: "+str(nonAttackerFlowsBeforeAttack))
+    
     for flow in nonAttackerFlowsBeforeAttack:#iterate through nonattackflows and look for IPs seen within routes
         fromHop = "*"
         toHop = "*"
         
-        #may need to change to x.x.x.0 format if gateways are wired----------------------
+        #may need to change to x.x.x.0 format if gateways are wired
         toIP = flow[0].split("_")[1]
         fromIP = flow[0].split("_")[0]
+        #print ""
+        #print "toOrig: "+toIP
+        #print "fromOrig: "+fromIP
+        #print "routes: "+str(routes)
         
-        #based on IP and netmask, find ranges --------------------------------
-        ipToRange = IPNetwork(toIP + "/" + netmask)
-        ipFromRange = IPNetwork(fromIP + "/" + netmask)
+        #BREAKS WITH 255.255.255.255
+        #based on IP and netmask, find ranges
+        #ipToRange = IPNetwork(toIP + "/" + netmask)
+        #ipFromRange = IPNetwork(fromIP + "/" + netmask)
+        
+		#validate if reassignment is needed for x.x.x.o format
+        if toIP not in routes:
+            splitOctets = toIP.split(".")
+            splitOctets.pop()
+            joinBy = "."
+            toSubnet = joinBy.join(splitOctets) + ".0"
+            foundTo = findIpRouter(toSubnet, toIP)
+			
+            if foundTo:
+                #toIP = str(ipToRange[0])
+                toIP = toSubnet
 
-		#validate if reassignment is needed for x.x.x.o format---------------------------
-        if toIP not in routes and IPAddress(toIP) in ipToRange:
-            toIP = str(ipToRange[0])
-        if fromIP not in routes and IPAddress(fromIP) in ipFromRange:
-            fromIP = str(ipFromRange[0])
-
+        #use boolean to track whether current node is attacer, to avoid over-correction
+        fromIpIsAttacker = fromIP==attackNodeIP
+        if fromIP not in routes and not fromIpIsAttacker:
+            splitOctets = fromIP.split(".")
+            splitOctets.pop()
+            joinBy = "."
+            fromSubnet = joinBy.join(splitOctets) + ".0"
+            foundFrom = findIpRouter(fromSubnet, fromIP)
+			
+            if foundFrom:
+                fromIP = fromSubnet
+        
         if toIP in routes:
             toHop = routes[toIP][0]
         if fromIP in routes:
             fromHop = routes[fromIP][0]
-            
-        target.write("\n fromip:" +fromIP + "\n")
-        target.write("\n toip:" +toIP + "\n") 
-        target.write("\n fromhop: "+ fromHop +" tohop: " + toHop + "\n")    
+
+        #print "1-----" + fromHop + "---1"
         
         if (flow[0],flow[1]) in attackerPathsSeen: 
             passThroughsBefore[(flow[0],flow[1])] = ("true",flow[0].split("_")[0],fromHop,flow[0].split("_")[1],toHop)
@@ -336,30 +350,66 @@ def buildHopTraff():
 
     for flow in nonAttackerFlowsBeforeAttack:
         fromHop = passThroughsBefore[(flow[0],flow[1])][2]
-        #target.write("\n passthroughbefore" + str(passThroughsBefore) +"\n nonattackerflowsbeforeattack: "+ str(nonAttackerFlowsBeforeAttack) + "\n flow 1 and 2 " + str(flow[0])+"---"+str(flow[1]) +"\n")
-        
         toHop = passThroughsBefore[(flow[0],flow[1])][4]
 
         fromIP = flow[0].split("_")[0]
         toIP = flow[0].split("_")[1] #may contain x.x.x.n format
         
-        #based on IP and netmask, find ranges ------------------------------------------------
-        ipToRange = IPNetwork(toIP + "/" + netmask)
-        ipFromRange = IPNetwork(fromIP + "/" + netmask)
+        #BREAKS WITH 255.255.255.255
+        #based on IP and netmask, find ranges
+        #ipToRange = IPNetwork(toIP + "/" + netmask)
+        #ipFromRange = IPNetwork(fromIP + "/" + netmask)
+        
+        #use boolean to track if to IP is seen as subnet/router
+        toIpIsRouter = False
+        
+		#validate if reassignment is needed for x.x.x.o format
+        if (fromIP, toIP) not in nonAttackerRoutes:
+            #if IPAddress(toIP) in ipToRange:
+            #    toIP = str(ipToRange[0])
+            #if IPAddress(fromIP) in ipFromRange:
+            #    fromIP = str(ipFromRange[0])
+            #print "toIP: "+toIP
+            #print "routes: " +str(routes)
+            if toIP not in routes:
+	            splitOctets = toIP.split(".")
+	            splitOctets.pop()
+	            joinBy = "."
+	            toSubnet = joinBy.join(splitOctets) + ".0"
+	            toIpIsRouter = findIpRouter(toSubnet, toIP)
+				
+	            if toIpIsRouter:
+	                toIP = toSubnet
+	                
+            #fromIpIsAttacker = fromIP==attackNodeIP
+            #if fromIP not in routes and not fromIpIsAttacker:
+             #   splitOctets = fromIP.split(".")
+             #   splitOctets.pop()
+             #   joinBy = "."
+             #   fromSubnet = joinBy.join(splitOctets) + ".0"
+             #   foundFrom = findIpRouter(fromSubnet, fromIP)
 
-		#validate if reassignment is needed for x.x.x.o format--------------------------------
-        if (fromIP, toIP) not in nonAttackerRoutes and IPAddress(toIP) in ipToRange:
-            toIP = str(ipToRange[0])
-        if (fromIP, toIP) not in nonAttackerRoutes and IPAddress(fromIP) in ipFromRange:
-            fromIP = str(ipFromRange[0])
+             #   if foundFrom:
+             #       print "reassigned"
+             #       fromIP = fromSubnet
+
+		
+        #print "dist "+str((fromIP, toIP))
+        #print "dist "+str(nonAttackerRoutes)
 		
 		#check again with new ip value
         if (fromIP, toIP) in nonAttackerRoutes: 
             dist = nonAttackerRoutes[fromIP,toIP] 
+            
+            #Add extra distance if only distance from router is used
+            #Distance would be n + 1 
+            if toIpIsRouter:
+                addedHopFromRouter = int(dist) + 1
+                dist = str(addedHopFromRouter)
         else: 
             dist = "*"
-
-        target.write("nonattackroutes: "+ str(nonAttackerRoutes)+"\n"+"RESULTS: " + str(toHop) + "---" + str(fromHop) +"---" + str(dist))
+        #print fromHop + " " + toHop + " " + dist
+        
         if not fromHop == "*" and not toHop == "*" and not dist == "*": 
 
             type = flow[1]
@@ -397,9 +447,8 @@ def buildHopTraff():
                 isAttackerBetweenSpoofedAndDstgw = "false"
                 isSrcBetweenSpoofedAndDst = "false"
                 isSrcBetweenSpoofedAndDstgw = "false"
-                target.write("\n attack name: " +str(attackName)+"\n")
+
                 if "spoof" in attackName:
-                    target.write("\n attack name: " +str(attackName)+"\n")
                     if flow[0].split("_")[1] == attackName.split("_")[1]:
                         destIsSpoofed = "true"
                         
@@ -439,7 +488,7 @@ def buildHopTraff():
                     afterLinkLost = "true"
                 else: afterLinkLost = "false"
 
-                instance += commands.getoutput("pwd").strip('\n')+","+attackNodeIP+","+str(flow[0])+","+str(fromHop)+","+str(toHop)+","+str(type)+","+str(dist)+","+str(tmpPassthrough)+","+str(beforeDelay)+","+str(beforeMissed)+","+str(beforeOOO)+","+str(beforeNumPackets)+","+str(duringDelay)+","+str(duringMissed)+","+str(duringOOO)+","+str(duringNumPackets)+","+str(afterDelay)+","+str(afterMissed)+","+str(afterOOO)+","+str(afterNumPackets)+","+str(srcIsSpoofed)+","+str(destIsSpoofed)+","+str(hopsToSpoofed)+","+str(duringLinkLost)+","+str(afterLinkLost)+","+str(attackName) +","+str(hopsFromSpoofedToDest)+ ","+str(attackerCloserToDestThanSpoofed)+","+str(isSpoofedBetweenAttacker)+","+str(isDstBetweenSpoofedAndAttacker)+","+str(isSpoofedBetweenAttackergw)+","+str(isDstBetweenSpoofedAndAttackergw)+","+str(isAttackerBetweenSpoofedAndDst)+","+str(isAttackerBetweenSpoofedAndDstgw)+","+str(isSrcBetweenSpoofedAndDst)+","+str(isSrcBetweenSpoofedAndDstgw)+","+str(hasAltPath(flow[0].split("_")[0],flow[0].split("_")[1],attackNodeIP))
+                instance += commands.getoutput("pwd").strip('\n')+","+attackNodeIP.replace('_','.')+","+str(flow[0])+","+str(fromHop)+","+str(toHop)+","+str(type)+","+str(dist)+","+str(tmpPassthrough)+","+str(beforeDelay)+","+str(beforeMissed)+","+str(beforeOOO)+","+str(beforeNumPackets)+","+str(duringDelay)+","+str(duringMissed)+","+str(duringOOO)+","+str(duringNumPackets)+","+str(afterDelay)+","+str(afterMissed)+","+str(afterOOO)+","+str(afterNumPackets)+","+str(srcIsSpoofed)+","+str(destIsSpoofed)+","+str(hopsToSpoofed)+","+str(duringLinkLost)+","+str(afterLinkLost)+","+str(attackName) +","+str(hopsFromSpoofedToDest)+ ","+str(attackerCloserToDestThanSpoofed)+","+str(isSpoofedBetweenAttacker)+","+str(isDstBetweenSpoofedAndAttacker)+","+str(isSpoofedBetweenAttackergw)+","+str(isDstBetweenSpoofedAndAttackergw)+","+str(isAttackerBetweenSpoofedAndDst)+","+str(isAttackerBetweenSpoofedAndDstgw)+","+str(isSrcBetweenSpoofedAndDst)+","+str(isSrcBetweenSpoofedAndDstgw)+","+str(hasAltPath(flow[0].split("_")[0],flow[0].split("_")[1],attackNodeIP))
                 instance = instance.strip('\n')
                 instance += '\n'
                 
@@ -478,7 +527,6 @@ def gatewaybBetweenAandC(a,b,c):
         else: return "false"
    
 def hasAltPath(fromNode,toNode,nodeToRemove):
-    return "true"
     global G
 
     if not nx.has_path(G,fromNode,toNode):
@@ -488,6 +536,20 @@ def hasAltPath(fromNode,toNode,nodeToRemove):
     if not nx.has_path(temp,fromNode,toNode):
         return "false"
     return "true"
+
+def findIpRouter(toSubnet, toIP):
+    fileForIP = toIP.replace(".","_")
+    fileName = fileForIP + '.mgencapture'
+    if toIP == attackNodeIP:
+        fileName = fileForIP + '.capture'
+    fileToSearch = open(fileName)
+    lines = fileToSearch.readlines()[2:-1]
+    hasRouterString = """'""" + toSubnet + """': ('0', '0.0.0.0')"""
+
+    for line in lines:
+        if hasRouterString in line:
+            return True
+    return False
 
 getAttackerPerspective()
 getNonAttackerPerspective()
@@ -499,7 +561,5 @@ getNonAttackerLossAfterAttack()
 
 calcPassThroughs()
 buildHopTraff()
-target.close() 
+
 print instance
-
-

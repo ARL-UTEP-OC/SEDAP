@@ -31,6 +31,7 @@ fi
 cd "$scriptDir/flowGenerator"
 ./flowGeneratorOriginal.py 10 $wireType #Script and number of nodes may be changed
 cd $scriptDir
+echo "Generating scenarios..."
 ./generateScenarios.sh $wireType
 
 imnTextFile=$scriptDir/$imnFile
@@ -50,6 +51,7 @@ until [ $scenarioFolders -ge $permutations ]; do
 	./parallelScenarios.sh $imnTextFile $maxProcs $wireType $gui
 	
 	cd $scriptDir
+	echo "Cleaning scenarios."
 	./cleanScenarios.sh $writingDir
 	
 	permutations=`cat $imnTextFile | wc -l`
@@ -59,6 +61,7 @@ done
 
 # called to copy directories to appropriate locations for tar
 cd $scriptDir
+echo "Organizing directories..."
 ./organizeDirectories.sh $writingDir
 
 cd $writingDir
@@ -81,6 +84,7 @@ do
 		
 			cd $scriptDir
 			# exececute runalltoarff.sh for generation of acurate all.arff files
+			echo "Generating .arff files..."
 			./runAllToArff.sh $writingDir/$protocolDir/$attackDir/ $wireType 
 			
 			cd $writingDir/$protocolDir/

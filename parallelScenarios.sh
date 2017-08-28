@@ -27,7 +27,7 @@ do
 	imnName="$nodeNum"_"$startTime"_60_"$attack"_"$scenario"_"$protocol"_"$wireType"
 	imnName=${imnName//\./_}
 	imnName+=_"$subnet"
-	echo "PARALLEL"
+	echo $imnName
 	#check for existance of scenario to avoid unnecessary overwriting
 	if [[ ! -d /$mainDir/$imnName ]]					
 	then

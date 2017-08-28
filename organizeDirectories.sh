@@ -27,7 +27,7 @@ do
 			atk=`echo $attack | sed s/".sh".*/""/`
 		
 			if [ ! -d $protocol/$atk$subnet ]; then
-				echo "making directory $atk$subnet"
+				echo "making directory $atk$subnet in $protocol"
 				mkdir $protocol/$atk$subnet
 			fi
 		done
@@ -41,6 +41,6 @@ for dir in $directoriesToTar; do
 	attack=`echo $dir | cut -d'_' -f4`
 	subnet=`echo $dir | cut -d'_' -f9`
 
-	cp -r $dir/ $protocol/$attack$subnet
+	mv $dir/ $protocol/$attack$subnet
 	
 done

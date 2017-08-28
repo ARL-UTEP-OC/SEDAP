@@ -95,7 +95,7 @@ if [ `hostname` = n""" + attackNodeNumber + """ -o """ + attackNodeNumber + """ 
 then
 
 #start logging
-tshark -a duration:175 -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | """ + workingDirectory + """/netCollect.py """ + rootDirectory + logPath + """ $myIP > $ipFileName.capture &    
+tshark -a duration:175 -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | """ + workingDirectory + """/netCollect.py """ + rootDirectory + logPath + """ $ipRange > $ipFileName.capture &    
 
 mgen flush input """ + workingDirectory + """/flowGenerator/flows/flow`hostname`.mgn output /dev/null &
 
@@ -130,7 +130,7 @@ def insertRoutingProtocol(router):
 	else:
 		serviceString += " zebra vtysh IPForward"
 	if not router:
-		serviceString += "DefaultRoute SSH"
+		serviceString += " DefaultRoute"
 	
 	service ="""------
     }

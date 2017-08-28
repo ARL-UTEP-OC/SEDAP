@@ -6,10 +6,10 @@
 # Pass "wired" or "wireless" for type of emulation
 wireType=$1 
 startTime=60
-attacks="blackholeAttack.sh spoofingAttack.sh1 spoofingAttack.sh2 spoofingAttack.sh3 spoofingAttack.sh4 spoofingAttack.sh5 spoofingAttack.sh6 spoofingAttack.sh7 spoofingAttack.sh8 spoofingAttack.sh9 spoofingAttack.sh10"
-protocols="OSPFv2 RIP" # Protocol is initially based on wired scenarios. BGP to be added
-scenarios="chain cycle tree wheel conn-grid star two-centroids"
-subnets="255.255.255.255" #"255.255.255.128 255.255.255.0 255.255.0.0 255.255.255.255" #only 255 for first wireless run
+attacks="spoofingAttack.sh2" # spoofingAttack.sh2 spoofingAttack.sh3 spoofingAttack.sh4 spoofingAttack.sh5 spoofingAttack.sh6 spoofingAttack.sh7 spoofingAttack.sh8 spoofingAttack.sh9 spoofingAttack.sh10"
+protocols="OSPFv2" # RIP" # Protocol is initially based on wired scenarios. BGP to be added
+scenarios="conn-grid" # "chain cycle tree wheel conn-grid star two-centroids"
+subnets="255.255.255.0" # 255.255.0.0 255.255.255.255" #only 255 for first wireless run
 
 # Protocols and Attacks will be modified based on wire type
 if [ $wireType == "wireless" ]
@@ -27,8 +27,8 @@ then
     rm $wireType"ImnSets.txt"
 fi
 
-#for nodeNum in 10
-#do
+for nodeNum in {1..10}
+do
 	for protocol in $protocols
 	do
 		for scenario in $scenarios
@@ -43,11 +43,11 @@ fi
 					# make sure victim and attacker aren't the same
 					if [[ ! "$nodeNum" -eq "$attackNumber" ]]
 					then
-						imnParams="10 $attack $scenario $protocol $subnet"
+						imnParams="$nodeNum $attack $scenario $protocol $subnet"
 						echo $imnParams >> $wireType"ImnSets.txt"
 					fi
 				done
 			done
 		done
 	done
-#done
+done

@@ -12,18 +12,32 @@ import os
 logPath =  os.getcwd()
 flows = []
 success = False
-successString=""
+successString = ""
 previousSecond = 0
-lineBefore=""
+lineBefore = ""
+victim = ""
+attacker = "";
 
-#if spoofing attack...
-#parsedPath = logPath.split("spoofingAttack_sh")
-victim = 5
-parsedAttacker = parsedPath[0].split("/")
-attacker = parsedAttacker[len(parsedAttacker)-1].split("_")[0]
+if "spoofingAttack_sh" in logPath:
+	parsedPath = logPath.split("spoofingAttack_sh")
+	parsedAttacker = parsedPath[0].split("/")
+	attacker = parsedAttacker[len(parsedAttacker)-1].split("_")[0]
+	victim = parsedPath[1].split("_")[0]
+
+else: #may be a blackhole attack
+	parsedPath = logPath.split("blackholeAttack_sh")
+	parsedAttacker = parsedPath[0].split("/")
+	attacker = parsedAttacker[len(parsedAttacker)-1].split("_")[0]
+	victim = (int(attacker)+5) # choose arbitrary victim to analyze
+	if victim > 10:
+		victim -= 10
+
 attackerIPFlow = str(int(attacker) + 10) + ".0.0.2_"
-mgenFile = "n" + victim + ".mgencapture"
+mgenFile = str(int(victim) + 10) + "_0_0_2.mgencapture"
 
+if "wireless" in logPath:
+	attackerIPFlow = str(int(attacker) + 10) + ".0.0.2_"
+	mgenFile =  "10_0_0_" + str(victim) + ".mgencapture"
 
 # Function used to write success status of attack.
 def writeToFile():

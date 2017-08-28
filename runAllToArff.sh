@@ -11,6 +11,7 @@
 
 arffDir=$1
 scriptDir=`pwd`
+echo "arffDir $arffDir"
 
 cd $arffDir
 
@@ -110,6 +111,7 @@ for dir in `ls -d */`; do
 
 		attackerIP=`ls | grep capture | grep -v mgen | cut -d'.' -f1`
 		netmask=`pwd | cut -d '_' -f9`
+		echo "$attackerIP / $netmask"
 		$scriptDir/netStateBuilder.py 30 30 $attackerIP $netmask>> res.arff
 		$scriptDir/netStateBuilder.py 30 30 $attackerIP $netmask>> ../all.arff
 
