@@ -75,8 +75,6 @@ def getRoutes():
     
 def getTraffTypeCounts():
     global lines
-
-    
     global flows
     
     srcIP = ""

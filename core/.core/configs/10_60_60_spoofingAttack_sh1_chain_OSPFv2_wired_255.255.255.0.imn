@@ -35,10 +35,13 @@ ipFileName=`echo $myIP | tr . _`
 if [ `hostname` = n10 -o 10 = 0 ]
 then
 
-#start logging
-tshark -a duration:175 -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | /root/install/impactFix/impactpredictionmodels/netCollect.py /root/wired/10_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.255.0 $myIP > $ipFileName.capture &    
+routingProtocol=`echo 10_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.255.0 | cut -d'_' -f7 | cut -d 'v' -f1 | sed 's/./\L&/g'`
 
-mgen flush input /root/install/impactFix/impactpredictionmodels/flowGenerator/flows/flow`hostname`.mgn output /dev/null &
+
+#start logging
+tshark -a duration:175 -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | /root/install/impactpredictionmodels/netCollect.py /root/wired/10_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.255.0 $ipRange > $ipFileName.capture &    
+
+mgen flush input /root/install/impactpredictionmodels/flowGenerator/flows/flow`hostname`.mgn output /dev/null &
 
 (
 cat << 'EOF'
@@ -49,6 +52,7 @@ pendingDuration=$2
 nodeToSpoof=`expr $3 + 10`
 logPath=$4
 
+
 # Parse routing protocol and convert to lowercase
 routingProtocol=`echo $logPath | cut -d'_' -f7 | cut -d 'v' -f1 | sed 's/./\L&/g'`
 subnet=`echo $logPath | cut -d '_' -f9`
@@ -58,6 +62,7 @@ cd "$SESSION_DIR/$NODE_NAME.conf"
 echo "none" > $logPath/attack.txt
 echo "sleep startime:" "$startTime"
 sleep $startTime
+
 
 #check for protocol
 #if [[ $routingProtocol == *"ospf"* && -n "$5" && "IPv6" -eq "$5" ]]
@@ -72,10 +77,6 @@ protocol="IPv4"
 ipToSpoof="$nodeToSpoof.0.0.2"
 
 cd "$SESSION_DIR/$NODE_NAME.conf"
-
-sh quaggaboot.sh zebra
-sh quaggaboot.sh "$routingProtocol"d
-sh quaggaboot.sh vtysh
 
 echo ifconfig eth0:1 $ipToSpoof netmask $subnet up
 ifconfig eth0:1 $ipToSpoof netmask $subnet up
@@ -125,7 +126,7 @@ chmod 755 attack.sh
 
 else
 	#echo `hostname` >> /root/wired/10_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.255.0/check.txt
-	mgen flush input /root/install/impactFix/impactpredictionmodels/flowGenerator/flows/flow`hostname`.mgn | /root/install/impactFix/impactpredictionmodels/mgenCollect.py /root/wired/10_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.255.0 > $ipFileName.mgencapture &
+	mgen flush input /root/install/impactpredictionmodels/flowGenerator/flows/flow`hostname`.mgn | /root/install/impactpredictionmodels/mgenCollect.py /root/wired/10_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.255.0 > $ipFileName.mgencapture &
 fi
 
 	}
@@ -139,7 +140,7 @@ fi
 	cmdup=('sh custom-post-config-commands.sh', )
     }
     }
-	services {OSPFv2 zebra vtysh IPForward DefaultRoute SSH UserDefined
+	services {OSPFv2 zebra vtysh IPForward DefaultRoute DefaultRoute UserDefined
  	}
 }
 
@@ -180,10 +181,13 @@ ipFileName=`echo $myIP | tr . _`
 if [ `hostname` = n10 -o 10 = 0 ]
 then
 
-#start logging
-tshark -a duration:175 -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | /root/install/impactFix/impactpredictionmodels/netCollect.py /root/wired/10_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.255.0 $myIP > $ipFileName.capture &    
+routingProtocol=`echo 10_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.255.0 | cut -d'_' -f7 | cut -d 'v' -f1 | sed 's/./\L&/g'`
 
-mgen flush input /root/install/impactFix/impactpredictionmodels/flowGenerator/flows/flow`hostname`.mgn output /dev/null &
+
+#start logging
+tshark -a duration:175 -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | /root/install/impactpredictionmodels/netCollect.py /root/wired/10_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.255.0 $ipRange > $ipFileName.capture &    
+
+mgen flush input /root/install/impactpredictionmodels/flowGenerator/flows/flow`hostname`.mgn output /dev/null &
 
 (
 cat << 'EOF'
@@ -194,6 +198,7 @@ pendingDuration=$2
 nodeToSpoof=`expr $3 + 10`
 logPath=$4
 
+
 # Parse routing protocol and convert to lowercase
 routingProtocol=`echo $logPath | cut -d'_' -f7 | cut -d 'v' -f1 | sed 's/./\L&/g'`
 subnet=`echo $logPath | cut -d '_' -f9`
@@ -203,6 +208,7 @@ cd "$SESSION_DIR/$NODE_NAME.conf"
 echo "none" > $logPath/attack.txt
 echo "sleep startime:" "$startTime"
 sleep $startTime
+
 
 #check for protocol
 #if [[ $routingProtocol == *"ospf"* && -n "$5" && "IPv6" -eq "$5" ]]
@@ -217,10 +223,6 @@ protocol="IPv4"
 ipToSpoof="$nodeToSpoof.0.0.2"
 
 cd "$SESSION_DIR/$NODE_NAME.conf"
-
-sh quaggaboot.sh zebra
-sh quaggaboot.sh "$routingProtocol"d
-sh quaggaboot.sh vtysh
 
 echo ifconfig eth0:1 $ipToSpoof netmask $subnet up
 ifconfig eth0:1 $ipToSpoof netmask $subnet up
@@ -270,7 +272,7 @@ chmod 755 attack.sh
 
 else
 	#echo `hostname` >> /root/wired/10_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.255.0/check.txt
-	mgen flush input /root/install/impactFix/impactpredictionmodels/flowGenerator/flows/flow`hostname`.mgn | /root/install/impactFix/impactpredictionmodels/mgenCollect.py /root/wired/10_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.255.0 > $ipFileName.mgencapture &
+	mgen flush input /root/install/impactpredictionmodels/flowGenerator/flows/flow`hostname`.mgn | /root/install/impactpredictionmodels/mgenCollect.py /root/wired/10_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.255.0 > $ipFileName.mgencapture &
 fi
 
 	}
@@ -284,7 +286,7 @@ fi
 	cmdup=('sh custom-post-config-commands.sh', )
     }
     }
-	services {OSPFv2 zebra vtysh IPForward DefaultRoute SSH UserDefined
+	services {OSPFv2 zebra vtysh IPForward DefaultRoute DefaultRoute UserDefined
  	}
 }
 
@@ -325,10 +327,13 @@ ipFileName=`echo $myIP | tr . _`
 if [ `hostname` = n10 -o 10 = 0 ]
 then
 
-#start logging
-tshark -a duration:175 -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | /root/install/impactFix/impactpredictionmodels/netCollect.py /root/wired/10_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.255.0 $myIP > $ipFileName.capture &    
+routingProtocol=`echo 10_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.255.0 | cut -d'_' -f7 | cut -d 'v' -f1 | sed 's/./\L&/g'`
 
-mgen flush input /root/install/impactFix/impactpredictionmodels/flowGenerator/flows/flow`hostname`.mgn output /dev/null &
+
+#start logging
+tshark -a duration:175 -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | /root/install/impactpredictionmodels/netCollect.py /root/wired/10_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.255.0 $ipRange > $ipFileName.capture &    
+
+mgen flush input /root/install/impactpredictionmodels/flowGenerator/flows/flow`hostname`.mgn output /dev/null &
 
 (
 cat << 'EOF'
@@ -339,6 +344,7 @@ pendingDuration=$2
 nodeToSpoof=`expr $3 + 10`
 logPath=$4
 
+
 # Parse routing protocol and convert to lowercase
 routingProtocol=`echo $logPath | cut -d'_' -f7 | cut -d 'v' -f1 | sed 's/./\L&/g'`
 subnet=`echo $logPath | cut -d '_' -f9`
@@ -348,6 +354,7 @@ cd "$SESSION_DIR/$NODE_NAME.conf"
 echo "none" > $logPath/attack.txt
 echo "sleep startime:" "$startTime"
 sleep $startTime
+
 
 #check for protocol
 #if [[ $routingProtocol == *"ospf"* && -n "$5" && "IPv6" -eq "$5" ]]
@@ -362,10 +369,6 @@ protocol="IPv4"
 ipToSpoof="$nodeToSpoof.0.0.2"
 
 cd "$SESSION_DIR/$NODE_NAME.conf"
-
-sh quaggaboot.sh zebra
-sh quaggaboot.sh "$routingProtocol"d
-sh quaggaboot.sh vtysh
 
 echo ifconfig eth0:1 $ipToSpoof netmask $subnet up
 ifconfig eth0:1 $ipToSpoof netmask $subnet up
@@ -415,7 +418,7 @@ chmod 755 attack.sh
 
 else
 	#echo `hostname` >> /root/wired/10_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.255.0/check.txt
-	mgen flush input /root/install/impactFix/impactpredictionmodels/flowGenerator/flows/flow`hostname`.mgn | /root/install/impactFix/impactpredictionmodels/mgenCollect.py /root/wired/10_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.255.0 > $ipFileName.mgencapture &
+	mgen flush input /root/install/impactpredictionmodels/flowGenerator/flows/flow`hostname`.mgn | /root/install/impactpredictionmodels/mgenCollect.py /root/wired/10_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.255.0 > $ipFileName.mgencapture &
 fi
 
 	}
@@ -429,7 +432,7 @@ fi
 	cmdup=('sh custom-post-config-commands.sh', )
     }
     }
-	services {OSPFv2 zebra vtysh IPForward DefaultRoute SSH UserDefined
+	services {OSPFv2 zebra vtysh IPForward DefaultRoute DefaultRoute UserDefined
  	}
 }
 
@@ -470,10 +473,13 @@ ipFileName=`echo $myIP | tr . _`
 if [ `hostname` = n10 -o 10 = 0 ]
 then
 
-#start logging
-tshark -a duration:175 -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | /root/install/impactFix/impactpredictionmodels/netCollect.py /root/wired/10_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.255.0 $myIP > $ipFileName.capture &    
+routingProtocol=`echo 10_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.255.0 | cut -d'_' -f7 | cut -d 'v' -f1 | sed 's/./\L&/g'`
 
-mgen flush input /root/install/impactFix/impactpredictionmodels/flowGenerator/flows/flow`hostname`.mgn output /dev/null &
+
+#start logging
+tshark -a duration:175 -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | /root/install/impactpredictionmodels/netCollect.py /root/wired/10_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.255.0 $ipRange > $ipFileName.capture &    
+
+mgen flush input /root/install/impactpredictionmodels/flowGenerator/flows/flow`hostname`.mgn output /dev/null &
 
 (
 cat << 'EOF'
@@ -484,6 +490,7 @@ pendingDuration=$2
 nodeToSpoof=`expr $3 + 10`
 logPath=$4
 
+
 # Parse routing protocol and convert to lowercase
 routingProtocol=`echo $logPath | cut -d'_' -f7 | cut -d 'v' -f1 | sed 's/./\L&/g'`
 subnet=`echo $logPath | cut -d '_' -f9`
@@ -493,6 +500,7 @@ cd "$SESSION_DIR/$NODE_NAME.conf"
 echo "none" > $logPath/attack.txt
 echo "sleep startime:" "$startTime"
 sleep $startTime
+
 
 #check for protocol
 #if [[ $routingProtocol == *"ospf"* && -n "$5" && "IPv6" -eq "$5" ]]
@@ -507,10 +515,6 @@ protocol="IPv4"
 ipToSpoof="$nodeToSpoof.0.0.2"
 
 cd "$SESSION_DIR/$NODE_NAME.conf"
-
-sh quaggaboot.sh zebra
-sh quaggaboot.sh "$routingProtocol"d
-sh quaggaboot.sh vtysh
 
 echo ifconfig eth0:1 $ipToSpoof netmask $subnet up
 ifconfig eth0:1 $ipToSpoof netmask $subnet up
@@ -560,7 +564,7 @@ chmod 755 attack.sh
 
 else
 	#echo `hostname` >> /root/wired/10_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.255.0/check.txt
-	mgen flush input /root/install/impactFix/impactpredictionmodels/flowGenerator/flows/flow`hostname`.mgn | /root/install/impactFix/impactpredictionmodels/mgenCollect.py /root/wired/10_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.255.0 > $ipFileName.mgencapture &
+	mgen flush input /root/install/impactpredictionmodels/flowGenerator/flows/flow`hostname`.mgn | /root/install/impactpredictionmodels/mgenCollect.py /root/wired/10_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.255.0 > $ipFileName.mgencapture &
 fi
 
 	}
@@ -574,7 +578,7 @@ fi
 	cmdup=('sh custom-post-config-commands.sh', )
     }
     }
-	services {OSPFv2 zebra vtysh IPForward DefaultRoute SSH UserDefined
+	services {OSPFv2 zebra vtysh IPForward DefaultRoute DefaultRoute UserDefined
  	}
 }
 
@@ -592,7 +596,7 @@ node n5 {
     iconcoords {774.0 340.0}
     labelcoords {774.0 372.0}
     interface-peer {eth0 n15}
-     custom-config {
+    custom-config {
 	custom-config-id service:UserDefined:custom-post-config-commands.sh
 	custom-command custom-post-config-commands.sh
 	config {
@@ -615,10 +619,13 @@ ipFileName=`echo $myIP | tr . _`
 if [ `hostname` = n10 -o 10 = 0 ]
 then
 
-#start logging
-tshark -a duration:175 -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | /root/install/impactFix/impactpredictionmodels/netCollect.py /root/wired/10_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.255.0 $myIP > $ipFileName.capture &    
+routingProtocol=`echo 10_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.255.0 | cut -d'_' -f7 | cut -d 'v' -f1 | sed 's/./\L&/g'`
 
-mgen flush input /root/install/impactFix/impactpredictionmodels/flowGenerator/flows/flow`hostname`.mgn output /dev/null &
+
+#start logging
+tshark -a duration:175 -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | /root/install/impactpredictionmodels/netCollect.py /root/wired/10_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.255.0 $ipRange > $ipFileName.capture &    
+
+mgen flush input /root/install/impactpredictionmodels/flowGenerator/flows/flow`hostname`.mgn output /dev/null &
 
 (
 cat << 'EOF'
@@ -629,6 +636,7 @@ pendingDuration=$2
 nodeToSpoof=`expr $3 + 10`
 logPath=$4
 
+
 # Parse routing protocol and convert to lowercase
 routingProtocol=`echo $logPath | cut -d'_' -f7 | cut -d 'v' -f1 | sed 's/./\L&/g'`
 subnet=`echo $logPath | cut -d '_' -f9`
@@ -638,6 +646,7 @@ cd "$SESSION_DIR/$NODE_NAME.conf"
 echo "none" > $logPath/attack.txt
 echo "sleep startime:" "$startTime"
 sleep $startTime
+
 
 #check for protocol
 #if [[ $routingProtocol == *"ospf"* && -n "$5" && "IPv6" -eq "$5" ]]
@@ -652,10 +661,6 @@ protocol="IPv4"
 ipToSpoof="$nodeToSpoof.0.0.2"
 
 cd "$SESSION_DIR/$NODE_NAME.conf"
-
-sh quaggaboot.sh zebra
-sh quaggaboot.sh "$routingProtocol"d
-sh quaggaboot.sh vtysh
 
 echo ifconfig eth0:1 $ipToSpoof netmask $subnet up
 ifconfig eth0:1 $ipToSpoof netmask $subnet up
@@ -705,7 +710,7 @@ chmod 755 attack.sh
 
 else
 	#echo `hostname` >> /root/wired/10_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.255.0/check.txt
-	mgen flush input /root/install/impactFix/impactpredictionmodels/flowGenerator/flows/flow`hostname`.mgn | /root/install/impactFix/impactpredictionmodels/mgenCollect.py /root/wired/10_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.255.0 > $ipFileName.mgencapture &
+	mgen flush input /root/install/impactpredictionmodels/flowGenerator/flows/flow`hostname`.mgn | /root/install/impactpredictionmodels/mgenCollect.py /root/wired/10_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.255.0 > $ipFileName.mgencapture &
 fi
 
 	}
@@ -719,7 +724,7 @@ fi
 	cmdup=('sh custom-post-config-commands.sh', )
     }
     }
-	services {OSPFv2 zebra vtysh IPForward DefaultRoute SSH UserDefined
+	services {OSPFv2 zebra vtysh IPForward DefaultRoute DefaultRoute UserDefined
  	}
 }
 
@@ -760,10 +765,13 @@ ipFileName=`echo $myIP | tr . _`
 if [ `hostname` = n10 -o 10 = 0 ]
 then
 
-#start logging
-tshark -a duration:175 -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | /root/install/impactFix/impactpredictionmodels/netCollect.py /root/wired/10_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.255.0 $myIP > $ipFileName.capture &    
+routingProtocol=`echo 10_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.255.0 | cut -d'_' -f7 | cut -d 'v' -f1 | sed 's/./\L&/g'`
 
-mgen flush input /root/install/impactFix/impactpredictionmodels/flowGenerator/flows/flow`hostname`.mgn output /dev/null &
+
+#start logging
+tshark -a duration:175 -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | /root/install/impactpredictionmodels/netCollect.py /root/wired/10_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.255.0 $ipRange > $ipFileName.capture &    
+
+mgen flush input /root/install/impactpredictionmodels/flowGenerator/flows/flow`hostname`.mgn output /dev/null &
 
 (
 cat << 'EOF'
@@ -774,6 +782,7 @@ pendingDuration=$2
 nodeToSpoof=`expr $3 + 10`
 logPath=$4
 
+
 # Parse routing protocol and convert to lowercase
 routingProtocol=`echo $logPath | cut -d'_' -f7 | cut -d 'v' -f1 | sed 's/./\L&/g'`
 subnet=`echo $logPath | cut -d '_' -f9`
@@ -783,6 +792,7 @@ cd "$SESSION_DIR/$NODE_NAME.conf"
 echo "none" > $logPath/attack.txt
 echo "sleep startime:" "$startTime"
 sleep $startTime
+
 
 #check for protocol
 #if [[ $routingProtocol == *"ospf"* && -n "$5" && "IPv6" -eq "$5" ]]
@@ -797,10 +807,6 @@ protocol="IPv4"
 ipToSpoof="$nodeToSpoof.0.0.2"
 
 cd "$SESSION_DIR/$NODE_NAME.conf"
-
-sh quaggaboot.sh zebra
-sh quaggaboot.sh "$routingProtocol"d
-sh quaggaboot.sh vtysh
 
 echo ifconfig eth0:1 $ipToSpoof netmask $subnet up
 ifconfig eth0:1 $ipToSpoof netmask $subnet up
@@ -850,7 +856,7 @@ chmod 755 attack.sh
 
 else
 	#echo `hostname` >> /root/wired/10_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.255.0/check.txt
-	mgen flush input /root/install/impactFix/impactpredictionmodels/flowGenerator/flows/flow`hostname`.mgn | /root/install/impactFix/impactpredictionmodels/mgenCollect.py /root/wired/10_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.255.0 > $ipFileName.mgencapture &
+	mgen flush input /root/install/impactpredictionmodels/flowGenerator/flows/flow`hostname`.mgn | /root/install/impactpredictionmodels/mgenCollect.py /root/wired/10_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.255.0 > $ipFileName.mgencapture &
 fi
 
 	}
@@ -864,7 +870,7 @@ fi
 	cmdup=('sh custom-post-config-commands.sh', )
     }
     }
-	services {OSPFv2 zebra vtysh IPForward DefaultRoute SSH UserDefined
+	services {OSPFv2 zebra vtysh IPForward DefaultRoute DefaultRoute UserDefined
  	}
 }
 
@@ -905,10 +911,13 @@ ipFileName=`echo $myIP | tr . _`
 if [ `hostname` = n10 -o 10 = 0 ]
 then
 
-#start logging
-tshark -a duration:175 -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | /root/install/impactFix/impactpredictionmodels/netCollect.py /root/wired/10_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.255.0 $myIP > $ipFileName.capture &    
+routingProtocol=`echo 10_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.255.0 | cut -d'_' -f7 | cut -d 'v' -f1 | sed 's/./\L&/g'`
 
-mgen flush input /root/install/impactFix/impactpredictionmodels/flowGenerator/flows/flow`hostname`.mgn output /dev/null &
+
+#start logging
+tshark -a duration:175 -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | /root/install/impactpredictionmodels/netCollect.py /root/wired/10_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.255.0 $ipRange > $ipFileName.capture &    
+
+mgen flush input /root/install/impactpredictionmodels/flowGenerator/flows/flow`hostname`.mgn output /dev/null &
 
 (
 cat << 'EOF'
@@ -919,6 +928,7 @@ pendingDuration=$2
 nodeToSpoof=`expr $3 + 10`
 logPath=$4
 
+
 # Parse routing protocol and convert to lowercase
 routingProtocol=`echo $logPath | cut -d'_' -f7 | cut -d 'v' -f1 | sed 's/./\L&/g'`
 subnet=`echo $logPath | cut -d '_' -f9`
@@ -928,6 +938,7 @@ cd "$SESSION_DIR/$NODE_NAME.conf"
 echo "none" > $logPath/attack.txt
 echo "sleep startime:" "$startTime"
 sleep $startTime
+
 
 #check for protocol
 #if [[ $routingProtocol == *"ospf"* && -n "$5" && "IPv6" -eq "$5" ]]
@@ -942,10 +953,6 @@ protocol="IPv4"
 ipToSpoof="$nodeToSpoof.0.0.2"
 
 cd "$SESSION_DIR/$NODE_NAME.conf"
-
-sh quaggaboot.sh zebra
-sh quaggaboot.sh "$routingProtocol"d
-sh quaggaboot.sh vtysh
 
 echo ifconfig eth0:1 $ipToSpoof netmask $subnet up
 ifconfig eth0:1 $ipToSpoof netmask $subnet up
@@ -995,7 +1002,7 @@ chmod 755 attack.sh
 
 else
 	#echo `hostname` >> /root/wired/10_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.255.0/check.txt
-	mgen flush input /root/install/impactFix/impactpredictionmodels/flowGenerator/flows/flow`hostname`.mgn | /root/install/impactFix/impactpredictionmodels/mgenCollect.py /root/wired/10_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.255.0 > $ipFileName.mgencapture &
+	mgen flush input /root/install/impactpredictionmodels/flowGenerator/flows/flow`hostname`.mgn | /root/install/impactpredictionmodels/mgenCollect.py /root/wired/10_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.255.0 > $ipFileName.mgencapture &
 fi
 
 	}
@@ -1009,7 +1016,7 @@ fi
 	cmdup=('sh custom-post-config-commands.sh', )
     }
     }
-	services {OSPFv2 zebra vtysh IPForward DefaultRoute SSH UserDefined
+	services {OSPFv2 zebra vtysh IPForward DefaultRoute DefaultRoute UserDefined
  	}
 }
 
@@ -1050,10 +1057,13 @@ ipFileName=`echo $myIP | tr . _`
 if [ `hostname` = n10 -o 10 = 0 ]
 then
 
-#start logging
-tshark -a duration:175 -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | /root/install/impactFix/impactpredictionmodels/netCollect.py /root/wired/10_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.255.0 $myIP > $ipFileName.capture &    
+routingProtocol=`echo 10_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.255.0 | cut -d'_' -f7 | cut -d 'v' -f1 | sed 's/./\L&/g'`
 
-mgen flush input /root/install/impactFix/impactpredictionmodels/flowGenerator/flows/flow`hostname`.mgn output /dev/null &
+
+#start logging
+tshark -a duration:175 -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | /root/install/impactpredictionmodels/netCollect.py /root/wired/10_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.255.0 $ipRange > $ipFileName.capture &    
+
+mgen flush input /root/install/impactpredictionmodels/flowGenerator/flows/flow`hostname`.mgn output /dev/null &
 
 (
 cat << 'EOF'
@@ -1064,6 +1074,7 @@ pendingDuration=$2
 nodeToSpoof=`expr $3 + 10`
 logPath=$4
 
+
 # Parse routing protocol and convert to lowercase
 routingProtocol=`echo $logPath | cut -d'_' -f7 | cut -d 'v' -f1 | sed 's/./\L&/g'`
 subnet=`echo $logPath | cut -d '_' -f9`
@@ -1073,6 +1084,7 @@ cd "$SESSION_DIR/$NODE_NAME.conf"
 echo "none" > $logPath/attack.txt
 echo "sleep startime:" "$startTime"
 sleep $startTime
+
 
 #check for protocol
 #if [[ $routingProtocol == *"ospf"* && -n "$5" && "IPv6" -eq "$5" ]]
@@ -1087,10 +1099,6 @@ protocol="IPv4"
 ipToSpoof="$nodeToSpoof.0.0.2"
 
 cd "$SESSION_DIR/$NODE_NAME.conf"
-
-sh quaggaboot.sh zebra
-sh quaggaboot.sh "$routingProtocol"d
-sh quaggaboot.sh vtysh
 
 echo ifconfig eth0:1 $ipToSpoof netmask $subnet up
 ifconfig eth0:1 $ipToSpoof netmask $subnet up
@@ -1140,7 +1148,7 @@ chmod 755 attack.sh
 
 else
 	#echo `hostname` >> /root/wired/10_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.255.0/check.txt
-	mgen flush input /root/install/impactFix/impactpredictionmodels/flowGenerator/flows/flow`hostname`.mgn | /root/install/impactFix/impactpredictionmodels/mgenCollect.py /root/wired/10_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.255.0 > $ipFileName.mgencapture &
+	mgen flush input /root/install/impactpredictionmodels/flowGenerator/flows/flow`hostname`.mgn | /root/install/impactpredictionmodels/mgenCollect.py /root/wired/10_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.255.0 > $ipFileName.mgencapture &
 fi
 
 	}
@@ -1154,7 +1162,7 @@ fi
 	cmdup=('sh custom-post-config-commands.sh', )
     }
     }
-	services {OSPFv2 zebra vtysh IPForward DefaultRoute SSH UserDefined
+	services {OSPFv2 zebra vtysh IPForward DefaultRoute DefaultRoute UserDefined
  	}
 }
 
@@ -1195,10 +1203,13 @@ ipFileName=`echo $myIP | tr . _`
 if [ `hostname` = n10 -o 10 = 0 ]
 then
 
-#start logging
-tshark -a duration:175 -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | /root/install/impactFix/impactpredictionmodels/netCollect.py /root/wired/10_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.255.0 $myIP > $ipFileName.capture &    
+routingProtocol=`echo 10_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.255.0 | cut -d'_' -f7 | cut -d 'v' -f1 | sed 's/./\L&/g'`
 
-mgen flush input /root/install/impactFix/impactpredictionmodels/flowGenerator/flows/flow`hostname`.mgn output /dev/null &
+
+#start logging
+tshark -a duration:175 -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | /root/install/impactpredictionmodels/netCollect.py /root/wired/10_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.255.0 $ipRange > $ipFileName.capture &    
+
+mgen flush input /root/install/impactpredictionmodels/flowGenerator/flows/flow`hostname`.mgn output /dev/null &
 
 (
 cat << 'EOF'
@@ -1209,6 +1220,7 @@ pendingDuration=$2
 nodeToSpoof=`expr $3 + 10`
 logPath=$4
 
+
 # Parse routing protocol and convert to lowercase
 routingProtocol=`echo $logPath | cut -d'_' -f7 | cut -d 'v' -f1 | sed 's/./\L&/g'`
 subnet=`echo $logPath | cut -d '_' -f9`
@@ -1218,6 +1230,7 @@ cd "$SESSION_DIR/$NODE_NAME.conf"
 echo "none" > $logPath/attack.txt
 echo "sleep startime:" "$startTime"
 sleep $startTime
+
 
 #check for protocol
 #if [[ $routingProtocol == *"ospf"* && -n "$5" && "IPv6" -eq "$5" ]]
@@ -1232,10 +1245,6 @@ protocol="IPv4"
 ipToSpoof="$nodeToSpoof.0.0.2"
 
 cd "$SESSION_DIR/$NODE_NAME.conf"
-
-sh quaggaboot.sh zebra
-sh quaggaboot.sh "$routingProtocol"d
-sh quaggaboot.sh vtysh
 
 echo ifconfig eth0:1 $ipToSpoof netmask $subnet up
 ifconfig eth0:1 $ipToSpoof netmask $subnet up
@@ -1285,7 +1294,7 @@ chmod 755 attack.sh
 
 else
 	#echo `hostname` >> /root/wired/10_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.255.0/check.txt
-	mgen flush input /root/install/impactFix/impactpredictionmodels/flowGenerator/flows/flow`hostname`.mgn | /root/install/impactFix/impactpredictionmodels/mgenCollect.py /root/wired/10_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.255.0 > $ipFileName.mgencapture &
+	mgen flush input /root/install/impactpredictionmodels/flowGenerator/flows/flow`hostname`.mgn | /root/install/impactpredictionmodels/mgenCollect.py /root/wired/10_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.255.0 > $ipFileName.mgencapture &
 fi
 
 	}
@@ -1299,7 +1308,7 @@ fi
 	cmdup=('sh custom-post-config-commands.sh', )
     }
     }
-	services {OSPFv2 zebra vtysh IPForward DefaultRoute SSH UserDefined
+	services {OSPFv2 zebra vtysh IPForward DefaultRoute DefaultRoute UserDefined
  	}
 }
 
@@ -1340,10 +1349,13 @@ ipFileName=`echo $myIP | tr . _`
 if [ `hostname` = n10 -o 10 = 0 ]
 then
 
-#start logging
-tshark -a duration:175 -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | /root/install/impactFix/impactpredictionmodels/netCollect.py /root/wired/10_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.255.0 $myIP > $ipFileName.capture &    
+routingProtocol=`echo 10_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.255.0 | cut -d'_' -f7 | cut -d 'v' -f1 | sed 's/./\L&/g'`
 
-mgen flush input /root/install/impactFix/impactpredictionmodels/flowGenerator/flows/flow`hostname`.mgn output /dev/null &
+
+#start logging
+tshark -a duration:175 -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | /root/install/impactpredictionmodels/netCollect.py /root/wired/10_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.255.0 $ipRange > $ipFileName.capture &    
+
+mgen flush input /root/install/impactpredictionmodels/flowGenerator/flows/flow`hostname`.mgn output /dev/null &
 
 (
 cat << 'EOF'
@@ -1354,6 +1366,7 @@ pendingDuration=$2
 nodeToSpoof=`expr $3 + 10`
 logPath=$4
 
+
 # Parse routing protocol and convert to lowercase
 routingProtocol=`echo $logPath | cut -d'_' -f7 | cut -d 'v' -f1 | sed 's/./\L&/g'`
 subnet=`echo $logPath | cut -d '_' -f9`
@@ -1363,6 +1376,7 @@ cd "$SESSION_DIR/$NODE_NAME.conf"
 echo "none" > $logPath/attack.txt
 echo "sleep startime:" "$startTime"
 sleep $startTime
+
 
 #check for protocol
 #if [[ $routingProtocol == *"ospf"* && -n "$5" && "IPv6" -eq "$5" ]]
@@ -1377,10 +1391,6 @@ protocol="IPv4"
 ipToSpoof="$nodeToSpoof.0.0.2"
 
 cd "$SESSION_DIR/$NODE_NAME.conf"
-
-sh quaggaboot.sh zebra
-sh quaggaboot.sh "$routingProtocol"d
-sh quaggaboot.sh vtysh
 
 echo ifconfig eth0:1 $ipToSpoof netmask $subnet up
 ifconfig eth0:1 $ipToSpoof netmask $subnet up
@@ -1430,7 +1440,7 @@ chmod 755 attack.sh
 
 else
 	#echo `hostname` >> /root/wired/10_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.255.0/check.txt
-	mgen flush input /root/install/impactFix/impactpredictionmodels/flowGenerator/flows/flow`hostname`.mgn | /root/install/impactFix/impactpredictionmodels/mgenCollect.py /root/wired/10_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.255.0 > $ipFileName.mgencapture &
+	mgen flush input /root/install/impactpredictionmodels/flowGenerator/flows/flow`hostname`.mgn | /root/install/impactpredictionmodels/mgenCollect.py /root/wired/10_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.255.0 > $ipFileName.mgencapture &
 fi
 
 	}
@@ -1444,7 +1454,7 @@ fi
 	cmdup=('sh custom-post-config-commands.sh', )
     }
     }
-	services {OSPFv2 zebra vtysh IPForward UserDefined
+	services {OSPFv2 zebra vtysh IPForward DefaultRoute UserDefined
  	}
 }
 
@@ -1489,7 +1499,7 @@ cd $SCRIPTDIR
 	cmdup=('sh custom-post-config-commands.sh', )
     }
     }
-	services {OSPFv2 zebra vtysh IPForward UserDefined
+	services {OSPFv2 zebra vtysh IPForward DefaultRoute UserDefined
  	}
 }
 
@@ -1538,7 +1548,7 @@ cd $SCRIPTDIR
 	cmdup=('sh custom-post-config-commands.sh', )
     }
     }
-	services {OSPFv2 zebra vtysh IPForward UserDefined
+	services {OSPFv2 zebra vtysh IPForward DefaultRoute UserDefined
  	}
 }
 
@@ -1587,7 +1597,7 @@ cd $SCRIPTDIR
 	cmdup=('sh custom-post-config-commands.sh', )
     }
     }
-	services {OSPFv2 zebra vtysh IPForward UserDefined
+	services {OSPFv2 zebra vtysh IPForward DefaultRoute UserDefined
  	}
 }
 
@@ -1636,7 +1646,7 @@ cd $SCRIPTDIR
 	cmdup=('sh custom-post-config-commands.sh', )
     }
     }
-	services {OSPFv2 zebra vtysh IPForward UserDefined
+	services {OSPFv2 zebra vtysh IPForward DefaultRoute UserDefined
  	}
 }
 
@@ -1685,7 +1695,7 @@ cd $SCRIPTDIR
 	cmdup=('sh custom-post-config-commands.sh', )
     }
     }
-	services {OSPFv2 zebra vtysh IPForward UserDefined
+	services {OSPFv2 zebra vtysh IPForward DefaultRoute UserDefined
  	}
 }
 
@@ -1734,7 +1744,7 @@ cd $SCRIPTDIR
 	cmdup=('sh custom-post-config-commands.sh', )
     }
     }
-	services {OSPFv2 zebra vtysh IPForward UserDefined
+	services {OSPFv2 zebra vtysh IPForward DefaultRoute UserDefined
  	}
 }
 
@@ -1783,7 +1793,7 @@ cd $SCRIPTDIR
 	cmdup=('sh custom-post-config-commands.sh', )
     }
     }
-	services {OSPFv2 zebra vtysh IPForward UserDefined
+	services {OSPFv2 zebra vtysh IPForward DefaultRoute UserDefined
  	}
 }
 
@@ -1832,7 +1842,7 @@ cd $SCRIPTDIR
 	cmdup=('sh custom-post-config-commands.sh', )
     }
     }
-	services {OSPFv2 zebra vtysh IPForward UserDefined
+	services {OSPFv2 zebra vtysh IPForward DefaultRoute UserDefined
  	}
 }
 
@@ -1881,7 +1891,7 @@ cd $SCRIPTDIR
 	cmdup=('sh custom-post-config-commands.sh', )
     }
     }
-	services {OSPFv2 zebra vtysh IPForward UserDefined
+	services {OSPFv2 zebra vtysh IPForward DefaultRoute UserDefined
  	}
 }
 
@@ -1926,7 +1936,7 @@ cd $SCRIPTDIR
 	cmdup=('sh custom-post-config-commands.sh', )
     }
     }
-	services {OSPFv2 zebra vtysh IPForward UserDefined
+	services {OSPFv2 zebra vtysh IPForward DefaultRoute UserDefined
  	}
 }
 

@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
-# Validates if a WIRED scenario's attack was successful 
-# by reading mgen files.
+# Validates if a WIRED scenario's attack was successful during time of
+# attack by reading mgen files.
 
 import ast
 import re
@@ -43,9 +43,9 @@ if "wireless" in logPath:
 def writeToFile():
 	successFile = open(logPath + "/success.txt", 'w')
 	if success:
-		successFile.write("Attack succeeded: " + successString + "\n")
+		successFile.write(logPath + " Attack succeeded: " + successString + "\n")
 	else:
-		successFile.write("Attack failed: \n" + logPath + "\n")
+		successFile.write(" Attack failed: \n" + logPath + "\n")
 		
 	successFile.close()
 
@@ -85,6 +85,9 @@ with open(logPath + "/" + mgenFile) as readFile:
 				if flow not in line and attackerIPFlow not in flow:
 					success = True
 					successString="Flow lost -> " + flow
+					
+					if "none" in line:
+						success = False
 			
 			# Ignore ipv6 logs due to lack of parsing ability
 			if "ipv6" in line or "ipv6" in lineBefore:

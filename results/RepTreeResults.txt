@@ -1,0 +1,134 @@
+Data that didn't do well.
+Blackhole 255.255.255.0 OSPF 
+Spoofing 255.255.255.0 RIP
+
+-----------------------------------------Spoofing 255.255.255.0 RIP------------------------------------
+                 TP Rate  FP Rate  Precision  Recall   F-Measure  MCC      ROC Area  PRC Area  Class
+                 0.258    0.001    0.879      0.258    0.399      0.471    0.686     0.302     true
+                 0.999    0.742    0.985      0.999    0.992      0.471    0.686     0.987     false
+Weighted Avg.    0.984    0.727    0.982      0.984    0.980      0.471    0.686     0.973     
+
+=== Confusion Matrix ===
+
+     a     b   <-- classified as
+    80   230 |     a = true
+    11 14679 |     b = false
+
+successfulAttack.py Results:
+	Succeeded: 67
+	Failed: 563
+
+-----------------------------------------Spoofing 255.255.255.255 RIP------------------------------------
+                 TP Rate  FP Rate  Precision  Recall   F-Measure  MCC      ROC Area  PRC Area  Class
+                 0.887    0.000    1.000      0.887    0.940      0.934    0.936     0.912     true
+                 1.000    0.113    0.984      1.000    0.992      0.934    0.936     0.981     false
+Weighted Avg.    0.986    0.099    0.986      0.986    0.985      0.934    0.936     0.972     
+
+=== Confusion Matrix ===
+
+     a     b   <-- classified as
+  1623   207 |     a = true
+     0 12552 |     b = false
+     
+successfulAttack.py Results:
+	Succeeded: 630
+	Failed: 0
+
+-----------------------------------------Spoofing 255.255.255.0 OSPF-----------------------------------
+                 TP Rate  FP Rate  Precision  Recall   F-Measure  MCC      ROC Area  PRC Area  Class
+                 0.896    0.001    0.992      0.896    0.942      0.934    0.942     0.912     true
+                 0.999    0.104    0.982      0.999    0.990      0.934    0.942     0.980     false
+Weighted Avg.    0.984    0.088    0.984      0.984    0.983      0.934    0.942     0.970     
+
+=== Confusion Matrix ===
+
+     a     b   <-- classified as
+  1645   190 |     a = true
+    14 10544 |     b = false
+
+successfulAttack.py Results:
+	Succeeded: 1
+	Failed: 629
+	
+-----------------------------------------Spoofing 255.255.255.255 OSPF-----------------------------------
+                 TP Rate  FP Rate  Precision  Recall   F-Measure  MCC      ROC Area  PRC Area  Class
+                 0.000    0.000    0.000      0.000    0.000      0.000    ?         ?         true
+                 1.000    0.000    1.000      1.000    1.000      0.000    ?         1.000     false
+Weighted Avg.    1.000    0.000    1.000      1.000    1.000      0.000    0.000     1.000     
+
+=== Confusion Matrix ===
+
+     a     b   <-- classified as
+     0     0 |     a = true
+     0 12823 |     b = false
+
+successfulAttack.py Results:
+	Succeeded: 630
+	Failed: 0
+	
+-----------------------------------------Blackhole 255.255.255.0 RIP-----------------------------------
+                 TP Rate  FP Rate  Precision  Recall   F-Measure  MCC      ROC Area  PRC Area  Class
+                 0.854    0.005    0.909      0.854    0.881      0.875    0.978     0.886     true
+                 0.995    0.146    0.992      0.995    0.994      0.875    0.978     0.998     false
+Weighted Avg.    0.988    0.139    0.988      0.988    0.988      0.875    0.978     0.992     
+
+=== Confusion Matrix ===
+
+    a    b   <-- classified as
+   70   12 |    a = true
+    7 1519 |    b = false
+   
+successfulAttack.py Results:
+	Succeeded: 12 
+	Failed: 58
+	
+-----------------------------------------Blackhole 255.255.255.255 RIP-----------------------------------
+                 TP Rate  FP Rate  Precision  Recall   F-Measure  MCC      ROC Area  PRC Area  Class
+                 1.000    0.000    1.000      1.000    1.000      0.000    ?         1.000     true
+                 0.000    0.000    0.000      0.000    0.000      0.000    ?         ?         false
+Weighted Avg.    1.000    0.000    1.000      1.000    1.000      0.000    0.000     1.000     
+
+=== Confusion Matrix ===
+
+    a    b   <-- classified as
+ 1644    0 |    a = true
+    0    0 |    b = false
+
+successfulAttack.py Results:
+	Succeeded: 70
+	Failed: 0
+
+-----------------------------------------Blackhole 255.255.255.0 OSPF------------------------------------
+                 TP Rate  FP Rate  Precision  Recall   F-Measure  MCC      ROC Area  PRC Area  Class
+                 0.000    0.002    0.000      0.000    0.000      -0.007   0.685     0.071     true
+                 0.998    1.000    0.970      0.998    0.984      -0.007   0.685     0.984     false
+Weighted Avg.    0.969    0.970    0.941      0.969    0.955      -0.007   0.685     0.956     
+
+=== Confusion Matrix ===
+
+    a    b   <-- classified as
+    0   40 |    a = true
+    2 1294 |    b = false
+    
+successfulAttack.py Results:
+	Succeeded: 3
+	Failed: 67
+
+-----------------------------------------Blackhole 255.255.255.255 OSPF----------------------------------
+                 TP Rate  FP Rate  Precision  Recall   F-Measure  MCC      ROC Area  PRC Area  Class
+                 0.817    0.052    0.870      0.817    0.843      0.779    0.873     0.799     true
+                 0.948    0.183    0.924      0.948    0.936      0.779    0.873     0.902     false
+Weighted Avg.    0.909    0.144    0.908      0.909    0.908      0.779    0.873     0.871     
+
+=== Confusion Matrix ===
+
+   a   b   <-- classified as
+ 335  75 |   a = true
+  50 909 |   b = false
+
+
+
+successfulAttack.py Results:
+	Succeeded: 70
+	Failed: 0
+---------------------------------------------------------------------------------------------------------

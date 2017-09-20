@@ -94,6 +94,9 @@ ipFileName=`echo $myIP | tr . _`
 if [ `hostname` = n""" + attackNodeNumber + """ -o """ + attackNodeNumber + """ = 0 ]
 then
 
+routingProtocol=`echo """ + logPath + """ | cut -d'_' -f7 | cut -d 'v' -f1 | sed 's/./\L&/g'`
+
+
 #start logging
 tshark -a duration:175 -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | """ + workingDirectory + """/netCollect.py """ + rootDirectory + logPath + """ $ipRange > $ipFileName.capture &    
 
@@ -129,6 +132,7 @@ def insertRoutingProtocol(router):
 		
 	else:
 		serviceString += " zebra vtysh IPForward"
+		serviceString += " DefaultRoute"
 	if not router:
 		serviceString += " DefaultRoute"
 	

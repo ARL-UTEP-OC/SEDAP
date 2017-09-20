@@ -43,9 +43,9 @@ do
 		
 	fi
 	
-	currentProcs=`pgrep -c wish`
+	currentProcs=`ps aux | grep -v grep | grep -c "n1 -l"`
 	permutations=`cat $imnFile | wc -l`
-	scenarioFolders=`ls /$mainDir/ | grep "_sh" | wc -l`
+	scenarioFolders=`ls /$mainDir/ | grep -c "_sh"
 	scenariosLeft=`expr $permutations - $scenarioFolders`
 	tempMaxProcs=$maxProcs
 	if [[ $scenariosLeft -lt $maxProcs ]]

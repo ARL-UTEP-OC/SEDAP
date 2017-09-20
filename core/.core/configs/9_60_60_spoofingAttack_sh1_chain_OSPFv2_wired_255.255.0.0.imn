@@ -1,6 +1,6 @@
 node n1 {
     type router
-    model host
+    model router
     network-config {
 	hostname n1
 	!
@@ -26,21 +26,19 @@ cd $SCRIPTDIR
 mkdir 9_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.0.0
 cd 9_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.0.0
 
-#get ip of current
-hostnameLen=`expr length $HN`
-hostnameLen=`expr $hostnameLen - 1` 
-nodeNumber="`expr substr $HN 2 $hostnameLen`" 
-nodeNumber=$(( $nodeNumber + 10))
-myIP=$nodeNumber".0.0.2"
+#get ip of current (defaults to FIRST IP)
+ipRange=`hostname -I`
+myIP=`echo $ipRange | cut -d' ' -f1`
+ipFileName=`echo $myIP | tr . _`
 
 #now insert attack script and mgen flush if node is attacker
 if [ `hostname` = n9 -o 9 = 0 ]
 then
 
 #start logging
-tshark -a duration:175 -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | /root/install/impactpredictionmodels_b1/impactpredictionmodels/netCollect.py /root/wired/9_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.0.0 $myIP > $HN.capture &    
+tshark -a duration:175 -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | /root/install/impactpredictionmodels/netCollect.py /root/wired/9_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.0.0 $ipRange > $ipFileName.capture &    
 
-mgen flush input /root/install/impactpredictionmodels_b1/impactpredictionmodels/flowGenerator/flows/flow`hostname`.mgn output /dev/null &
+mgen flush input /root/install/impactpredictionmodels/flowGenerator/flows/flow`hostname`.mgn output /dev/null &
 
 (
 cat << 'EOF'
@@ -60,6 +58,11 @@ cd "$SESSION_DIR/$NODE_NAME.conf"
 echo "none" > $logPath/attack.txt
 echo "sleep startime:" "$startTime"
 sleep $startTime
+
+killall vtysh
+killall "$routingProtocol"d
+killall zebra
+sleep 5
 
 #check for protocol
 #if [[ $routingProtocol == *"ospf"* && -n "$5" && "IPv6" -eq "$5" ]]
@@ -126,8 +129,8 @@ chmod 755 attack.sh
 ./attack.sh 60 60 1 /root/wired/9_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.0.0 
 
 else
-	echo `hostname` >> /root/wired/9_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.0.0/check.txt
-	mgen flush input /root/install/impactpredictionmodels_b1/impactpredictionmodels/flowGenerator/flows/flow`hostname`.mgn | /root/install/impactpredictionmodels_b1/impactpredictionmodels/mgenCollect.py /root/wired/9_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.0.0 > `hostname`.mgencapture &
+	#echo `hostname` >> /root/wired/9_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.0.0/check.txt
+	mgen flush input /root/install/impactpredictionmodels/flowGenerator/flows/flow`hostname`.mgn | /root/install/impactpredictionmodels/mgenCollect.py /root/wired/9_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.0.0 > $ipFileName.mgencapture &
 fi
 
 	}
@@ -141,13 +144,13 @@ fi
 	cmdup=('sh custom-post-config-commands.sh', )
     }
     }
-	services {DefaultRoute SSH UserDefined
+	services {OSPFv2 zebra vtysh IPForward DefaultRoute DefaultRoute UserDefined
  	}
 }
 
 node n2 {
     type router
-    model host
+    model router
     network-config {
 	hostname n2
 	!
@@ -173,21 +176,19 @@ cd $SCRIPTDIR
 mkdir 9_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.0.0
 cd 9_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.0.0
 
-#get ip of current
-hostnameLen=`expr length $HN`
-hostnameLen=`expr $hostnameLen - 1` 
-nodeNumber="`expr substr $HN 2 $hostnameLen`" 
-nodeNumber=$(( $nodeNumber + 10))
-myIP=$nodeNumber".0.0.2"
+#get ip of current (defaults to FIRST IP)
+ipRange=`hostname -I`
+myIP=`echo $ipRange | cut -d' ' -f1`
+ipFileName=`echo $myIP | tr . _`
 
 #now insert attack script and mgen flush if node is attacker
 if [ `hostname` = n9 -o 9 = 0 ]
 then
 
 #start logging
-tshark -a duration:175 -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | /root/install/impactpredictionmodels_b1/impactpredictionmodels/netCollect.py /root/wired/9_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.0.0 $myIP > $HN.capture &    
+tshark -a duration:175 -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | /root/install/impactpredictionmodels/netCollect.py /root/wired/9_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.0.0 $ipRange > $ipFileName.capture &    
 
-mgen flush input /root/install/impactpredictionmodels_b1/impactpredictionmodels/flowGenerator/flows/flow`hostname`.mgn output /dev/null &
+mgen flush input /root/install/impactpredictionmodels/flowGenerator/flows/flow`hostname`.mgn output /dev/null &
 
 (
 cat << 'EOF'
@@ -207,6 +208,11 @@ cd "$SESSION_DIR/$NODE_NAME.conf"
 echo "none" > $logPath/attack.txt
 echo "sleep startime:" "$startTime"
 sleep $startTime
+
+killall vtysh
+killall "$routingProtocol"d
+killall zebra
+sleep 5
 
 #check for protocol
 #if [[ $routingProtocol == *"ospf"* && -n "$5" && "IPv6" -eq "$5" ]]
@@ -273,8 +279,8 @@ chmod 755 attack.sh
 ./attack.sh 60 60 1 /root/wired/9_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.0.0 
 
 else
-	echo `hostname` >> /root/wired/9_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.0.0/check.txt
-	mgen flush input /root/install/impactpredictionmodels_b1/impactpredictionmodels/flowGenerator/flows/flow`hostname`.mgn | /root/install/impactpredictionmodels_b1/impactpredictionmodels/mgenCollect.py /root/wired/9_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.0.0 > `hostname`.mgencapture &
+	#echo `hostname` >> /root/wired/9_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.0.0/check.txt
+	mgen flush input /root/install/impactpredictionmodels/flowGenerator/flows/flow`hostname`.mgn | /root/install/impactpredictionmodels/mgenCollect.py /root/wired/9_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.0.0 > $ipFileName.mgencapture &
 fi
 
 	}
@@ -288,13 +294,13 @@ fi
 	cmdup=('sh custom-post-config-commands.sh', )
     }
     }
-	services {DefaultRoute SSH UserDefined
+	services {OSPFv2 zebra vtysh IPForward DefaultRoute DefaultRoute UserDefined
  	}
 }
 
 node n3 {
     type router
-    model host
+    model router
     network-config {
 	hostname n3
 	!
@@ -320,21 +326,19 @@ cd $SCRIPTDIR
 mkdir 9_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.0.0
 cd 9_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.0.0
 
-#get ip of current
-hostnameLen=`expr length $HN`
-hostnameLen=`expr $hostnameLen - 1` 
-nodeNumber="`expr substr $HN 2 $hostnameLen`" 
-nodeNumber=$(( $nodeNumber + 10))
-myIP=$nodeNumber".0.0.2"
+#get ip of current (defaults to FIRST IP)
+ipRange=`hostname -I`
+myIP=`echo $ipRange | cut -d' ' -f1`
+ipFileName=`echo $myIP | tr . _`
 
 #now insert attack script and mgen flush if node is attacker
 if [ `hostname` = n9 -o 9 = 0 ]
 then
 
 #start logging
-tshark -a duration:175 -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | /root/install/impactpredictionmodels_b1/impactpredictionmodels/netCollect.py /root/wired/9_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.0.0 $myIP > $HN.capture &    
+tshark -a duration:175 -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | /root/install/impactpredictionmodels/netCollect.py /root/wired/9_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.0.0 $ipRange > $ipFileName.capture &    
 
-mgen flush input /root/install/impactpredictionmodels_b1/impactpredictionmodels/flowGenerator/flows/flow`hostname`.mgn output /dev/null &
+mgen flush input /root/install/impactpredictionmodels/flowGenerator/flows/flow`hostname`.mgn output /dev/null &
 
 (
 cat << 'EOF'
@@ -354,6 +358,11 @@ cd "$SESSION_DIR/$NODE_NAME.conf"
 echo "none" > $logPath/attack.txt
 echo "sleep startime:" "$startTime"
 sleep $startTime
+
+killall vtysh
+killall "$routingProtocol"d
+killall zebra
+sleep 5
 
 #check for protocol
 #if [[ $routingProtocol == *"ospf"* && -n "$5" && "IPv6" -eq "$5" ]]
@@ -420,8 +429,8 @@ chmod 755 attack.sh
 ./attack.sh 60 60 1 /root/wired/9_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.0.0 
 
 else
-	echo `hostname` >> /root/wired/9_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.0.0/check.txt
-	mgen flush input /root/install/impactpredictionmodels_b1/impactpredictionmodels/flowGenerator/flows/flow`hostname`.mgn | /root/install/impactpredictionmodels_b1/impactpredictionmodels/mgenCollect.py /root/wired/9_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.0.0 > `hostname`.mgencapture &
+	#echo `hostname` >> /root/wired/9_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.0.0/check.txt
+	mgen flush input /root/install/impactpredictionmodels/flowGenerator/flows/flow`hostname`.mgn | /root/install/impactpredictionmodels/mgenCollect.py /root/wired/9_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.0.0 > $ipFileName.mgencapture &
 fi
 
 	}
@@ -435,13 +444,13 @@ fi
 	cmdup=('sh custom-post-config-commands.sh', )
     }
     }
-	services {DefaultRoute SSH UserDefined
+	services {OSPFv2 zebra vtysh IPForward DefaultRoute DefaultRoute UserDefined
  	}
 }
 
 node n4 {
     type router
-    model host
+    model router
     network-config {
 	hostname n4
 	!
@@ -467,21 +476,19 @@ cd $SCRIPTDIR
 mkdir 9_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.0.0
 cd 9_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.0.0
 
-#get ip of current
-hostnameLen=`expr length $HN`
-hostnameLen=`expr $hostnameLen - 1` 
-nodeNumber="`expr substr $HN 2 $hostnameLen`" 
-nodeNumber=$(( $nodeNumber + 10))
-myIP=$nodeNumber".0.0.2"
+#get ip of current (defaults to FIRST IP)
+ipRange=`hostname -I`
+myIP=`echo $ipRange | cut -d' ' -f1`
+ipFileName=`echo $myIP | tr . _`
 
 #now insert attack script and mgen flush if node is attacker
 if [ `hostname` = n9 -o 9 = 0 ]
 then
 
 #start logging
-tshark -a duration:175 -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | /root/install/impactpredictionmodels_b1/impactpredictionmodels/netCollect.py /root/wired/9_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.0.0 $myIP > $HN.capture &    
+tshark -a duration:175 -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | /root/install/impactpredictionmodels/netCollect.py /root/wired/9_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.0.0 $ipRange > $ipFileName.capture &    
 
-mgen flush input /root/install/impactpredictionmodels_b1/impactpredictionmodels/flowGenerator/flows/flow`hostname`.mgn output /dev/null &
+mgen flush input /root/install/impactpredictionmodels/flowGenerator/flows/flow`hostname`.mgn output /dev/null &
 
 (
 cat << 'EOF'
@@ -501,6 +508,11 @@ cd "$SESSION_DIR/$NODE_NAME.conf"
 echo "none" > $logPath/attack.txt
 echo "sleep startime:" "$startTime"
 sleep $startTime
+
+killall vtysh
+killall "$routingProtocol"d
+killall zebra
+sleep 5
 
 #check for protocol
 #if [[ $routingProtocol == *"ospf"* && -n "$5" && "IPv6" -eq "$5" ]]
@@ -567,8 +579,8 @@ chmod 755 attack.sh
 ./attack.sh 60 60 1 /root/wired/9_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.0.0 
 
 else
-	echo `hostname` >> /root/wired/9_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.0.0/check.txt
-	mgen flush input /root/install/impactpredictionmodels_b1/impactpredictionmodels/flowGenerator/flows/flow`hostname`.mgn | /root/install/impactpredictionmodels_b1/impactpredictionmodels/mgenCollect.py /root/wired/9_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.0.0 > `hostname`.mgencapture &
+	#echo `hostname` >> /root/wired/9_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.0.0/check.txt
+	mgen flush input /root/install/impactpredictionmodels/flowGenerator/flows/flow`hostname`.mgn | /root/install/impactpredictionmodels/mgenCollect.py /root/wired/9_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.0.0 > $ipFileName.mgencapture &
 fi
 
 	}
@@ -582,13 +594,13 @@ fi
 	cmdup=('sh custom-post-config-commands.sh', )
     }
     }
-	services {DefaultRoute SSH UserDefined
+	services {OSPFv2 zebra vtysh IPForward DefaultRoute DefaultRoute UserDefined
  	}
 }
 
 node n5 {
     type router
-    model host
+    model router
     network-config {
 	hostname n5
 	!
@@ -600,7 +612,7 @@ node n5 {
     iconcoords {774.0 340.0}
     labelcoords {774.0 372.0}
     interface-peer {eth0 n15}
-     custom-config {
+    custom-config {
 	custom-config-id service:UserDefined:custom-post-config-commands.sh
 	custom-command custom-post-config-commands.sh
 	config {
@@ -614,21 +626,19 @@ cd $SCRIPTDIR
 mkdir 9_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.0.0
 cd 9_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.0.0
 
-#get ip of current
-hostnameLen=`expr length $HN`
-hostnameLen=`expr $hostnameLen - 1` 
-nodeNumber="`expr substr $HN 2 $hostnameLen`" 
-nodeNumber=$(( $nodeNumber + 10))
-myIP=$nodeNumber".0.0.2"
+#get ip of current (defaults to FIRST IP)
+ipRange=`hostname -I`
+myIP=`echo $ipRange | cut -d' ' -f1`
+ipFileName=`echo $myIP | tr . _`
 
 #now insert attack script and mgen flush if node is attacker
 if [ `hostname` = n9 -o 9 = 0 ]
 then
 
 #start logging
-tshark -a duration:175 -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | /root/install/impactpredictionmodels_b1/impactpredictionmodels/netCollect.py /root/wired/9_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.0.0 $myIP > $HN.capture &    
+tshark -a duration:175 -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | /root/install/impactpredictionmodels/netCollect.py /root/wired/9_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.0.0 $ipRange > $ipFileName.capture &    
 
-mgen flush input /root/install/impactpredictionmodels_b1/impactpredictionmodels/flowGenerator/flows/flow`hostname`.mgn output /dev/null &
+mgen flush input /root/install/impactpredictionmodels/flowGenerator/flows/flow`hostname`.mgn output /dev/null &
 
 (
 cat << 'EOF'
@@ -648,6 +658,11 @@ cd "$SESSION_DIR/$NODE_NAME.conf"
 echo "none" > $logPath/attack.txt
 echo "sleep startime:" "$startTime"
 sleep $startTime
+
+killall vtysh
+killall "$routingProtocol"d
+killall zebra
+sleep 5
 
 #check for protocol
 #if [[ $routingProtocol == *"ospf"* && -n "$5" && "IPv6" -eq "$5" ]]
@@ -714,8 +729,8 @@ chmod 755 attack.sh
 ./attack.sh 60 60 1 /root/wired/9_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.0.0 
 
 else
-	echo `hostname` >> /root/wired/9_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.0.0/check.txt
-	mgen flush input /root/install/impactpredictionmodels_b1/impactpredictionmodels/flowGenerator/flows/flow`hostname`.mgn | /root/install/impactpredictionmodels_b1/impactpredictionmodels/mgenCollect.py /root/wired/9_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.0.0 > `hostname`.mgencapture &
+	#echo `hostname` >> /root/wired/9_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.0.0/check.txt
+	mgen flush input /root/install/impactpredictionmodels/flowGenerator/flows/flow`hostname`.mgn | /root/install/impactpredictionmodels/mgenCollect.py /root/wired/9_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.0.0 > $ipFileName.mgencapture &
 fi
 
 	}
@@ -729,13 +744,13 @@ fi
 	cmdup=('sh custom-post-config-commands.sh', )
     }
     }
-	services {DefaultRoute SSH UserDefined
+	services {OSPFv2 zebra vtysh IPForward DefaultRoute DefaultRoute UserDefined
  	}
 }
 
 node n6 {
     type router
-    model host
+    model router
     network-config {
 	hostname n6
 	!
@@ -761,21 +776,19 @@ cd $SCRIPTDIR
 mkdir 9_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.0.0
 cd 9_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.0.0
 
-#get ip of current
-hostnameLen=`expr length $HN`
-hostnameLen=`expr $hostnameLen - 1` 
-nodeNumber="`expr substr $HN 2 $hostnameLen`" 
-nodeNumber=$(( $nodeNumber + 10))
-myIP=$nodeNumber".0.0.2"
+#get ip of current (defaults to FIRST IP)
+ipRange=`hostname -I`
+myIP=`echo $ipRange | cut -d' ' -f1`
+ipFileName=`echo $myIP | tr . _`
 
 #now insert attack script and mgen flush if node is attacker
 if [ `hostname` = n9 -o 9 = 0 ]
 then
 
 #start logging
-tshark -a duration:175 -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | /root/install/impactpredictionmodels_b1/impactpredictionmodels/netCollect.py /root/wired/9_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.0.0 $myIP > $HN.capture &    
+tshark -a duration:175 -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | /root/install/impactpredictionmodels/netCollect.py /root/wired/9_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.0.0 $ipRange > $ipFileName.capture &    
 
-mgen flush input /root/install/impactpredictionmodels_b1/impactpredictionmodels/flowGenerator/flows/flow`hostname`.mgn output /dev/null &
+mgen flush input /root/install/impactpredictionmodels/flowGenerator/flows/flow`hostname`.mgn output /dev/null &
 
 (
 cat << 'EOF'
@@ -795,6 +808,11 @@ cd "$SESSION_DIR/$NODE_NAME.conf"
 echo "none" > $logPath/attack.txt
 echo "sleep startime:" "$startTime"
 sleep $startTime
+
+killall vtysh
+killall "$routingProtocol"d
+killall zebra
+sleep 5
 
 #check for protocol
 #if [[ $routingProtocol == *"ospf"* && -n "$5" && "IPv6" -eq "$5" ]]
@@ -861,8 +879,8 @@ chmod 755 attack.sh
 ./attack.sh 60 60 1 /root/wired/9_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.0.0 
 
 else
-	echo `hostname` >> /root/wired/9_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.0.0/check.txt
-	mgen flush input /root/install/impactpredictionmodels_b1/impactpredictionmodels/flowGenerator/flows/flow`hostname`.mgn | /root/install/impactpredictionmodels_b1/impactpredictionmodels/mgenCollect.py /root/wired/9_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.0.0 > `hostname`.mgencapture &
+	#echo `hostname` >> /root/wired/9_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.0.0/check.txt
+	mgen flush input /root/install/impactpredictionmodels/flowGenerator/flows/flow`hostname`.mgn | /root/install/impactpredictionmodels/mgenCollect.py /root/wired/9_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.0.0 > $ipFileName.mgencapture &
 fi
 
 	}
@@ -876,13 +894,13 @@ fi
 	cmdup=('sh custom-post-config-commands.sh', )
     }
     }
-	services {DefaultRoute SSH UserDefined
+	services {OSPFv2 zebra vtysh IPForward DefaultRoute DefaultRoute UserDefined
  	}
 }
 
 node n7 {
     type router
-    model host
+    model router
     network-config {
 	hostname n7
 	!
@@ -908,21 +926,19 @@ cd $SCRIPTDIR
 mkdir 9_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.0.0
 cd 9_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.0.0
 
-#get ip of current
-hostnameLen=`expr length $HN`
-hostnameLen=`expr $hostnameLen - 1` 
-nodeNumber="`expr substr $HN 2 $hostnameLen`" 
-nodeNumber=$(( $nodeNumber + 10))
-myIP=$nodeNumber".0.0.2"
+#get ip of current (defaults to FIRST IP)
+ipRange=`hostname -I`
+myIP=`echo $ipRange | cut -d' ' -f1`
+ipFileName=`echo $myIP | tr . _`
 
 #now insert attack script and mgen flush if node is attacker
 if [ `hostname` = n9 -o 9 = 0 ]
 then
 
 #start logging
-tshark -a duration:175 -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | /root/install/impactpredictionmodels_b1/impactpredictionmodels/netCollect.py /root/wired/9_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.0.0 $myIP > $HN.capture &    
+tshark -a duration:175 -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | /root/install/impactpredictionmodels/netCollect.py /root/wired/9_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.0.0 $ipRange > $ipFileName.capture &    
 
-mgen flush input /root/install/impactpredictionmodels_b1/impactpredictionmodels/flowGenerator/flows/flow`hostname`.mgn output /dev/null &
+mgen flush input /root/install/impactpredictionmodels/flowGenerator/flows/flow`hostname`.mgn output /dev/null &
 
 (
 cat << 'EOF'
@@ -942,6 +958,11 @@ cd "$SESSION_DIR/$NODE_NAME.conf"
 echo "none" > $logPath/attack.txt
 echo "sleep startime:" "$startTime"
 sleep $startTime
+
+killall vtysh
+killall "$routingProtocol"d
+killall zebra
+sleep 5
 
 #check for protocol
 #if [[ $routingProtocol == *"ospf"* && -n "$5" && "IPv6" -eq "$5" ]]
@@ -1008,8 +1029,8 @@ chmod 755 attack.sh
 ./attack.sh 60 60 1 /root/wired/9_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.0.0 
 
 else
-	echo `hostname` >> /root/wired/9_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.0.0/check.txt
-	mgen flush input /root/install/impactpredictionmodels_b1/impactpredictionmodels/flowGenerator/flows/flow`hostname`.mgn | /root/install/impactpredictionmodels_b1/impactpredictionmodels/mgenCollect.py /root/wired/9_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.0.0 > `hostname`.mgencapture &
+	#echo `hostname` >> /root/wired/9_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.0.0/check.txt
+	mgen flush input /root/install/impactpredictionmodels/flowGenerator/flows/flow`hostname`.mgn | /root/install/impactpredictionmodels/mgenCollect.py /root/wired/9_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.0.0 > $ipFileName.mgencapture &
 fi
 
 	}
@@ -1023,13 +1044,13 @@ fi
 	cmdup=('sh custom-post-config-commands.sh', )
     }
     }
-	services {DefaultRoute SSH UserDefined
+	services {OSPFv2 zebra vtysh IPForward DefaultRoute DefaultRoute UserDefined
  	}
 }
 
 node n8 {
     type router
-    model host
+    model router
     network-config {
 	hostname n8
 	!
@@ -1055,21 +1076,19 @@ cd $SCRIPTDIR
 mkdir 9_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.0.0
 cd 9_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.0.0
 
-#get ip of current
-hostnameLen=`expr length $HN`
-hostnameLen=`expr $hostnameLen - 1` 
-nodeNumber="`expr substr $HN 2 $hostnameLen`" 
-nodeNumber=$(( $nodeNumber + 10))
-myIP=$nodeNumber".0.0.2"
+#get ip of current (defaults to FIRST IP)
+ipRange=`hostname -I`
+myIP=`echo $ipRange | cut -d' ' -f1`
+ipFileName=`echo $myIP | tr . _`
 
 #now insert attack script and mgen flush if node is attacker
 if [ `hostname` = n9 -o 9 = 0 ]
 then
 
 #start logging
-tshark -a duration:175 -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | /root/install/impactpredictionmodels_b1/impactpredictionmodels/netCollect.py /root/wired/9_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.0.0 $myIP > $HN.capture &    
+tshark -a duration:175 -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | /root/install/impactpredictionmodels/netCollect.py /root/wired/9_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.0.0 $ipRange > $ipFileName.capture &    
 
-mgen flush input /root/install/impactpredictionmodels_b1/impactpredictionmodels/flowGenerator/flows/flow`hostname`.mgn output /dev/null &
+mgen flush input /root/install/impactpredictionmodels/flowGenerator/flows/flow`hostname`.mgn output /dev/null &
 
 (
 cat << 'EOF'
@@ -1089,6 +1108,11 @@ cd "$SESSION_DIR/$NODE_NAME.conf"
 echo "none" > $logPath/attack.txt
 echo "sleep startime:" "$startTime"
 sleep $startTime
+
+killall vtysh
+killall "$routingProtocol"d
+killall zebra
+sleep 5
 
 #check for protocol
 #if [[ $routingProtocol == *"ospf"* && -n "$5" && "IPv6" -eq "$5" ]]
@@ -1155,8 +1179,8 @@ chmod 755 attack.sh
 ./attack.sh 60 60 1 /root/wired/9_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.0.0 
 
 else
-	echo `hostname` >> /root/wired/9_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.0.0/check.txt
-	mgen flush input /root/install/impactpredictionmodels_b1/impactpredictionmodels/flowGenerator/flows/flow`hostname`.mgn | /root/install/impactpredictionmodels_b1/impactpredictionmodels/mgenCollect.py /root/wired/9_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.0.0 > `hostname`.mgencapture &
+	#echo `hostname` >> /root/wired/9_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.0.0/check.txt
+	mgen flush input /root/install/impactpredictionmodels/flowGenerator/flows/flow`hostname`.mgn | /root/install/impactpredictionmodels/mgenCollect.py /root/wired/9_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.0.0 > $ipFileName.mgencapture &
 fi
 
 	}
@@ -1170,7 +1194,7 @@ fi
 	cmdup=('sh custom-post-config-commands.sh', )
     }
     }
-	services {DefaultRoute SSH UserDefined
+	services {OSPFv2 zebra vtysh IPForward DefaultRoute DefaultRoute UserDefined
  	}
 }
 
@@ -1202,21 +1226,19 @@ cd $SCRIPTDIR
 mkdir 9_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.0.0
 cd 9_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.0.0
 
-#get ip of current
-hostnameLen=`expr length $HN`
-hostnameLen=`expr $hostnameLen - 1` 
-nodeNumber="`expr substr $HN 2 $hostnameLen`" 
-nodeNumber=$(( $nodeNumber + 10))
-myIP=$nodeNumber".0.0.2"
+#get ip of current (defaults to FIRST IP)
+ipRange=`hostname -I`
+myIP=`echo $ipRange | cut -d' ' -f1`
+ipFileName=`echo $myIP | tr . _`
 
 #now insert attack script and mgen flush if node is attacker
 if [ `hostname` = n9 -o 9 = 0 ]
 then
 
 #start logging
-tshark -a duration:175 -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | /root/install/impactpredictionmodels_b1/impactpredictionmodels/netCollect.py /root/wired/9_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.0.0 $myIP > $HN.capture &    
+tshark -a duration:175 -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | /root/install/impactpredictionmodels/netCollect.py /root/wired/9_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.0.0 $ipRange > $ipFileName.capture &    
 
-mgen flush input /root/install/impactpredictionmodels_b1/impactpredictionmodels/flowGenerator/flows/flow`hostname`.mgn output /dev/null &
+mgen flush input /root/install/impactpredictionmodels/flowGenerator/flows/flow`hostname`.mgn output /dev/null &
 
 (
 cat << 'EOF'
@@ -1236,6 +1258,11 @@ cd "$SESSION_DIR/$NODE_NAME.conf"
 echo "none" > $logPath/attack.txt
 echo "sleep startime:" "$startTime"
 sleep $startTime
+
+killall vtysh
+killall "$routingProtocol"d
+killall zebra
+sleep 5
 
 #check for protocol
 #if [[ $routingProtocol == *"ospf"* && -n "$5" && "IPv6" -eq "$5" ]]
@@ -1302,8 +1329,8 @@ chmod 755 attack.sh
 ./attack.sh 60 60 1 /root/wired/9_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.0.0 
 
 else
-	echo `hostname` >> /root/wired/9_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.0.0/check.txt
-	mgen flush input /root/install/impactpredictionmodels_b1/impactpredictionmodels/flowGenerator/flows/flow`hostname`.mgn | /root/install/impactpredictionmodels_b1/impactpredictionmodels/mgenCollect.py /root/wired/9_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.0.0 > `hostname`.mgencapture &
+	#echo `hostname` >> /root/wired/9_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.0.0/check.txt
+	mgen flush input /root/install/impactpredictionmodels/flowGenerator/flows/flow`hostname`.mgn | /root/install/impactpredictionmodels/mgenCollect.py /root/wired/9_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.0.0 > $ipFileName.mgencapture &
 fi
 
 	}
@@ -1317,13 +1344,13 @@ fi
 	cmdup=('sh custom-post-config-commands.sh', )
     }
     }
-	services {OSPFv2 zebra vtysh IPForward UserDefined
+	services {OSPFv2 zebra vtysh IPForward DefaultRoute UserDefined
  	}
 }
 
 node n10 {
     type router
-    model host
+    model router
     network-config {
 	hostname n10
 	!
@@ -1349,21 +1376,19 @@ cd $SCRIPTDIR
 mkdir 9_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.0.0
 cd 9_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.0.0
 
-#get ip of current
-hostnameLen=`expr length $HN`
-hostnameLen=`expr $hostnameLen - 1` 
-nodeNumber="`expr substr $HN 2 $hostnameLen`" 
-nodeNumber=$(( $nodeNumber + 10))
-myIP=$nodeNumber".0.0.2"
+#get ip of current (defaults to FIRST IP)
+ipRange=`hostname -I`
+myIP=`echo $ipRange | cut -d' ' -f1`
+ipFileName=`echo $myIP | tr . _`
 
 #now insert attack script and mgen flush if node is attacker
 if [ `hostname` = n9 -o 9 = 0 ]
 then
 
 #start logging
-tshark -a duration:175 -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | /root/install/impactpredictionmodels_b1/impactpredictionmodels/netCollect.py /root/wired/9_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.0.0 $myIP > $HN.capture &    
+tshark -a duration:175 -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | /root/install/impactpredictionmodels/netCollect.py /root/wired/9_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.0.0 $ipRange > $ipFileName.capture &    
 
-mgen flush input /root/install/impactpredictionmodels_b1/impactpredictionmodels/flowGenerator/flows/flow`hostname`.mgn output /dev/null &
+mgen flush input /root/install/impactpredictionmodels/flowGenerator/flows/flow`hostname`.mgn output /dev/null &
 
 (
 cat << 'EOF'
@@ -1383,6 +1408,11 @@ cd "$SESSION_DIR/$NODE_NAME.conf"
 echo "none" > $logPath/attack.txt
 echo "sleep startime:" "$startTime"
 sleep $startTime
+
+killall vtysh
+killall "$routingProtocol"d
+killall zebra
+sleep 5
 
 #check for protocol
 #if [[ $routingProtocol == *"ospf"* && -n "$5" && "IPv6" -eq "$5" ]]
@@ -1449,8 +1479,8 @@ chmod 755 attack.sh
 ./attack.sh 60 60 1 /root/wired/9_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.0.0 
 
 else
-	echo `hostname` >> /root/wired/9_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.0.0/check.txt
-	mgen flush input /root/install/impactpredictionmodels_b1/impactpredictionmodels/flowGenerator/flows/flow`hostname`.mgn | /root/install/impactpredictionmodels_b1/impactpredictionmodels/mgenCollect.py /root/wired/9_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.0.0 > `hostname`.mgencapture &
+	#echo `hostname` >> /root/wired/9_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.0.0/check.txt
+	mgen flush input /root/install/impactpredictionmodels/flowGenerator/flows/flow`hostname`.mgn | /root/install/impactpredictionmodels/mgenCollect.py /root/wired/9_60_60_spoofingAttack_sh1_chain_OSPFv2_wired_255.255.0.0 > $ipFileName.mgencapture &
 fi
 
 	}
@@ -1464,7 +1494,7 @@ fi
 	cmdup=('sh custom-post-config-commands.sh', )
     }
     }
-	services {DefaultRoute SSH UserDefined
+	services {OSPFv2 zebra vtysh IPForward DefaultRoute DefaultRoute UserDefined
  	}
 }
 
@@ -1509,7 +1539,7 @@ cd $SCRIPTDIR
 	cmdup=('sh custom-post-config-commands.sh', )
     }
     }
-	services {OSPFv2 zebra vtysh IPForward UserDefined
+	services {OSPFv2 zebra vtysh IPForward DefaultRoute UserDefined
  	}
 }
 
@@ -1558,7 +1588,7 @@ cd $SCRIPTDIR
 	cmdup=('sh custom-post-config-commands.sh', )
     }
     }
-	services {OSPFv2 zebra vtysh IPForward UserDefined
+	services {OSPFv2 zebra vtysh IPForward DefaultRoute UserDefined
  	}
 }
 
@@ -1607,7 +1637,7 @@ cd $SCRIPTDIR
 	cmdup=('sh custom-post-config-commands.sh', )
     }
     }
-	services {OSPFv2 zebra vtysh IPForward UserDefined
+	services {OSPFv2 zebra vtysh IPForward DefaultRoute UserDefined
  	}
 }
 
@@ -1656,7 +1686,7 @@ cd $SCRIPTDIR
 	cmdup=('sh custom-post-config-commands.sh', )
     }
     }
-	services {OSPFv2 zebra vtysh IPForward UserDefined
+	services {OSPFv2 zebra vtysh IPForward DefaultRoute UserDefined
  	}
 }
 
@@ -1705,7 +1735,7 @@ cd $SCRIPTDIR
 	cmdup=('sh custom-post-config-commands.sh', )
     }
     }
-	services {OSPFv2 zebra vtysh IPForward UserDefined
+	services {OSPFv2 zebra vtysh IPForward DefaultRoute UserDefined
  	}
 }
 
@@ -1754,7 +1784,7 @@ cd $SCRIPTDIR
 	cmdup=('sh custom-post-config-commands.sh', )
     }
     }
-	services {OSPFv2 zebra vtysh IPForward UserDefined
+	services {OSPFv2 zebra vtysh IPForward DefaultRoute UserDefined
  	}
 }
 
@@ -1803,7 +1833,7 @@ cd $SCRIPTDIR
 	cmdup=('sh custom-post-config-commands.sh', )
     }
     }
-	services {OSPFv2 zebra vtysh IPForward UserDefined
+	services {OSPFv2 zebra vtysh IPForward DefaultRoute UserDefined
  	}
 }
 
@@ -1852,7 +1882,7 @@ cd $SCRIPTDIR
 	cmdup=('sh custom-post-config-commands.sh', )
     }
     }
-	services {OSPFv2 zebra vtysh IPForward UserDefined
+	services {OSPFv2 zebra vtysh IPForward DefaultRoute UserDefined
  	}
 }
 
@@ -1901,7 +1931,7 @@ cd $SCRIPTDIR
 	cmdup=('sh custom-post-config-commands.sh', )
     }
     }
-	services {OSPFv2 zebra vtysh IPForward UserDefined
+	services {OSPFv2 zebra vtysh IPForward DefaultRoute UserDefined
  	}
 }
 
@@ -1946,7 +1976,7 @@ cd $SCRIPTDIR
 	cmdup=('sh custom-post-config-commands.sh', )
     }
     }
-	services {OSPFv2 zebra vtysh IPForward UserDefined
+	services {OSPFv2 zebra vtysh IPForward DefaultRoute UserDefined
  	}
 }
 

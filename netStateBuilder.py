@@ -324,8 +324,6 @@ def calcPassThroughs():
             toHop = routes[toIP][0]
         if fromIP in routes:
             fromHop = routes[fromIP][0]
-
-        #print "1-----" + fromHop + "---1"
         
         if (flow[0],flow[1]) in attackerPathsSeen: 
             passThroughsBefore[(flow[0],flow[1])] = ("true",flow[0].split("_")[0],fromHop,flow[0].split("_")[1],toHop)
@@ -485,7 +483,7 @@ def buildHopTraff():
                     isSrcBetweenSpoofedAndDst = bBetweenAandC(attackName.split("_")[1],flow[0].split("_")[0],flow[0].split("_")[1])
                     isSrcBetweenSpoofedAndDstgw = gatewaybBetweenAandC(attackName.split("_")[1],flow[0].split("_")[0],flow[0].split("_")[1])
                 #print "duringNumPacket",duringNumPackets
-                if int(duringNumPackets) > 0: #if a fifth of the packets are lost, count it as lost flow
+                if int(duringNumPackets) > 25: #if a fifth of the packets are lost, count it as lost flow
                     duringLinkLost = "true"
                 else: duringLinkLost = "false"
                 #print "afterNumPacket",afterNumPackets
@@ -534,18 +532,19 @@ def gatewaybBetweenAandC(a,b,c):
 def hasAltPath(fromNode,toNode,nodeToRemove):
     global G
     
-    print "removing node:",fromNode, toNode, nodeToRemove
+    #print "removing node:",fromNode, toNode, nodeToRemove
 
+    return "true"# undo auto return for wired scenarios ---------------
     if not nx.has_path(G,fromNode,toNode):
-        print "returning false no path"
+        #print "returning false no path"
         return "false"
     temp = G.copy()
 
     temp.remove_node(nodeToRemove)
     if not nx.has_path(temp,fromNode,toNode):
-        print "returning false after remove"
+        #print "returning false after remove"
         return "false"
-    print "returning true"
+    #print "returning true"
     return "true"
 
 def findIpRouter(toSubnet, toIP):

@@ -5,6 +5,7 @@ pendingDuration=$2
 nodeToSpoof=`expr $3 + 10`
 logPath=$4
 
+
 # Parse routing protocol and convert to lowercase
 routingProtocol=`echo $logPath | cut -d'_' -f7 | cut -d 'v' -f1 | sed 's/./\L&/g'`
 subnet=`echo $logPath | cut -d '_' -f9`
@@ -14,6 +15,7 @@ cd "$SESSION_DIR/$NODE_NAME.conf"
 echo "none" > $logPath/attack.txt
 echo "sleep startime:" "$startTime"
 sleep $startTime
+
 
 #check for protocol
 #if [[ $routingProtocol == *"ospf"* && -n "$5" && "IPv6" -eq "$5" ]]
@@ -28,10 +30,6 @@ protocol="IPv4"
 ipToSpoof="$nodeToSpoof.0.0.2"
 
 cd "$SESSION_DIR/$NODE_NAME.conf"
-
-sh quaggaboot.sh zebra
-sh quaggaboot.sh "$routingProtocol"d
-sh quaggaboot.sh vtysh
 
 echo ifconfig eth0:1 $ipToSpoof netmask $subnet up
 ifconfig eth0:1 $ipToSpoof netmask $subnet up

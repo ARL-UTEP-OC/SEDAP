@@ -1,6 +1,6 @@
 node n1 {
     type router
-    model host
+    model router
     network-config {
 	hostname n1
 	!
@@ -26,19 +26,19 @@ cd $SCRIPTDIR
 mkdir 5_60_60_blackholeAttack_sh_conn-grid_OSPFv2_wired_255.255.0.0
 cd 5_60_60_blackholeAttack_sh_conn-grid_OSPFv2_wired_255.255.0.0
 
-#get ip of current
-hostnameLen=`expr length $HN`
-hostnameLen=`expr $hostnameLen - 1` 
-myIP="`expr substr $HN 2 $hostnameLen`.0.0.1" 
+#get ip of current (defaults to FIRST IP)
+ipRange=`hostname -I`
+myIP=`echo $ipRange | cut -d' ' -f1`
+ipFileName=`echo $myIP | tr . _`
 
 #now insert attack script and mgen flush if node is attacker
 if [ `hostname` = n5 -o 5 = 0 ]
 then
 
 #start logging
-tshark -a duration:175 -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | /root/install/impactpredictionmodels_b1/impactpredictionmodels/netCollect.py /root/wired/5_60_60_blackholeAttack_sh_conn-grid_OSPFv2_wired_255.255.0.0 $myIP > $HN.capture &    
+tshark -a duration:175 -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | /root/install/impactpredictionmodels/netCollect.py /root/wired/5_60_60_blackholeAttack_sh_conn-grid_OSPFv2_wired_255.255.0.0 $ipRange > $ipFileName.capture &    
 
-mgen flush input /root/install/impactpredictionmodels_b1/impactpredictionmodels/flowGenerator/flows/flow`hostname`.mgn output /dev/null &
+mgen flush input /root/install/impactpredictionmodels/flowGenerator/flows/flow`hostname`.mgn output /dev/null &
 
 (
 cat << 'EOF'
@@ -93,7 +93,7 @@ identifyRoutingProtocol()
 
 bringUpInterfaces()
 {
-	for ((nodeToSpoof=1;nodeToSpoof <= numberOfNodes; nodeToSpoof++))
+	for ((nodeToSpoof=11;nodeToSpoof <= numberOfNodes; nodeToSpoof++))
 	do
 		
 		if [ $nodeToSpoof != $attackingNode ]
@@ -139,8 +139,8 @@ chmod 755 attack.sh
 ./attack.sh 60 60 5 10 /root/wired/5_60_60_blackholeAttack_sh_conn-grid_OSPFv2_wired_255.255.0.0 
 
 else
-	echo `hostname` >> /root/wired/5_60_60_blackholeAttack_sh_conn-grid_OSPFv2_wired_255.255.0.0/check.txt
-	mgen flush input /root/install/impactpredictionmodels_b1/impactpredictionmodels/flowGenerator/flows/flow`hostname`.mgn | /root/install/impactpredictionmodels_b1/impactpredictionmodels/mgenCollect.py /root/wired/5_60_60_blackholeAttack_sh_conn-grid_OSPFv2_wired_255.255.0.0 > `hostname`.mgencapture &
+	#echo `hostname` >> /root/wired/5_60_60_blackholeAttack_sh_conn-grid_OSPFv2_wired_255.255.0.0/check.txt
+	mgen flush input /root/install/impactpredictionmodels/flowGenerator/flows/flow`hostname`.mgn | /root/install/impactpredictionmodels/mgenCollect.py /root/wired/5_60_60_blackholeAttack_sh_conn-grid_OSPFv2_wired_255.255.0.0 > $ipFileName.mgencapture &
 fi
 
 	}
@@ -154,13 +154,13 @@ fi
 	cmdup=('sh custom-post-config-commands.sh', )
     }
     }
-	services {DefaultRoute SSH UserDefined
+	services {OSPFv2 zebra vtysh IPForward DefaultRoute DefaultRoute UserDefined
 	}
 }
 
 node n2 {
     type router
-    model host
+    model router
     network-config {
 	hostname n2
 	!
@@ -186,19 +186,19 @@ cd $SCRIPTDIR
 mkdir 5_60_60_blackholeAttack_sh_conn-grid_OSPFv2_wired_255.255.0.0
 cd 5_60_60_blackholeAttack_sh_conn-grid_OSPFv2_wired_255.255.0.0
 
-#get ip of current
-hostnameLen=`expr length $HN`
-hostnameLen=`expr $hostnameLen - 1` 
-myIP="`expr substr $HN 2 $hostnameLen`.0.0.1" 
+#get ip of current (defaults to FIRST IP)
+ipRange=`hostname -I`
+myIP=`echo $ipRange | cut -d' ' -f1`
+ipFileName=`echo $myIP | tr . _`
 
 #now insert attack script and mgen flush if node is attacker
 if [ `hostname` = n5 -o 5 = 0 ]
 then
 
 #start logging
-tshark -a duration:175 -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | /root/install/impactpredictionmodels_b1/impactpredictionmodels/netCollect.py /root/wired/5_60_60_blackholeAttack_sh_conn-grid_OSPFv2_wired_255.255.0.0 $myIP > $HN.capture &    
+tshark -a duration:175 -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | /root/install/impactpredictionmodels/netCollect.py /root/wired/5_60_60_blackholeAttack_sh_conn-grid_OSPFv2_wired_255.255.0.0 $ipRange > $ipFileName.capture &    
 
-mgen flush input /root/install/impactpredictionmodels_b1/impactpredictionmodels/flowGenerator/flows/flow`hostname`.mgn output /dev/null &
+mgen flush input /root/install/impactpredictionmodels/flowGenerator/flows/flow`hostname`.mgn output /dev/null &
 
 (
 cat << 'EOF'
@@ -253,7 +253,7 @@ identifyRoutingProtocol()
 
 bringUpInterfaces()
 {
-	for ((nodeToSpoof=1;nodeToSpoof <= numberOfNodes; nodeToSpoof++))
+	for ((nodeToSpoof=11;nodeToSpoof <= numberOfNodes; nodeToSpoof++))
 	do
 		
 		if [ $nodeToSpoof != $attackingNode ]
@@ -299,8 +299,8 @@ chmod 755 attack.sh
 ./attack.sh 60 60 5 10 /root/wired/5_60_60_blackholeAttack_sh_conn-grid_OSPFv2_wired_255.255.0.0 
 
 else
-	echo `hostname` >> /root/wired/5_60_60_blackholeAttack_sh_conn-grid_OSPFv2_wired_255.255.0.0/check.txt
-	mgen flush input /root/install/impactpredictionmodels_b1/impactpredictionmodels/flowGenerator/flows/flow`hostname`.mgn | /root/install/impactpredictionmodels_b1/impactpredictionmodels/mgenCollect.py /root/wired/5_60_60_blackholeAttack_sh_conn-grid_OSPFv2_wired_255.255.0.0 > `hostname`.mgencapture &
+	#echo `hostname` >> /root/wired/5_60_60_blackholeAttack_sh_conn-grid_OSPFv2_wired_255.255.0.0/check.txt
+	mgen flush input /root/install/impactpredictionmodels/flowGenerator/flows/flow`hostname`.mgn | /root/install/impactpredictionmodels/mgenCollect.py /root/wired/5_60_60_blackholeAttack_sh_conn-grid_OSPFv2_wired_255.255.0.0 > $ipFileName.mgencapture &
 fi
 
 	}
@@ -314,13 +314,13 @@ fi
 	cmdup=('sh custom-post-config-commands.sh', )
     }
     }
-	services {DefaultRoute SSH UserDefined
+	services {OSPFv2 zebra vtysh IPForward DefaultRoute DefaultRoute UserDefined
 	}
 }
 
 node n3 {
     type router
-    model host
+    model router
     network-config {
 	hostname n3
 	!
@@ -346,19 +346,19 @@ cd $SCRIPTDIR
 mkdir 5_60_60_blackholeAttack_sh_conn-grid_OSPFv2_wired_255.255.0.0
 cd 5_60_60_blackholeAttack_sh_conn-grid_OSPFv2_wired_255.255.0.0
 
-#get ip of current
-hostnameLen=`expr length $HN`
-hostnameLen=`expr $hostnameLen - 1` 
-myIP="`expr substr $HN 2 $hostnameLen`.0.0.1" 
+#get ip of current (defaults to FIRST IP)
+ipRange=`hostname -I`
+myIP=`echo $ipRange | cut -d' ' -f1`
+ipFileName=`echo $myIP | tr . _`
 
 #now insert attack script and mgen flush if node is attacker
 if [ `hostname` = n5 -o 5 = 0 ]
 then
 
 #start logging
-tshark -a duration:175 -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | /root/install/impactpredictionmodels_b1/impactpredictionmodels/netCollect.py /root/wired/5_60_60_blackholeAttack_sh_conn-grid_OSPFv2_wired_255.255.0.0 $myIP > $HN.capture &    
+tshark -a duration:175 -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | /root/install/impactpredictionmodels/netCollect.py /root/wired/5_60_60_blackholeAttack_sh_conn-grid_OSPFv2_wired_255.255.0.0 $ipRange > $ipFileName.capture &    
 
-mgen flush input /root/install/impactpredictionmodels_b1/impactpredictionmodels/flowGenerator/flows/flow`hostname`.mgn output /dev/null &
+mgen flush input /root/install/impactpredictionmodels/flowGenerator/flows/flow`hostname`.mgn output /dev/null &
 
 (
 cat << 'EOF'
@@ -413,7 +413,7 @@ identifyRoutingProtocol()
 
 bringUpInterfaces()
 {
-	for ((nodeToSpoof=1;nodeToSpoof <= numberOfNodes; nodeToSpoof++))
+	for ((nodeToSpoof=11;nodeToSpoof <= numberOfNodes; nodeToSpoof++))
 	do
 		
 		if [ $nodeToSpoof != $attackingNode ]
@@ -459,8 +459,8 @@ chmod 755 attack.sh
 ./attack.sh 60 60 5 10 /root/wired/5_60_60_blackholeAttack_sh_conn-grid_OSPFv2_wired_255.255.0.0 
 
 else
-	echo `hostname` >> /root/wired/5_60_60_blackholeAttack_sh_conn-grid_OSPFv2_wired_255.255.0.0/check.txt
-	mgen flush input /root/install/impactpredictionmodels_b1/impactpredictionmodels/flowGenerator/flows/flow`hostname`.mgn | /root/install/impactpredictionmodels_b1/impactpredictionmodels/mgenCollect.py /root/wired/5_60_60_blackholeAttack_sh_conn-grid_OSPFv2_wired_255.255.0.0 > `hostname`.mgencapture &
+	#echo `hostname` >> /root/wired/5_60_60_blackholeAttack_sh_conn-grid_OSPFv2_wired_255.255.0.0/check.txt
+	mgen flush input /root/install/impactpredictionmodels/flowGenerator/flows/flow`hostname`.mgn | /root/install/impactpredictionmodels/mgenCollect.py /root/wired/5_60_60_blackholeAttack_sh_conn-grid_OSPFv2_wired_255.255.0.0 > $ipFileName.mgencapture &
 fi
 
 	}
@@ -474,13 +474,13 @@ fi
 	cmdup=('sh custom-post-config-commands.sh', )
     }
     }
-	services {DefaultRoute SSH UserDefined
+	services {OSPFv2 zebra vtysh IPForward DefaultRoute DefaultRoute UserDefined
 	}
 }
 
 node n4 {
     type router
-    model host
+    model router
     network-config {
 	hostname n4
 	!
@@ -506,19 +506,19 @@ cd $SCRIPTDIR
 mkdir 5_60_60_blackholeAttack_sh_conn-grid_OSPFv2_wired_255.255.0.0
 cd 5_60_60_blackholeAttack_sh_conn-grid_OSPFv2_wired_255.255.0.0
 
-#get ip of current
-hostnameLen=`expr length $HN`
-hostnameLen=`expr $hostnameLen - 1` 
-myIP="`expr substr $HN 2 $hostnameLen`.0.0.1" 
+#get ip of current (defaults to FIRST IP)
+ipRange=`hostname -I`
+myIP=`echo $ipRange | cut -d' ' -f1`
+ipFileName=`echo $myIP | tr . _`
 
 #now insert attack script and mgen flush if node is attacker
 if [ `hostname` = n5 -o 5 = 0 ]
 then
 
 #start logging
-tshark -a duration:175 -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | /root/install/impactpredictionmodels_b1/impactpredictionmodels/netCollect.py /root/wired/5_60_60_blackholeAttack_sh_conn-grid_OSPFv2_wired_255.255.0.0 $myIP > $HN.capture &    
+tshark -a duration:175 -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | /root/install/impactpredictionmodels/netCollect.py /root/wired/5_60_60_blackholeAttack_sh_conn-grid_OSPFv2_wired_255.255.0.0 $ipRange > $ipFileName.capture &    
 
-mgen flush input /root/install/impactpredictionmodels_b1/impactpredictionmodels/flowGenerator/flows/flow`hostname`.mgn output /dev/null &
+mgen flush input /root/install/impactpredictionmodels/flowGenerator/flows/flow`hostname`.mgn output /dev/null &
 
 (
 cat << 'EOF'
@@ -573,7 +573,7 @@ identifyRoutingProtocol()
 
 bringUpInterfaces()
 {
-	for ((nodeToSpoof=1;nodeToSpoof <= numberOfNodes; nodeToSpoof++))
+	for ((nodeToSpoof=11;nodeToSpoof <= numberOfNodes; nodeToSpoof++))
 	do
 		
 		if [ $nodeToSpoof != $attackingNode ]
@@ -619,8 +619,8 @@ chmod 755 attack.sh
 ./attack.sh 60 60 5 10 /root/wired/5_60_60_blackholeAttack_sh_conn-grid_OSPFv2_wired_255.255.0.0 
 
 else
-	echo `hostname` >> /root/wired/5_60_60_blackholeAttack_sh_conn-grid_OSPFv2_wired_255.255.0.0/check.txt
-	mgen flush input /root/install/impactpredictionmodels_b1/impactpredictionmodels/flowGenerator/flows/flow`hostname`.mgn | /root/install/impactpredictionmodels_b1/impactpredictionmodels/mgenCollect.py /root/wired/5_60_60_blackholeAttack_sh_conn-grid_OSPFv2_wired_255.255.0.0 > `hostname`.mgencapture &
+	#echo `hostname` >> /root/wired/5_60_60_blackholeAttack_sh_conn-grid_OSPFv2_wired_255.255.0.0/check.txt
+	mgen flush input /root/install/impactpredictionmodels/flowGenerator/flows/flow`hostname`.mgn | /root/install/impactpredictionmodels/mgenCollect.py /root/wired/5_60_60_blackholeAttack_sh_conn-grid_OSPFv2_wired_255.255.0.0 > $ipFileName.mgencapture &
 fi
 
 	}
@@ -634,7 +634,7 @@ fi
 	cmdup=('sh custom-post-config-commands.sh', )
     }
     }
-	services {DefaultRoute SSH UserDefined
+	services {OSPFv2 zebra vtysh IPForward DefaultRoute DefaultRoute UserDefined
 	}
 }
 
@@ -666,19 +666,19 @@ cd $SCRIPTDIR
 mkdir 5_60_60_blackholeAttack_sh_conn-grid_OSPFv2_wired_255.255.0.0
 cd 5_60_60_blackholeAttack_sh_conn-grid_OSPFv2_wired_255.255.0.0
 
-#get ip of current
-hostnameLen=`expr length $HN`
-hostnameLen=`expr $hostnameLen - 1` 
-myIP="`expr substr $HN 2 $hostnameLen`.0.0.1" 
+#get ip of current (defaults to FIRST IP)
+ipRange=`hostname -I`
+myIP=`echo $ipRange | cut -d' ' -f1`
+ipFileName=`echo $myIP | tr . _`
 
 #now insert attack script and mgen flush if node is attacker
 if [ `hostname` = n5 -o 5 = 0 ]
 then
 
 #start logging
-tshark -a duration:175 -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | /root/install/impactpredictionmodels_b1/impactpredictionmodels/netCollect.py /root/wired/5_60_60_blackholeAttack_sh_conn-grid_OSPFv2_wired_255.255.0.0 $myIP > $HN.capture &    
+tshark -a duration:175 -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | /root/install/impactpredictionmodels/netCollect.py /root/wired/5_60_60_blackholeAttack_sh_conn-grid_OSPFv2_wired_255.255.0.0 $ipRange > $ipFileName.capture &    
 
-mgen flush input /root/install/impactpredictionmodels_b1/impactpredictionmodels/flowGenerator/flows/flow`hostname`.mgn output /dev/null &
+mgen flush input /root/install/impactpredictionmodels/flowGenerator/flows/flow`hostname`.mgn output /dev/null &
 
 (
 cat << 'EOF'
@@ -733,7 +733,7 @@ identifyRoutingProtocol()
 
 bringUpInterfaces()
 {
-	for ((nodeToSpoof=1;nodeToSpoof <= numberOfNodes; nodeToSpoof++))
+	for ((nodeToSpoof=11;nodeToSpoof <= numberOfNodes; nodeToSpoof++))
 	do
 		
 		if [ $nodeToSpoof != $attackingNode ]
@@ -779,8 +779,8 @@ chmod 755 attack.sh
 ./attack.sh 60 60 5 10 /root/wired/5_60_60_blackholeAttack_sh_conn-grid_OSPFv2_wired_255.255.0.0 
 
 else
-	echo `hostname` >> /root/wired/5_60_60_blackholeAttack_sh_conn-grid_OSPFv2_wired_255.255.0.0/check.txt
-	mgen flush input /root/install/impactpredictionmodels_b1/impactpredictionmodels/flowGenerator/flows/flow`hostname`.mgn | /root/install/impactpredictionmodels_b1/impactpredictionmodels/mgenCollect.py /root/wired/5_60_60_blackholeAttack_sh_conn-grid_OSPFv2_wired_255.255.0.0 > `hostname`.mgencapture &
+	#echo `hostname` >> /root/wired/5_60_60_blackholeAttack_sh_conn-grid_OSPFv2_wired_255.255.0.0/check.txt
+	mgen flush input /root/install/impactpredictionmodels/flowGenerator/flows/flow`hostname`.mgn | /root/install/impactpredictionmodels/mgenCollect.py /root/wired/5_60_60_blackholeAttack_sh_conn-grid_OSPFv2_wired_255.255.0.0 > $ipFileName.mgencapture &
 fi
 
 	}
@@ -794,13 +794,13 @@ fi
 	cmdup=('sh custom-post-config-commands.sh', )
     }
     }
-	services {OSPFv2 zebra vtysh IPForward UserDefined
+	services {OSPFv2 zebra vtysh IPForward DefaultRoute UserDefined
 	}
 }
 
 node n6 {
     type router
-    model host
+    model router
     network-config {
 	hostname n6
 	!
@@ -826,19 +826,19 @@ cd $SCRIPTDIR
 mkdir 5_60_60_blackholeAttack_sh_conn-grid_OSPFv2_wired_255.255.0.0
 cd 5_60_60_blackholeAttack_sh_conn-grid_OSPFv2_wired_255.255.0.0
 
-#get ip of current
-hostnameLen=`expr length $HN`
-hostnameLen=`expr $hostnameLen - 1` 
-myIP="`expr substr $HN 2 $hostnameLen`.0.0.1" 
+#get ip of current (defaults to FIRST IP)
+ipRange=`hostname -I`
+myIP=`echo $ipRange | cut -d' ' -f1`
+ipFileName=`echo $myIP | tr . _`
 
 #now insert attack script and mgen flush if node is attacker
 if [ `hostname` = n5 -o 5 = 0 ]
 then
 
 #start logging
-tshark -a duration:175 -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | /root/install/impactpredictionmodels_b1/impactpredictionmodels/netCollect.py /root/wired/5_60_60_blackholeAttack_sh_conn-grid_OSPFv2_wired_255.255.0.0 $myIP > $HN.capture &    
+tshark -a duration:175 -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | /root/install/impactpredictionmodels/netCollect.py /root/wired/5_60_60_blackholeAttack_sh_conn-grid_OSPFv2_wired_255.255.0.0 $ipRange > $ipFileName.capture &    
 
-mgen flush input /root/install/impactpredictionmodels_b1/impactpredictionmodels/flowGenerator/flows/flow`hostname`.mgn output /dev/null &
+mgen flush input /root/install/impactpredictionmodels/flowGenerator/flows/flow`hostname`.mgn output /dev/null &
 
 (
 cat << 'EOF'
@@ -893,7 +893,7 @@ identifyRoutingProtocol()
 
 bringUpInterfaces()
 {
-	for ((nodeToSpoof=1;nodeToSpoof <= numberOfNodes; nodeToSpoof++))
+	for ((nodeToSpoof=11;nodeToSpoof <= numberOfNodes; nodeToSpoof++))
 	do
 		
 		if [ $nodeToSpoof != $attackingNode ]
@@ -939,8 +939,8 @@ chmod 755 attack.sh
 ./attack.sh 60 60 5 10 /root/wired/5_60_60_blackholeAttack_sh_conn-grid_OSPFv2_wired_255.255.0.0 
 
 else
-	echo `hostname` >> /root/wired/5_60_60_blackholeAttack_sh_conn-grid_OSPFv2_wired_255.255.0.0/check.txt
-	mgen flush input /root/install/impactpredictionmodels_b1/impactpredictionmodels/flowGenerator/flows/flow`hostname`.mgn | /root/install/impactpredictionmodels_b1/impactpredictionmodels/mgenCollect.py /root/wired/5_60_60_blackholeAttack_sh_conn-grid_OSPFv2_wired_255.255.0.0 > `hostname`.mgencapture &
+	#echo `hostname` >> /root/wired/5_60_60_blackholeAttack_sh_conn-grid_OSPFv2_wired_255.255.0.0/check.txt
+	mgen flush input /root/install/impactpredictionmodels/flowGenerator/flows/flow`hostname`.mgn | /root/install/impactpredictionmodels/mgenCollect.py /root/wired/5_60_60_blackholeAttack_sh_conn-grid_OSPFv2_wired_255.255.0.0 > $ipFileName.mgencapture &
 fi
 
 	}
@@ -954,13 +954,13 @@ fi
 	cmdup=('sh custom-post-config-commands.sh', )
     }
     }
-	services {DefaultRoute SSH UserDefined
+	services {OSPFv2 zebra vtysh IPForward DefaultRoute DefaultRoute UserDefined
 	}
 }
 
 node n7 {
     type router
-    model host
+    model router
     network-config {
 	hostname n7
 	!
@@ -986,19 +986,19 @@ cd $SCRIPTDIR
 mkdir 5_60_60_blackholeAttack_sh_conn-grid_OSPFv2_wired_255.255.0.0
 cd 5_60_60_blackholeAttack_sh_conn-grid_OSPFv2_wired_255.255.0.0
 
-#get ip of current
-hostnameLen=`expr length $HN`
-hostnameLen=`expr $hostnameLen - 1` 
-myIP="`expr substr $HN 2 $hostnameLen`.0.0.1" 
+#get ip of current (defaults to FIRST IP)
+ipRange=`hostname -I`
+myIP=`echo $ipRange | cut -d' ' -f1`
+ipFileName=`echo $myIP | tr . _`
 
 #now insert attack script and mgen flush if node is attacker
 if [ `hostname` = n5 -o 5 = 0 ]
 then
 
 #start logging
-tshark -a duration:175 -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | /root/install/impactpredictionmodels_b1/impactpredictionmodels/netCollect.py /root/wired/5_60_60_blackholeAttack_sh_conn-grid_OSPFv2_wired_255.255.0.0 $myIP > $HN.capture &    
+tshark -a duration:175 -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | /root/install/impactpredictionmodels/netCollect.py /root/wired/5_60_60_blackholeAttack_sh_conn-grid_OSPFv2_wired_255.255.0.0 $ipRange > $ipFileName.capture &    
 
-mgen flush input /root/install/impactpredictionmodels_b1/impactpredictionmodels/flowGenerator/flows/flow`hostname`.mgn output /dev/null &
+mgen flush input /root/install/impactpredictionmodels/flowGenerator/flows/flow`hostname`.mgn output /dev/null &
 
 (
 cat << 'EOF'
@@ -1053,7 +1053,7 @@ identifyRoutingProtocol()
 
 bringUpInterfaces()
 {
-	for ((nodeToSpoof=1;nodeToSpoof <= numberOfNodes; nodeToSpoof++))
+	for ((nodeToSpoof=11;nodeToSpoof <= numberOfNodes; nodeToSpoof++))
 	do
 		
 		if [ $nodeToSpoof != $attackingNode ]
@@ -1099,8 +1099,8 @@ chmod 755 attack.sh
 ./attack.sh 60 60 5 10 /root/wired/5_60_60_blackholeAttack_sh_conn-grid_OSPFv2_wired_255.255.0.0 
 
 else
-	echo `hostname` >> /root/wired/5_60_60_blackholeAttack_sh_conn-grid_OSPFv2_wired_255.255.0.0/check.txt
-	mgen flush input /root/install/impactpredictionmodels_b1/impactpredictionmodels/flowGenerator/flows/flow`hostname`.mgn | /root/install/impactpredictionmodels_b1/impactpredictionmodels/mgenCollect.py /root/wired/5_60_60_blackholeAttack_sh_conn-grid_OSPFv2_wired_255.255.0.0 > `hostname`.mgencapture &
+	#echo `hostname` >> /root/wired/5_60_60_blackholeAttack_sh_conn-grid_OSPFv2_wired_255.255.0.0/check.txt
+	mgen flush input /root/install/impactpredictionmodels/flowGenerator/flows/flow`hostname`.mgn | /root/install/impactpredictionmodels/mgenCollect.py /root/wired/5_60_60_blackholeAttack_sh_conn-grid_OSPFv2_wired_255.255.0.0 > $ipFileName.mgencapture &
 fi
 
 	}
@@ -1114,13 +1114,13 @@ fi
 	cmdup=('sh custom-post-config-commands.sh', )
     }
     }
-	services {DefaultRoute SSH UserDefined
+	services {OSPFv2 zebra vtysh IPForward DefaultRoute DefaultRoute UserDefined
 	}
 }
 
 node n8 {
     type router
-    model host
+    model router
     network-config {
 	hostname n8
 	!
@@ -1146,19 +1146,19 @@ cd $SCRIPTDIR
 mkdir 5_60_60_blackholeAttack_sh_conn-grid_OSPFv2_wired_255.255.0.0
 cd 5_60_60_blackholeAttack_sh_conn-grid_OSPFv2_wired_255.255.0.0
 
-#get ip of current
-hostnameLen=`expr length $HN`
-hostnameLen=`expr $hostnameLen - 1` 
-myIP="`expr substr $HN 2 $hostnameLen`.0.0.1" 
+#get ip of current (defaults to FIRST IP)
+ipRange=`hostname -I`
+myIP=`echo $ipRange | cut -d' ' -f1`
+ipFileName=`echo $myIP | tr . _`
 
 #now insert attack script and mgen flush if node is attacker
 if [ `hostname` = n5 -o 5 = 0 ]
 then
 
 #start logging
-tshark -a duration:175 -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | /root/install/impactpredictionmodels_b1/impactpredictionmodels/netCollect.py /root/wired/5_60_60_blackholeAttack_sh_conn-grid_OSPFv2_wired_255.255.0.0 $myIP > $HN.capture &    
+tshark -a duration:175 -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | /root/install/impactpredictionmodels/netCollect.py /root/wired/5_60_60_blackholeAttack_sh_conn-grid_OSPFv2_wired_255.255.0.0 $ipRange > $ipFileName.capture &    
 
-mgen flush input /root/install/impactpredictionmodels_b1/impactpredictionmodels/flowGenerator/flows/flow`hostname`.mgn output /dev/null &
+mgen flush input /root/install/impactpredictionmodels/flowGenerator/flows/flow`hostname`.mgn output /dev/null &
 
 (
 cat << 'EOF'
@@ -1213,7 +1213,7 @@ identifyRoutingProtocol()
 
 bringUpInterfaces()
 {
-	for ((nodeToSpoof=1;nodeToSpoof <= numberOfNodes; nodeToSpoof++))
+	for ((nodeToSpoof=11;nodeToSpoof <= numberOfNodes; nodeToSpoof++))
 	do
 		
 		if [ $nodeToSpoof != $attackingNode ]
@@ -1259,8 +1259,8 @@ chmod 755 attack.sh
 ./attack.sh 60 60 5 10 /root/wired/5_60_60_blackholeAttack_sh_conn-grid_OSPFv2_wired_255.255.0.0 
 
 else
-	echo `hostname` >> /root/wired/5_60_60_blackholeAttack_sh_conn-grid_OSPFv2_wired_255.255.0.0/check.txt
-	mgen flush input /root/install/impactpredictionmodels_b1/impactpredictionmodels/flowGenerator/flows/flow`hostname`.mgn | /root/install/impactpredictionmodels_b1/impactpredictionmodels/mgenCollect.py /root/wired/5_60_60_blackholeAttack_sh_conn-grid_OSPFv2_wired_255.255.0.0 > `hostname`.mgencapture &
+	#echo `hostname` >> /root/wired/5_60_60_blackholeAttack_sh_conn-grid_OSPFv2_wired_255.255.0.0/check.txt
+	mgen flush input /root/install/impactpredictionmodels/flowGenerator/flows/flow`hostname`.mgn | /root/install/impactpredictionmodels/mgenCollect.py /root/wired/5_60_60_blackholeAttack_sh_conn-grid_OSPFv2_wired_255.255.0.0 > $ipFileName.mgencapture &
 fi
 
 	}
@@ -1274,13 +1274,13 @@ fi
 	cmdup=('sh custom-post-config-commands.sh', )
     }
     }
-	services {DefaultRoute SSH UserDefined
+	services {OSPFv2 zebra vtysh IPForward DefaultRoute DefaultRoute UserDefined
 	}
 }
 
 node n9 {
     type router
-    model host
+    model router
     network-config {
 	hostname n9
 	!
@@ -1306,19 +1306,19 @@ cd $SCRIPTDIR
 mkdir 5_60_60_blackholeAttack_sh_conn-grid_OSPFv2_wired_255.255.0.0
 cd 5_60_60_blackholeAttack_sh_conn-grid_OSPFv2_wired_255.255.0.0
 
-#get ip of current
-hostnameLen=`expr length $HN`
-hostnameLen=`expr $hostnameLen - 1` 
-myIP="`expr substr $HN 2 $hostnameLen`.0.0.1" 
+#get ip of current (defaults to FIRST IP)
+ipRange=`hostname -I`
+myIP=`echo $ipRange | cut -d' ' -f1`
+ipFileName=`echo $myIP | tr . _`
 
 #now insert attack script and mgen flush if node is attacker
 if [ `hostname` = n5 -o 5 = 0 ]
 then
 
 #start logging
-tshark -a duration:175 -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | /root/install/impactpredictionmodels_b1/impactpredictionmodels/netCollect.py /root/wired/5_60_60_blackholeAttack_sh_conn-grid_OSPFv2_wired_255.255.0.0 $myIP > $HN.capture &    
+tshark -a duration:175 -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | /root/install/impactpredictionmodels/netCollect.py /root/wired/5_60_60_blackholeAttack_sh_conn-grid_OSPFv2_wired_255.255.0.0 $ipRange > $ipFileName.capture &    
 
-mgen flush input /root/install/impactpredictionmodels_b1/impactpredictionmodels/flowGenerator/flows/flow`hostname`.mgn output /dev/null &
+mgen flush input /root/install/impactpredictionmodels/flowGenerator/flows/flow`hostname`.mgn output /dev/null &
 
 (
 cat << 'EOF'
@@ -1373,7 +1373,7 @@ identifyRoutingProtocol()
 
 bringUpInterfaces()
 {
-	for ((nodeToSpoof=1;nodeToSpoof <= numberOfNodes; nodeToSpoof++))
+	for ((nodeToSpoof=11;nodeToSpoof <= numberOfNodes; nodeToSpoof++))
 	do
 		
 		if [ $nodeToSpoof != $attackingNode ]
@@ -1419,8 +1419,8 @@ chmod 755 attack.sh
 ./attack.sh 60 60 5 10 /root/wired/5_60_60_blackholeAttack_sh_conn-grid_OSPFv2_wired_255.255.0.0 
 
 else
-	echo `hostname` >> /root/wired/5_60_60_blackholeAttack_sh_conn-grid_OSPFv2_wired_255.255.0.0/check.txt
-	mgen flush input /root/install/impactpredictionmodels_b1/impactpredictionmodels/flowGenerator/flows/flow`hostname`.mgn | /root/install/impactpredictionmodels_b1/impactpredictionmodels/mgenCollect.py /root/wired/5_60_60_blackholeAttack_sh_conn-grid_OSPFv2_wired_255.255.0.0 > `hostname`.mgencapture &
+	#echo `hostname` >> /root/wired/5_60_60_blackholeAttack_sh_conn-grid_OSPFv2_wired_255.255.0.0/check.txt
+	mgen flush input /root/install/impactpredictionmodels/flowGenerator/flows/flow`hostname`.mgn | /root/install/impactpredictionmodels/mgenCollect.py /root/wired/5_60_60_blackholeAttack_sh_conn-grid_OSPFv2_wired_255.255.0.0 > $ipFileName.mgencapture &
 fi
 
 	}
@@ -1434,13 +1434,13 @@ fi
 	cmdup=('sh custom-post-config-commands.sh', )
     }
     }
-	services {DefaultRoute SSH UserDefined
+	services {OSPFv2 zebra vtysh IPForward DefaultRoute DefaultRoute UserDefined
 	}
 }
 
 node n10 {
     type router
-    model host
+    model router
     network-config {
 	hostname n10
 	!
@@ -1466,19 +1466,19 @@ cd $SCRIPTDIR
 mkdir 5_60_60_blackholeAttack_sh_conn-grid_OSPFv2_wired_255.255.0.0
 cd 5_60_60_blackholeAttack_sh_conn-grid_OSPFv2_wired_255.255.0.0
 
-#get ip of current
-hostnameLen=`expr length $HN`
-hostnameLen=`expr $hostnameLen - 1` 
-myIP="`expr substr $HN 2 $hostnameLen`.0.0.1" 
+#get ip of current (defaults to FIRST IP)
+ipRange=`hostname -I`
+myIP=`echo $ipRange | cut -d' ' -f1`
+ipFileName=`echo $myIP | tr . _`
 
 #now insert attack script and mgen flush if node is attacker
 if [ `hostname` = n5 -o 5 = 0 ]
 then
 
 #start logging
-tshark -a duration:175 -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | /root/install/impactpredictionmodels_b1/impactpredictionmodels/netCollect.py /root/wired/5_60_60_blackholeAttack_sh_conn-grid_OSPFv2_wired_255.255.0.0 $myIP > $HN.capture &    
+tshark -a duration:175 -nli eth0 -T fields -E separator=, -e frame.time_epoch -e frame.len -e frame.protocols -e ip.src -e ip.dst -e ipv6.src -e ipv6.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport | /root/install/impactpredictionmodels/netCollect.py /root/wired/5_60_60_blackholeAttack_sh_conn-grid_OSPFv2_wired_255.255.0.0 $ipRange > $ipFileName.capture &    
 
-mgen flush input /root/install/impactpredictionmodels_b1/impactpredictionmodels/flowGenerator/flows/flow`hostname`.mgn output /dev/null &
+mgen flush input /root/install/impactpredictionmodels/flowGenerator/flows/flow`hostname`.mgn output /dev/null &
 
 (
 cat << 'EOF'
@@ -1533,7 +1533,7 @@ identifyRoutingProtocol()
 
 bringUpInterfaces()
 {
-	for ((nodeToSpoof=1;nodeToSpoof <= numberOfNodes; nodeToSpoof++))
+	for ((nodeToSpoof=11;nodeToSpoof <= numberOfNodes; nodeToSpoof++))
 	do
 		
 		if [ $nodeToSpoof != $attackingNode ]
@@ -1579,8 +1579,8 @@ chmod 755 attack.sh
 ./attack.sh 60 60 5 10 /root/wired/5_60_60_blackholeAttack_sh_conn-grid_OSPFv2_wired_255.255.0.0 
 
 else
-	echo `hostname` >> /root/wired/5_60_60_blackholeAttack_sh_conn-grid_OSPFv2_wired_255.255.0.0/check.txt
-	mgen flush input /root/install/impactpredictionmodels_b1/impactpredictionmodels/flowGenerator/flows/flow`hostname`.mgn | /root/install/impactpredictionmodels_b1/impactpredictionmodels/mgenCollect.py /root/wired/5_60_60_blackholeAttack_sh_conn-grid_OSPFv2_wired_255.255.0.0 > `hostname`.mgencapture &
+	#echo `hostname` >> /root/wired/5_60_60_blackholeAttack_sh_conn-grid_OSPFv2_wired_255.255.0.0/check.txt
+	mgen flush input /root/install/impactpredictionmodels/flowGenerator/flows/flow`hostname`.mgn | /root/install/impactpredictionmodels/mgenCollect.py /root/wired/5_60_60_blackholeAttack_sh_conn-grid_OSPFv2_wired_255.255.0.0 > $ipFileName.mgencapture &
 fi
 
 	}
@@ -1594,7 +1594,7 @@ fi
 	cmdup=('sh custom-post-config-commands.sh', )
     }
     }
-	services {DefaultRoute SSH UserDefined
+	services {OSPFv2 zebra vtysh IPForward DefaultRoute DefaultRoute UserDefined
 	}
 }
 
@@ -1643,7 +1643,7 @@ cd $SCRIPTDIR
 	cmdup=('sh custom-post-config-commands.sh', )
     }
     }
-	services {OSPFv2 zebra vtysh IPForward UserDefined
+	services {OSPFv2 zebra vtysh IPForward DefaultRoute UserDefined
 	}
 }
 
@@ -1696,7 +1696,7 @@ cd $SCRIPTDIR
 	cmdup=('sh custom-post-config-commands.sh', )
     }
     }
-	services {OSPFv2 zebra vtysh IPForward UserDefined
+	services {OSPFv2 zebra vtysh IPForward DefaultRoute UserDefined
 	}
 }
 
@@ -1745,7 +1745,7 @@ cd $SCRIPTDIR
 	cmdup=('sh custom-post-config-commands.sh', )
     }
     }
-	services {OSPFv2 zebra vtysh IPForward UserDefined
+	services {OSPFv2 zebra vtysh IPForward DefaultRoute UserDefined
 	}
 }
 
@@ -1802,7 +1802,7 @@ cd $SCRIPTDIR
 	cmdup=('sh custom-post-config-commands.sh', )
     }
     }
-	services {OSPFv2 zebra vtysh IPForward UserDefined
+	services {OSPFv2 zebra vtysh IPForward DefaultRoute UserDefined
 	}
 }
 
@@ -1863,7 +1863,7 @@ cd $SCRIPTDIR
 	cmdup=('sh custom-post-config-commands.sh', )
     }
     }
-	services {OSPFv2 zebra vtysh IPForward UserDefined
+	services {OSPFv2 zebra vtysh IPForward DefaultRoute UserDefined
 	}
 }
 
@@ -1916,7 +1916,7 @@ cd $SCRIPTDIR
 	cmdup=('sh custom-post-config-commands.sh', )
     }
     }
-	services {OSPFv2 zebra vtysh IPForward UserDefined
+	services {OSPFv2 zebra vtysh IPForward DefaultRoute UserDefined
 	}
 }
 
@@ -1965,7 +1965,7 @@ cd $SCRIPTDIR
 	cmdup=('sh custom-post-config-commands.sh', )
     }
     }
-	services {OSPFv2 zebra vtysh IPForward UserDefined
+	services {OSPFv2 zebra vtysh IPForward DefaultRoute UserDefined
 	}
 }
 
@@ -2022,7 +2022,7 @@ cd $SCRIPTDIR
 	cmdup=('sh custom-post-config-commands.sh', )
     }
     }
-	services {OSPFv2 zebra vtysh IPForward UserDefined
+	services {OSPFv2 zebra vtysh IPForward DefaultRoute UserDefined
 	}
 }
 
@@ -2075,7 +2075,7 @@ cd $SCRIPTDIR
 	cmdup=('sh custom-post-config-commands.sh', )
     }
     }
-	services {OSPFv2 zebra vtysh IPForward UserDefined
+	services {OSPFv2 zebra vtysh IPForward DefaultRoute UserDefined
 	}
 }
 
@@ -2132,7 +2132,7 @@ cd $SCRIPTDIR
 	cmdup=('sh custom-post-config-commands.sh', )
     }
     }
-	services {OSPFv2 zebra vtysh IPForward UserDefined
+	services {OSPFv2 zebra vtysh IPForward DefaultRoute UserDefined
 	}
 }
 

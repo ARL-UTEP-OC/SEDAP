@@ -39,7 +39,6 @@ identifyRoutingProtocol()
 	#if ospf is used
 	if [[ $routingProtocol == *"ospf"* ]]
 	then
-		sleep 5
 		vtysh <<< $'configure terminal \n router ospf \n redistribute connected'
 		echo "sent vtysh cmd"
 	fi
@@ -49,7 +48,7 @@ identifyRoutingProtocol()
 
 bringUpInterfaces()
 {
-	for ((nodeToSpoof=11;nodeToSpoof <= numberOfNodes; nodeToSpoof++))
+	for ((nodeToSpoof=1;nodeToSpoof <= numberOfNodes; nodeToSpoof++))
 	do
 		
 		if [ $nodeToSpoof != $attackingNode ]
@@ -77,13 +76,13 @@ sleep $startTime
 
 if [ $pendingDuration -gt 0 ]
 	then
-		echo "starting blackhole"
-		echo "blackHole" > $logPath/attack.txt
+	echo "starting blackhole"
+	echo "blackHole" > $logPath/attack.txt
 
-		bringUpInterfaces
-		identifyRoutingProtocol
-		sleep $pendingDuration
-		bringDownInterfaces
+	bringUpInterfaces
+	identifyRoutingProtocol
+	sleep $pendingDuration
+	bringDownInterfaces
 fi
 echo "none" > $logPath/attack.txt
 
