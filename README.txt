@@ -1,25 +1,18 @@
+The SEDAP tool enables analysts to design and execute network scenarios for several popular emulation and simulation platforms. The executed scenarios allow the generation of models that can be used to conduct multiple types of analysis. The scenarios are composed of a large number of different combinations of 1) network topologies, e.g., chain topology,  2) routing protocols, e.g., NRL OLSR, and 3) a particular type of a network attack, e.g., spoofing attack. SEDAP allows analysts to run different combinations of the aforementioned scenarios and logs scenario data such as packet arrival statistics, route states, and attack start and end times. The tool converts collected data to formats used by multiple statistical analysis tools, such as WEKA, which then generates analysis models. The generated models aid analysts to perform efficient analysis of computer networks. SEDAP also includes an analysis component that contains a visualization feature for viewing results of running statistical and comparison algorithms on node states (e.g., position of the node, and status such as compromised or not), packet transmission, and routing. The focus of this component is to facilitate the task of viewing differences between similar scenarios and the different emulation and simulation tool outputs resulting from running these scenarios.
 
-
-2015-11-06 (JCA)
-Initial Commit
-
-Includes all of the code that was used to generate the models for the 2012 MILCOM paper.
+This version of SEDAP includes all of the code that was used to generate the models for the 2012 MILCOM paper.
 
 Ensure that CORE is installed and then run ./generateScenarios.sh
 
 Directories are hard-coded. Must run scripts in /root/install/sedap/IntelAttacker
 
 ******************
-2016-16-08 (JJM)
-Second Commit
 
 Updated for parallel execution of wireless attacks.
 ./generateScenarios.sh is first ran to write ALL scenarios to a text file.
 May then run ./parallelScenarios.sh with file name and number of process to run at once.
 
 ******************
-2016-14-09 (JJM)
-Third Commit
 
 Updated comments within scripts to provide details on script responsibilities.
 Sedap.sh was added for acting as a main controller for running, cleaning, 
@@ -37,9 +30,6 @@ May automatically run using ./sedap.sh
 Note: Text file and number of processes ran at a time are currently hard-coded.
 
 ******************
-2016-21-09 (JJM)
-Fourth Commit
-
 First service was created. Originally, the OLSR service was modified by.
 The service has been left as it was before, and a modified version named
 nrlMod.py has been made. 
@@ -60,9 +50,6 @@ blackholeAttack.sh
 spoofingAttack.sh
 
 ******************
-******************
-2016-14-09 (JJM)
-Third Commit
 
 Updated comments within scripts to provide details on script responsibilities.
 Sedap.sh was added for acting as a main controller for running, cleaning, 
